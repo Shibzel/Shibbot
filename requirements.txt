@@ -1,0 +1,11 @@
+aiohttp
+requests
+orjson
+asyncio
+py-cord==2.0.0b7
+psycopg2
+psutil
+pythonping
+asyncpraw
+aiowiki
+git+https://github.com/JeanLeShiba/aiogtrans.git

@@ -41,8 +41,8 @@ class BotEvents(commands.Cog):
                     discord.Activity(
                         type=discord.ActivityType.watching,
                         name=random.choice(
-                            ["after the guy who stole my milk", "you.", "submissions on Reddit",
-                                "the end of the world", "ur mama", "inside your soul", "to but rare fish"]
+                            ["after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama",
+                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking (don't have a website tho, that's sad :c)"]
                         )
                     ),
                     discord.Activity(

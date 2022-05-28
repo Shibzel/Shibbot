@@ -64,7 +64,11 @@ class ArgToDuration(commands.Converter):
                     remove_chars(argument, "years ", "")), "year(s)"
                 _datetime = datetime.datetime.utcnow() + datetime.timedelta(seconds=raw_time*31557600)
             # This was tricky, I'm sure there's a better way to do this. If it's the case don't hesitate to tell me 😏
-            return Duration(_datetime, raw_time, duration_type)
+            return Duration(
+                _datetime,
+                raw_time,
+                duration_type
+            )
         except (ValueError, NameError):
             raise commands.BadArgument
 
@@ -93,12 +97,43 @@ class Mod(commands.Cog):
         self.client.cursor.execute(
             "CREATE TABLE IF NOT EXISTS sanctions(guild_id INTEGER, user_id INTEGER, type TEXT, duration DATETIME)")
         self.client.cursor.execute(
-            "CREATE TABLE IF NOT EXISTS warns(guild_id INTEGER, user_id INTEGER, reason TEXT, date DATETIME)")
+            "CREATE TABLE IF NOT EXISTS warns(guild_id INTEGER, user_id INTEGER, reason TEXT, date DATETIME, mod_id INTEGER)")
         self.client.cursor.execute(
             "CREATE TABLE IF NOT EXISTS mod_plugin(guild_id INTEGER PRIMARY KEY, enabled BOOLEAN, mute_role INTEGER, logs_channel INTEGER)")
         self.client.db.commit()
 
         self.resume_sanctions.start()
+
+    @commands.command(name="logs", aliases=["setlogs"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_channels=True)
+    @commands.cooldown(3, 30, commands.BucketType.member)
+    async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        text = self.client.fl(self.client.get_lang(ctx)).change_logs_channel
+        if not channel:
+            embed_text = text["checks"]["missing_args"]["embed"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+
+        self.client.cursor.execute(
+            "UPDATE mod_plugin SET logs_channel=? WHERE guild_id=?",
+            (channel.id, ctx.guild.id,)
+        )
+        self.client.db.commit()
+        embed_text = text["embed"]
+        await ctx.reply(
+            embed=discord.Embed(
+                title=embed_text["title"],
+                description=f"<a:verified:836312937332867072> " +
+                embed_text["description"].format(channel=channel.mention),
+                color=discord.Color.green()
+            )
+        )
 
     async def log(self, guild: discord.Guild, embed):
         self.client.cursor.execute(
@@ -134,15 +169,15 @@ class Mod(commands.Cog):
                     embed_text["description"].format(
                         member=member.mention,
                         member_id=member.id,
-                        mod=found_entry.user.mention.id,
+                        mod=found_entry.user.mention,
                         reason=found_entry.reason
                     ),
                     found_entry.created_at
                 )
             )
 
-    @ commands.Cog.listener()
-    @ plugin_is_enabled()
+    @commands.Cog.listener()
+    @plugin_is_enabled()
     async def on_member_ban(self, guild: discord.Guild, user: discord.User):
         await asyncio.sleep(0.5)
         found_entry = None
@@ -161,9 +196,9 @@ class Mod(commands.Cog):
                 embed=LogEmbed(
                     embed_text["action"],
                     embed_text["description"].format(
-                        user=user.mention,
-                        user_id=user.id,
-                        mod=found_entry.user.mention.id,
+                        member=user.mention,
+                        member_id=user.id,
+                        mod=found_entry.user.mention,
                         reason=found_entry.reason
                     ),
                     found_entry.created_at
@@ -190,8 +225,8 @@ class Mod(commands.Cog):
                 embed=LogEmbed(
                     embed_text["action"],
                     embed_text["description"].format(
-                        user=user.mention,
-                        user_id=user.id
+                        member=user.mention,
+                        member_id=user.id
                     ),
                     found_entry.created_at
                 )
@@ -313,7 +348,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
-        text = self.client.fl(self.client.get_lang(ctx)).clear
+        text = self.client.fl(self.client.get_lang(ctx)).clear_messages
         try:
             limit = int(limit)
             limit = limit if limit <= 100 else 100
@@ -358,7 +393,7 @@ class Mod(commands.Cog):
             else:  # No member, classical clear
                 await ctx.message.delete()
                 deleted_messages = await ctx.channel.purge(limit=limit)
-                embed_text = text["channel_clear"]
+                embed_text = text["channel_clear"]["embed"]
                 embed = discord.Embed(
                     title=embed_text["title"],
                     description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
@@ -366,9 +401,339 @@ class Mod(commands.Cog):
                     ),
                     color=discord.Color.green()
                 )
-            await ctx.send(
+            return await ctx.send(
                 embed=embed,
                 delete_after=10.0
+            )
+
+    @commands.command(name="nuke")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_channels=True)
+    @commands.cooldown(1, 15, commands.BucketType.member)
+    async def nuke_channel(self, ctx: commands.Context):
+        text = self.client.fl(self.client.get_lang(ctx)).nuke_channel
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            title=embed_text["title"],
+            description=embed_text["description"],
+            color=discord.Color.red()
+        )
+        buttons_text = text["buttons"]
+        no_button = discord.ui.Button(
+            label=buttons_text["no"],
+            style=discord.ButtonStyle.green
+        )
+        kadaboom_button = discord.ui.Button(
+            label=buttons_text["yes"],
+            style=discord.ButtonStyle.danger
+        )
+
+        async def go_back_callback(interaction: discord.Interaction):
+            if interaction.user.id != ctx.author.id:
+                return
+            no_button.disabled = True
+            kadaboom_button.disabled = True
+            await interaction.response.edit_message(
+                view=discord.ui.View(
+                    no_button,
+                    kadaboom_button
+                )
+            )
+        no_button.callback = go_back_callback
+
+        async def kadaboom_callback(interaction: discord.Interaction):
+            if interaction.user.id != ctx.author.id:
+                return
+            async with interaction.channel.typing():
+                no_button.disabled = True
+                kadaboom_button.disabled = True
+                await interaction.response.edit_message(
+                    view=discord.ui.View(
+                        no_button,
+                        kadaboom_button
+                    )
+                )
+                await interaction.channel.send(content="3 !")
+                await asyncio.sleep(2.0)
+                await interaction.channel.send(content="2 !")
+                await asyncio.sleep(2.0)
+                await interaction.channel.send(content="1 ! <:POG:815700150164652092>")
+                await asyncio.sleep(1.0)
+                deleted_messages = await interaction.channel.purge(limit=1000)
+            embed_text = text["done"]
+            embed = discord.Embed(
+                title=embed_text["title"],
+                description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
+                    n_messages=len(deleted_messages)
+                ),
+                color=discord.Color.red()
+            )
+            await interaction.channel.send(
+                embed=embed,
+                delete_after=10
+            )
+        kadaboom_button.callback = kadaboom_callback
+
+        await ctx.reply(
+            embed=embed,
+            view=discord.ui.View(
+                no_button,
+                kadaboom_button
+            )
+        )
+
+    @commands.command(name="warn")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
+        text = self.client.fl(self.client.get_lang(ctx)).warn_member
+        if not member:
+            embed_text = text["checks"]["missing_args"]["embed"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            return
+
+        self.client.cursor.execute(
+            f"SELECT * FROM warns WHERE guild_id=? AND user_id=?",
+            (ctx.guild.id, member.id,)
+        )
+        warns = self.client.cursor.fetchall()
+        nb_warns = len(warns)+1 if warns else 1
+        self.client.cursor.execute(
+            "INSERT INTO warns (guild_id, user_id, reason, date, mod_id) VALUES (?,?,?,?,?)",
+            (ctx.guild.id, member.id, reason,
+             datetime.datetime.utcnow(), ctx.author.id,)
+        )
+        self.client.db.commit()
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention,
+                n_warns=nb_warns,
+                reason=reason
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.message.delete()
+        await ctx.send(embed=embed)
+        embed_text = text["log"]["embed"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"].format(n_warns=nb_warns),
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id,
+                    mod=ctx.message.author.mention,
+                    reason=reason
+                )
+            )
+        )
+
+        try:
+            embed_text = text["pm"]["embed"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild.name,
+                        reason=reason
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
+
+    @commands.command(name="clearwarns", aliases=["cwarns"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
+        text = self.client.fl(self.client.get_lang(ctx)).clear_user_warns
+        if not member:
+            embed_text = text["checks"]["missing_args"]["embed"]
+            return await ctx.reply(
+                mbed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            return
+
+        self.client.cursor.execute(
+            f"DELETE FROM warns WHERE guild_id=? AND user_id=?",
+            (ctx.guild.id, member.id,)
+        )
+        self.client.db.commit()
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+                member=member.mention
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.message.delete()
+        await ctx.send(embed=embed)
+        embed_text = text["log"]["embed"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    mod=ctx.message.author.mention,
+                    member=member.mention,
+                    reason=reason
+                )
+            )
+        )
+
+    @commands.command(name="warnings", aliases=["infractions"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
+        text = self.client.fl(self.client.get_lang(ctx)).show_warnings
+        if not member:
+            embed_text = text["checks"]["missing_args"]["embed"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            return
+
+        self.client.cursor.execute(
+            "SELECT * FROM warns WHERE guild_id=? AND user_id=?",
+            (ctx.guild.id, member.id,)
+        )
+        warns = self.client.cursor.fetchall()
+
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention,
+                member_id=member.id
+            ),
+            color=discord.Color.dark_gold()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        if not warns:
+            field_text = embed_text["fields"]["no_infra"]
+            embed.add_field(
+                name="No infraction",
+                value="(⊙ˍ⊙) "+field_text["value"]
+            )
+            await ctx.message.delete()
+            await ctx.send(embed=embed)
+        else:
+            page = 0
+            warns.reverse()
+
+            sorted_warns = []
+            page_warns = []
+            for warn in warns:
+                page_warns.append(warn)
+                if len(page_warns) == 5 or warn == warns[-1]:
+                    sorted_warns.append(page_warns)
+                    page_warns = []
+
+            def generate_warn_page():
+                nonlocal page
+                embed._fields = []
+                page_embed = embed
+                field_text = text["embed"]["fields"]["warn"]
+                for warn in sorted_warns[page]:
+                    mod = self.client.get_user(warn[4])
+                    date_time = datetime.datetime.strptime(
+                        warn[3], "%Y-%m-%d %H:%M:%S.%f")
+                    page_embed.add_field(
+                        name=field_text["name"].format(
+                            n_warn=warns.index(warn)+1
+                        ),
+                        value=field_text["value"].format(
+                            reason=warn[2],
+                            mod=mod.mention if mod else f"<@!{warn[4]}>",
+                            date=date_time.strftime("%d %b %Y")
+                        ),
+                        inline=False
+                    )
+
+                return page_embed
+
+            buttons_text = embed_text["buttons"]
+
+            async def previous_page_callback(interaction: discord.Interaction):
+                if interaction.user.id != ctx.author.id:
+                    return
+
+                nonlocal page
+                page -= 1
+                if page == 0:
+                    previous_page_button.disabled = True
+                await interaction.response.edit_message(
+                    embed=generate_warn_page(),
+                    view=discord.ui.View(
+                        previous_page_button,
+                        next_page_button
+                    )
+                )
+            previous_page_button = discord.ui.Button(
+                style=discord.ButtonStyle.blurple,
+                label=buttons_text["previous"],
+                disabled=True
+            )
+            previous_page_button.callback = previous_page_callback
+
+            async def next_page_callback(interaction: discord.Interaction):
+                if interaction.user.id != ctx.author.id:
+                    return
+
+                nonlocal page
+                page += 1
+                previous_page_button.disabled = False
+                if sorted_warns[page][-1] == warns[-1]:
+                    next_page_button.disabled = True
+                await interaction.response.edit_message(
+                    embed=generate_warn_page(),
+                    view=discord.ui.View(
+                        previous_page_button,
+                        next_page_button
+                    )
+                )
+            next_page_button = discord.ui.Button(
+                style=discord.ButtonStyle.green,
+                label=buttons_text["next"],
+                disabled=True if len(sorted_warns) == 1 else False
+            )
+            next_page_button.callback = next_page_callback
+            await ctx.message.delete()
+            await ctx.send(
+                embed=generate_warn_page(),
+                view=discord.ui.View(
+                    previous_page_button,
+                    next_page_button,
+                )
             )
 
 

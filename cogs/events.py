@@ -4,7 +4,6 @@ import random
 import discord
 from discord.ext import commands, tasks
 
-from utils import endswith
 from bot import Shibbot
 
 
@@ -15,6 +14,7 @@ def setup(client):
 class BotEvents(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
+        self.activity_is_looping = False
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -22,8 +22,10 @@ class BotEvents(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await asyncio.sleep(5.5)
-        self.change_activity.start()
+        if not self.activity_is_looping:
+            await asyncio.sleep(5.5)
+            self.change_activity.start()
+            self.activity_is_looping = True
 
     @tasks.loop(seconds=30)
     async def change_activity(self):

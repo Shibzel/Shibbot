@@ -761,7 +761,8 @@ class Mod(commands.Cog):
                     description=embed_text["description"].format(
                         guild=ctx.guild.name,
                         reason=reason
-                    )
+                    ),
+                    color=discord.Color.dark_gold()
                 )
             )
         except:
@@ -840,12 +841,79 @@ class Mod(commands.Cog):
                         guild=ctx.guild.name,
                         duration=duration,
                         reason=reason
-                    )
+                    ),
+                    color=discord.Color.dark_gold()
                 )
             )
         except:
             pass
         await self.add_temp_sanction(*data)
+
+    @commands.command(name="unmute")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    async def unmute_member(self, ctx: commands.Context, member: discord.Member = None):
+        lang = self.client.fl(self.client.get_lang(ctx))
+        text = lang.unmute_member
+        if not member:
+            embed_text = text["checks"]["missing_args"]["embed"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            return
+        await ctx.message.delete()
+        mute_role = await self.get_mute_role(ctx.guild)
+        if not mute_role in member.roles:
+            embed_text = text["checks"]["not_muted"]["embed"]
+            return await ctx.send(
+                embed=discord.Embed(
+                    title=embed_text["title"],
+                    description="ಠ_ಠ "+embed_text["description"],
+                    color=discord.Color.red()
+                )
+            )
+
+        await member.remove_roles(mute_role)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+        embed_text = text["log"]["embed"]
+        embed_text = lang.log_unmute["embed"]
+        await self.log(
+            member.guild, embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id
+                )
+            )
+        )
+
+        try:
+            embed_text = text["pm"]["embed"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild.name
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
 
 
 class LogEmbed(discord.Embed):

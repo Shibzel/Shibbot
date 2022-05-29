@@ -278,12 +278,12 @@ class English:
                     "description": "You've been muted on **{guild}**.\nReason : {reason}."
                 }
             }
-        },
+        }
         self.tempmute_member = {
             "checks": {
                 "missing_args": {
                     "embed": {
-                        "description": "Gimme a member to tempmute !\nUsage: `tmute[member] [duration] <reason>`"
+                        "description": "Gimme a member to tempmute !\nUsage: `tmute [member] [duration] <reason>`"
                     }
                 },
                 "already_muted": {
@@ -305,7 +305,31 @@ class English:
             },
             "pm": {
                 "embed": {
-                    "description": "You've been tempmuted on **{guild}** for {duration}.\nReason : {reason}."
+                    "description": "You've been tempmuted on **{guild}** for `{duration}`.\nReason : {reason}."
+                }
+            }
+        }
+        self.unmute_member = {
+            "checks": {
+                "missing_args": {
+                    "embed": {
+                        "description": "Gimme a member to unmute !\nUsage: `tmute [member]`"
+                    }
+                },
+                "not_muted": {
+                    "embed": {
+                        "title": "Oops...",
+                        "description": "This member is not muted !"
+                    }
+                }
+            },
+            "embed": {
+                "title": "Muted !",
+                "description": "{member} is now unmuted."
+            },
+            "pm": {
+                "embed": {
+                    "description": "You've been unmuted from **{guild}**."
                 }
             }
         }

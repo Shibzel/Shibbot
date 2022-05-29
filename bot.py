@@ -53,13 +53,6 @@ class Shibbot(commands.Bot):
             "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
         self.db.commit()
 
-        self.reddit_conf = self.config["reddit"]
-        self.reddit = Reddit(client_id='eHjvFtZ3cYzNbRYyxs4akA',
-                             client_secret=self.reddit_conf["client_secret"],
-                             user_agent='shibbot',
-                             username="JeanTheShiba",
-                             password=self.reddit_conf["password"],)
-
         self.discord_conf = self.config["discord"]
         self.default_prefix = "$"
         self.default_language = "en"
@@ -77,9 +70,24 @@ class Shibbot(commands.Bot):
             ),
             intents=discord.Intents.all(),
             case_insensitive=True,
+            activity=discord.Streaming(
+                name="connecting...",
+                url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            ),
             *args, **kwargs
         )
         super().remove_command("help")
+
+        self.reddit_conf = self.config["reddit"]
+        self.reddit = Reddit(
+            loop=self.loop,
+            client_id='eHjvFtZ3cYzNbRYyxs4akA',
+            client_secret=self.reddit_conf["client_secret"],
+            user_agent='shibbot',
+            username="JeanTheShiba",
+            password=self.reddit_conf["password"],
+        )
+
         print(f"   ----------------------------\n[+] Loading cogs...")
         for filename in sus.listdir("./cogs"):
             if filename.endswith(".py"):
@@ -136,13 +144,6 @@ class Shibbot(commands.Bot):
             f"   ----------------------------\n[+] Ready. \n[-] Connected as : {super().user}\n[-] Id : {super().user.id}")
         if self.bot_is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={super().user.id}&permissions=8&scope=applications.commands%20bot"
-
-        await self.change_presence(
-            activity=discord.Streaming(
-                name="connecting...",
-                url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            )
-        )
         self.bot_is_alive = True
 
     async def on_resumed(self):

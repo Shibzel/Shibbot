@@ -4,3 +4,4 @@ from .decorators import *
 from .functions import *
 from .reddit import Reddit
 from .lang import *
+from .converters import *

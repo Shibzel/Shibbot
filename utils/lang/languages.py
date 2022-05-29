@@ -140,7 +140,7 @@ class English:
         self.log_unmute = {
             "embed": {
                 "action": "Unmute",
-                "description": "`{member}` (id : `{member_id}`) has been unmuted"
+                "description": "{member} (id : `{member_id}`) has been unmuted."
             }
         }
         self.clear_messages = {
@@ -246,6 +246,66 @@ class English:
                 "buttons": {
                     "previous": "Previous",
                     "next": "Next"
+                }
+            }
+        }
+        self.mute_member = {
+            "checks": {
+                "missing_args": {
+                    "embed": {
+                        "description": "Gimme a member to mute !\nUsage: `mute[member] <reason>`"
+                    }
+                },
+                "already_muted": {
+                    "embed": {
+                        "title": "Oops...",
+                        "description": "This member is already muted !"
+                    }
+                }
+            },
+            "embed": {
+                "title": "Muted !",
+                "description": "Just muted {member}.\nReason : {reason}"
+            },
+            "log": {
+                "embed": {
+                    "action": "Mute",
+                    "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nReason : {reason}."
+                }
+            },
+            "pm": {
+                "embed": {
+                    "description": "You've been muted on **{guild}**.\nReason : {reason}."
+                }
+            }
+        },
+        self.tempmute_member = {
+            "checks": {
+                "missing_args": {
+                    "embed": {
+                        "description": "Gimme a member to tempmute !\nUsage: `tmute[member] [duration] <reason>`"
+                    }
+                },
+                "already_muted": {
+                    "embed": {
+                        "title": "Oops...",
+                        "description": "This member is already muted !"
+                    }
+                }
+            },
+            "embed": {
+                "title": "Muted !",
+                "description": "{member} is now tempmuted for `{duration}`.\nReason : {reason}"
+            },
+            "log": {
+                "embed": {
+                    "action": "Tempmute",
+                    "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nReason : {reason}."
+                }
+            },
+            "pm": {
+                "embed": {
+                    "description": "You've been tempmuted on **{guild}** for {duration}.\nReason : {reason}."
                 }
             }
         }

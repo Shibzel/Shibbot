@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 try:
     from orjson import load as _load, dumps as _dumps  # Faster than json
@@ -7,13 +8,13 @@ except ImportError:
 import aiohttp
 
 
-def dump(_object, fpath, *args, **kwargs) -> None:
+def dump(_object:object, fpath:str, *args, **kwargs) -> None:
     """Writes a json file, wow."""
     with open(fpath, "wb+") as out_file:
         out_file.write(_dumps(_object, *args, **kwargs))
 
 
-def load(fpath):
+def load(fpath:str):
     """Loads a json file, incredible."""
     with open(fpath, "rb") as json_file:
         return _loads(json_file.read())

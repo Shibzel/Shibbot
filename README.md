@@ -56,9 +56,9 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 
 ## Prerequisites
 
--   [Python 3.8+ (idealy 3.10+)](python.org)
+-   [Python 3.8+ (idealy 3.10+)](https://python.org)
     
--   [Pycord 2.0.0b7](pycord.dev) - Discord API wrapper
+-   [Pycord 2.0.0b7](https://pycord.dev) - Discord API wrapper
     
 
 **API wrappers :**
@@ -75,20 +75,20 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 
 ## Contributors
 
--   [JeanLeShiba](github.com/JeanLeShiba) - Owner and main developper of Shibbot
+-   [JeanLeShiba](https://github.com/JeanLeShiba) - Owner and main developper of Shibbot
     
--   [Cloudy_Paul](github.com/Cloudy-Paul) - Tester and translater
+-   [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester and translater
     
 
 ## Aknowlegement
 
--   [shibe.online](shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
+-   [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
     
--   [coronavirus-19-api.herokuapp.com](coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
+-   [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
     
 -   [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
     
--   [translate.argosopentech.com](translate.argosopentech.com) for the host of a LibreTranslate server
+-   [translate.argosopentech.com](https://translate.argosopentech.com) for the host of a LibreTranslate server
     
 
-*Oh ? You reached the end...*
+*Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

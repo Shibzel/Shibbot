@@ -16,7 +16,7 @@ But it also has less popular ones : `nuke` (try it, it's really funny), `multiki
 That's a good feature isn't it ? Nah ?
 Then let's hop to the next one :
 
-#### Fun and entertainement
+### Fun and entertainement
 
 ![Fun](https://media.discordapp.net/attachments/875848985502441543/981164099301957672/images.png)
 

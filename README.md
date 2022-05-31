@@ -1,8 +1,8 @@
-# Shibbot
+# **__Shibbot__**
 
-## Features
+# Features
 
-#### Moderation
+### Moderation
 
 Shibbot will help you moderate your server(s) efficiently : it has all the classics moderation commands (there is a lot of them, really), such as `kick`, `tempmute`, `ban`, you know, the basic ones.
 But it also has less popular ones : `nuke` (try it, it's really funny), `multikick`, `softban` to more flexibility while you sanction a member (abusively or not haha, we don't care).
@@ -32,25 +32,25 @@ What's that ?**
 
 There is some wierd commands, like `piss` or `twitter`, we have absolutely no ideas why they exists neither what they do. Maybe you should try them out.
 
-#### Tools
+### Tools
 
 < Text here >
 
-### So what are you waiting for ?
+## So what are you waiting for ?
 
 ![Invite](https://media.discordapp.net/attachments/875848985502441543/981164096290455592/you_shloud.jpg)
 
 Invite the bot by clicking right [here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands).
 
-## About this repository
+# About this repository
 
-### Host and code
+## Host and code
 
 Please don't host yourself the bot, a lot of features will soon depend on the database, it is preferable to invite it by using the link right above.
 
 Of, course you can inspire your code on mine, I didn't said that this is the best idea but I think that my code isn't bad at all (I hope so).
 
-### Prerequisites
+## Prerequisites
 
 -   [Python 3.8+ (idealy 3.10+)](python.org)
     
@@ -69,14 +69,14 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 -   [Orjson](https://pypi.org/project/orjson/) - faster json serialisation
     
 
-### Contributors
+## Contributors
 
 -   [JeanLeShiba](github.com/JeanLeShiba) - Owner and main developper of Shibbot
     
 -   [Cloudy_Paul](github.com/Cloudy-Paul) - Tester and translater
     
 
-### Aknowlegement
+## Aknowlegement
 
 -   [shibe.online](shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
     

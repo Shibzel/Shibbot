@@ -1,5 +1,9 @@
 # **__Shibbot__**
 
+Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapper and SQLite as database.
+
+![Profile](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
+
 # Features
 
 ### Moderation

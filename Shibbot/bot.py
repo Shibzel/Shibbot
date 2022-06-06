@@ -1,6 +1,7 @@
 import datetime
 import sqlite3
 import os as sus
+from typing import Coroutine
 
 import aiosqlite
 import discord
@@ -15,19 +16,19 @@ __version__ = "0.3"
 
 async def get_prefix(client, ctx) -> str:
     """Gets the prefix of a server."""
-    # try:
-    if ctx.guild:
-        async with client.aiodb() as db:
-            async with db.execute(
-                "SELECT prefix FROM guilds WHERE guild_id=?", (ctx.guild.id,)
-            ) as cursor:
-                prefix = await cursor.fetchone()
-        if not prefix:
-            raise Exception
-        return prefix[0]
-    raise Exception
-    # except:
-    #     return client.default_prefix
+    try:
+        if ctx.guild:
+            async with client.aiodb() as db:
+                async with db.execute(
+                    "SELECT prefix FROM guilds WHERE guild_id=?",
+                    (ctx.guild.id,)
+                ) as cursor:
+                    prefix = await cursor.fetchone()
+            if prefix:
+                return prefix[0]
+        raise Exception
+    except:
+        return client.default_prefix
 
 
 class Shibbot(commands.Bot):
@@ -82,14 +83,14 @@ class Shibbot(commands.Bot):
         )
 
         self.db_path = "database.sqlite"
+
+        def aiosqlite_conn() -> aiosqlite.Connection:
+            # aioSQLite for asynchronous stuff
+            return aiosqlite.connect(self.db_path)
+        self.aiodb = aiosqlite_conn
         # SQLite3 for synchronous stuff
         self.db = sqlite3.connect(self.db_path)
         self.cursor = self.db.cursor()
-        # aioSQLite for asynchronous stuff
-
-        def aiosqlite_conn():
-            return aiosqlite.connect(self.db_path)
-        self.aiodb = aiosqlite_conn
         print(f"[+] Connected to Database. Located at /{self.db_path}")
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
@@ -105,34 +106,37 @@ class Shibbot(commands.Bot):
                     print(
                         f"[x] Could not load '{cogname}' : ({type(e).__name__}: {e})")
 
-    def fetch_guild(self, guild: discord.Guild):
+    async def fetch_guild(self, guild: discord.Guild):
         """Used to fetch a guild's data or insert a guild into the guild's table."""
-        self.cursor.execute(
-            f"SELECT * FROM guilds WHERE guild_id={guild.id}")
-        data = self.cursor.fetchone()
-        if not data:
-            self.cursor.execute(
-                "INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)",
-                (guild.id, self.default_prefix, self.default_language)
-            )
-            self.db.commit()
+        async with self.aiodb() as db:
+            async with db.execute(
+                f"SELECT * FROM guilds WHERE guild_id=?",
+                (guild.id,)
+            ) as cursor:
+                data = await cursor.fetchone()
+            if not data:
+                async with cursor.execute(
+                    "INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)",
+                    (guild.id, self.default_prefix, self.default_language)
+                ):
+                    db.commit()
         return data
 
-    def _get_prefix(self, ctx: commands.Context) -> str:
+    def _get_prefix(self, ctx: commands.Context) -> Coroutine:
         return get_prefix(self, ctx)
 
-    def get_lang(self, ctx: commands.Context) -> str:
+    async def get_lang(self, ctx: commands.Context) -> str:
         """Gets the langage of a server."""
         try:
             if ctx.guild or isinstance(ctx, discord.Guild):
-                self.cursor.execute(
-                    "SELECT lang FROM guilds WHERE guild_id=?",
-                    (ctx.guild.id,)
-                )
-                lang = self.cursor.fetchone()
-                if not lang:
-                    raise Exception
-                return lang[0]
+                async with self.aiodb() as db:
+                    async with db.execute(
+                        "SELECT lang FROM guilds WHERE guild_id=?",
+                        (ctx.guild.id,)
+                    ) as cursor:
+                        lang = await cursor.fetchone()
+                if lang:
+                    return lang[0]
             raise Exception
         except:
             return self.default_language

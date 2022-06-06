@@ -66,10 +66,10 @@ class BotEvents(commands.Cog):
 
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx: discord.ApplicationContext, error):
-        lang = self.client.fl(self.client.get_lang(ctx))
+        text = self.client.fl(await self.client.get_lang(ctx)).on_command_error
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
-                description=textCommandOnCooldown["description"].format(
+                description=text["CommandOnCooldown"]["description"].format(
                     secs=round(error.cooldown.get_retry_after(), 2)
                 )
             )
@@ -83,7 +83,7 @@ class BotEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         """Command invoked when an error occurs."""
-        text = self.client.fl(self.client.get_lang(ctx)).on_command_error
+        text = self.client.fl(await self.client.get_lang(ctx)).on_command_error
         time = None if self.client.test_mode else 20
 
         if isinstance(error, commands.PrivateMessageOnly):

@@ -1,22 +1,19 @@
 import asyncio
 
-try:
-    from orjson import loads as _loads, dumps as _dumps  # Faster than json
-except ImportError:
-    from json import loads as _loads, dumps as _dumps
+import orjson # Faster than json
 import aiohttp
 
 
 def dump(_object: object, fpath: str, *args, **kwargs) -> None:
     """Writes a json file, wow."""
     with open(fpath, "wb+") as out_file:
-        out_file.write(_dumps(_object, *args, **kwargs))
+        out_file.write(orjson.dumps(_object, *args, **kwargs))
 
 
 def load(fpath: str):
     """Loads a json file, incredible."""
     with open(fpath, "rb") as json_file:
-        return _loads(json_file.read())
+        return orjson.loads(json_file.read())
 
 
 async def get_from_urls(urls: list) -> list:
@@ -26,5 +23,5 @@ async def get_from_urls(urls: list) -> list:
         responses = await asyncio.gather(*tasks)
         results = []
         for response in responses:
-            results.append(await response.json(loads=_loads))
+            results.append(await response.json(loads=orjson.loads))
         return results

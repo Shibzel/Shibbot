@@ -136,7 +136,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.cooldown(3, 30, commands.BucketType.member)
     async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        text = self.client.fl(self.client.get_lang(ctx)).change_logs_channel
+        text = self.client.fl(await self.client.get_lang(ctx)).change_logs_channel
         if not channel:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -260,7 +260,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
-        text = self.client.fl(self.client.get_lang(ctx)).clear_messages
+        text = self.client.fl(await self.client.get_lang(ctx)).clear_messages
         try:
             limit = int(limit)
             limit = limit if limit <= 100 else 100
@@ -324,7 +324,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.cooldown(1, 15, commands.BucketType.member)
     async def nuke_channel(self, ctx: commands.Context):
-        text = self.client.fl(self.client.get_lang(ctx)).nuke_channel
+        text = self.client.fl(await self.client.get_lang(ctx)).nuke_channel
         embed_text = text["embed"]
         embed = discord.Embed(
             title=embed_text["title"],
@@ -400,7 +400,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
     async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        text = self.client.fl(self.client.get_lang(ctx)).warn_member
+        text = self.client.fl(await self.client.get_lang(ctx)).warn_member
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -472,7 +472,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
     async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
-        text = self.client.fl(self.client.get_lang(ctx)).clear_user_warns
+        text = self.client.fl(await self.client.get_lang(ctx)).clear_user_warns
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -520,7 +520,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
     async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
-        text = self.client.fl(self.client.get_lang(ctx)).show_warnings
+        text = self.client.fl(await self.client.get_lang(ctx)).show_warnings
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -702,7 +702,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
     async def mute_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        text = self.client.fl(self.client.get_lang(ctx)).mute_member
+        text = self.client.fl(await self.client.get_lang(ctx)).mute_member
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -773,7 +773,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
-        text = self.client.fl(self.client.get_lang(ctx)).tempmute_member
+        text = self.client.fl(await self.client.get_lang(ctx)).tempmute_member
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]
             return await ctx.reply(
@@ -854,7 +854,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
     async def unmute_member(self, ctx: commands.Context, member: discord.Member = None):
-        lang = self.client.fl(self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx))
         text = lang.unmute_member
         if not member:
             embed_text = text["checks"]["missing_args"]["embed"]

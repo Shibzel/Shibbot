@@ -8,7 +8,7 @@ class Reddit:
 
     def __init__(
         self,
-        loop: asyncio.AbstractEventLoop,
+        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
         a2f: bool = False,
         *args, **kwargs
     ):

@@ -12,40 +12,42 @@ class English:
         }
 
         # events.py cog
-        self.CommandOnCooldown = {
-            "description": "Wait, wait ! This command is on cooldown, you cannot use it until this message disappears (`{secs} second(s)`)."
-        }
-        self.PrivateMessageOnly = {
-            "description": "This command is dm only."
-        }
-        self.NoPrivateMessage = {
-            "description": "This command is guild only."
-        }
-        self.NotOwner = {
-            "description": "You're not my owner, you can't use this command."
-        }
-        self.UserNotFound = {
-            "description": "Couldn't find that user."
-        }
-        self.ChannelNotFound = {
-            "description": "Couldn't find that channel."
-        }
-        self.NSFWChannelRequired = {
-            "description": "This channel {channel} isn't for NSFW content ! Kids might be shocked."
-        }
-        self.MissingPermissions = {
-            "description": "You can't do that. You're missing {permissions} permission(s) to run this command."
-        }
-        self.BotMissingPermissions = {
-            "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution."
-        }
-        self.BadArgument = {
-            "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."
-        }
-        self.CommandError = {
-            "description": " Something went wrong, I couldn't do that.",
-            "footer": "If the problem persists, contact the owner of the bot : {owner}.",
-            "dissmiss": "dissmiss"
+        self.on_command_error = {
+            "CommandOnCooldown": {
+                "description": "Wait, wait ! This command is on cooldown, you cannot use it until this message disappears (`{secs} second(s)`)."
+            },
+            "PrivateMessageOnly": {
+                "description": "This command is dm only."
+            },
+            "NoPrivateMessage": {
+                "description": "This command is guild only."
+            },
+            "NotOwner": {
+                "description": "You're not my owner, you can't use this command."
+            },
+            "UserNotFound": {
+                "description": "Couldn't find that user."
+            },
+            "ChannelNotFound": {
+                "description": "Couldn't find that channel."
+            },
+            "NSFWChannelRequired": {
+                "description": "This channel {channel} isn't for NSFW content ! Kids might be shocked."
+            },
+            "MissingPermissions": {
+                "description": "You can't do that. You're missing {permissions} permission(s) to run this command."
+            },
+            "BotMissingPermissions": {
+                "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution."
+            },
+            "BadArgument": {
+                "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."
+            },
+            "CommandError": {
+                "description": " Something went wrong, I couldn't do that.",
+                "footer": "If the problem persists, contact the owner of the bot : {owner}.",
+                "dissmiss": "dissmiss"
+            }
         }
 
         # config.py cog

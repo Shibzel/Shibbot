@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands, tasks
 
@@ -37,22 +39,29 @@ class Fun(commands.Cog):
         self.client.cursor.execute(
             "CREATE TABLE IF NOT EXISTS fun_plugin (guild_id INTEGER PRIMARY KEY, enabled BOOLEAN)")
 
-    for i in ("shibes", "cats", "birds", "foxes", "memes", "nsfw_memes"):
-        try:
-            setattr(self, i, utils.load(f"cache/{i}.json"))
-        except (Exception,) as e:
-            setattr(self, i, None)
-            print(f"[x] Failed loading {i}.json, the command associed to it won't work until it got updated : {str(e)}")
+        for i in ("shibes", "cats", "birds", "memes", "nsfw_memes"):
+            try:
+                setattr(self, i, utils.load(f"cache/{i}.json"))
+            except (Exception,) as e:
+                setattr(self, i, None)
+                print(
+                    f"[x] Failed loading {i}.json, the command associed to it won't work until it got updated : {str(e)}")
+
+        self.update_shibe_online.start()
 
     @tasks.loop(hours=10)
     async def update_shibe_online(self):
         async def update(i):
             try:
-                urls = await utils.fetch_from_urls([f"https://shibe.online/api{i}?count=100&urls=true&httpsUrls=true"]*10)
-                setattrs(self, i, urls)
+                urls_list = await utils.get_from_urls([f"https://shibe.online/api/{i}?count=100&urls=true&httpsUrls=true"]*10)
+                urls = []
+                for list in urls_list:
+                    urls += list
+                urls = utils.filter_doubles(urls)
+                setattr(self, i, urls)
                 utils.dump(urls, f"cache/{i}.json")
-                print(f"[+] Sucessfully updated {i}.")
-            except Excetion as e:
+                print(f"[+] Sucessfully updated {i} ({len(urls)} images).")
+            except Exception as e:
                 print(f"[x] Failed while trying to update {i} : {str(e)}")
         tasks = [update(i) for i in ["shibes", "cats", "birds"]]
         await asyncio.gather(*tasks)

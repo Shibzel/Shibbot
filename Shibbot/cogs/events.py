@@ -69,7 +69,7 @@ class BotEvents(commands.Cog):
         lang = self.client.fl(self.client.get_lang(ctx))
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
-                description=lang.CommandOnCooldown["description"].format(
+                description=textCommandOnCooldown["description"].format(
                     secs=round(error.cooldown.get_retry_after(), 2)
                 )
             )
@@ -83,38 +83,38 @@ class BotEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         """Command invoked when an error occurs."""
-        lang = self.client.fl(self.client.get_lang(ctx))
+        text = self.client.fl(self.client.get_lang(ctx)).on_command_error
         time = None if self.client.test_mode else 20
 
         if isinstance(error, commands.PrivateMessageOnly):
             embed = ErrorEmbed(
-                description=lang.PrivateMessageOnly["description"]
+                description=text["PrivateMessageOnly"]["description"]
             )
         elif isinstance(error, commands.NoPrivateMessage):
             embed = ErrorEmbed(
-                description=lang.NoPrivateMessage["description"]
+                description=text["NoPrivateMessage"]["description"]
             )
         elif isinstance(error, commands.NotOwner):
             embed = ErrorEmbed(
-                description=lang.NotOwner["description"])
+                description=text["NotOwner"]["description"])
         elif isinstance(error, (commands.MemberNotFound, commands.UserNotFound)
                         ):
             embed = ErrorEmbed(
-                description=lang.UserNotFound["description"])
+                description=text["UserNotFound"]["description"])
         elif isinstance(error, commands.ChannelNotFound):
             embed = ErrorEmbed(
-                description=lang.ChannelNotFound["description"]
+                description=["textChannelNotFound"]["description"]
             )
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
-                description=lang.CommandOnCooldown["description"].format(
+                description=text["CommandOnCooldown"]["description"].format(
                     secs=round(error.cooldown.get_retry_after(), 2)
                 )
             )
             time = error.cooldown.per
         elif isinstance(error, commands.NSFWChannelRequired):
             embed = ErrorEmbed(
-                description=lang.NSFWChannelRequired["description"].format(
+                description=text["NSFWChannelRequired"]["description"].format(
                     channel=error.channel.mention)
             )
         elif isinstance(error, commands.MissingPermissions):
@@ -125,16 +125,16 @@ class BotEvents(commands.Cog):
                 else:
                     permissions += f" and `{str_permission}`"
             embed = ErrorEmbed(
-                description=lang.MissingPermissions["description"].format(
+                description=text["MissingPermissions"]["description"].format(
                     permissions=permissions)
             )
         elif isinstance(error, commands.BotMissingPermissions):
             embed = ErrorEmbed(
-                description=lang.BotMissingPermissions["description"]
+                description=text["BotMissingPermissions"]["description"]
             )
         elif isinstance(error, commands.BadArgument):
             embed = ErrorEmbed(
-                description=lang.BadArgument["description"]
+                description=text["BadArgument"]["description"]
             )
         elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)
                         ):
@@ -148,7 +148,7 @@ class BotEvents(commands.Cog):
                     color=discord.Color.red()
                 )
             else:
-                text = lang.CommandError
+                text = text["CommandError"]
                 embed = ErrorEmbed(
                     description=text["description"]
                 )
@@ -160,7 +160,7 @@ class BotEvents(commands.Cog):
         try:
             dismiss_button = discord.ui.Button(
                 style=discord.ButtonStyle.danger,
-                label=lang.CommandError["dissmiss"],
+                label=text["CommandError"]["dissmiss"],
                 emoji="✖"
             )
             message: discord.Message = await ctx.reply(

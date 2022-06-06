@@ -2,6 +2,7 @@ import datetime
 import sqlite3
 import os as sus
 
+import aiosqlite
 import discord
 from discord.ext import commands
 
@@ -12,21 +13,21 @@ __author__ = "JeanTheShiba"
 __version__ = "0.3"
 
 
-def get_prefix(client, ctx) -> str:
+async def get_prefix(client, ctx) -> str:
     """Gets the prefix of a server."""
-    try:
-        if ctx.guild:
-            client.cursor.execute(
-                "SELECT prefix FROM guilds WHERE guild_id=?",
-                (ctx.guild.id)
-            )
-            prefix = client.cursor.fetchone()
-            if not prefix:
-                raise Exception
-            return prefix[0]
-        raise Exception
-    except:
-        return client.default_prefix
+    # try:
+    if ctx.guild:
+        async with client.aiodb() as db:
+            async with db.execute(
+                "SELECT prefix FROM guilds WHERE guild_id=?", (ctx.guild.id,)
+            ) as cursor:
+                prefix = await cursor.fetchone()
+        if not prefix:
+            raise Exception
+        return prefix[0]
+    raise Exception
+    # except:
+    #     return client.default_prefix
 
 
 class Shibbot(commands.Bot):
@@ -45,14 +46,6 @@ class Shibbot(commands.Bot):
         #self.website_url = "shibbot.xyz"
         self.fl = fl
 
-        self.db_path = "database.sqlite"
-        self.db = sqlite3.connect(self.db_path)
-        self.cursor = self.db.cursor()
-        print(f"[+] Connected to Database. Located at /{self.db_path}")
-        self.cursor.execute(
-            "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
-        self.db.commit()
-
         self.discord_conf = self.config["discord"]
         self.default_prefix = "$"
         self.default_language = "en"
@@ -61,7 +54,7 @@ class Shibbot(commands.Bot):
         self.bot_is_alive = None
         super().__init__(
             command_prefix=get_prefix,
-            owner_id=380044496370532353,
+            owner_id=380044496370532353,  # It's me :O
             allowed_mentions=discord.AllowedMentions(
                 roles=False,
                 users=True,
@@ -87,6 +80,20 @@ class Shibbot(commands.Bot):
             username="JeanTheShiba",
             password=self.reddit_conf["password"],
         )
+
+        self.db_path = "database.sqlite"
+        # SQLite3 for synchronous stuff
+        self.db = sqlite3.connect(self.db_path)
+        self.cursor = self.db.cursor()
+        # aioSQLite for asynchronous stuff
+
+        def aiosqlite_conn():
+            return aiosqlite.connect(self.db_path)
+        self.aiodb = aiosqlite_conn
+        print(f"[+] Connected to Database. Located at /{self.db_path}")
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
+        self.db.commit()
 
         print(f"   ----------------------------\n[+] Loading cogs...")
         for filename in sus.listdir("./cogs"):

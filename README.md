@@ -1,4 +1,4 @@
-# **__Shibbot__**
+# ****Shibbot****
 
 Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapper and SQLite as database.
 
@@ -11,14 +11,14 @@ Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapp
 Shibbot will help you moderate your server(s) efficiently : it has all the classics moderation commands (there is a lot of them, really), such as `kick`, `tempmute`, `ban`, you know, the basic ones.
 But it also has less popular ones : `nuke` (try it, it's really funny), `multikick`, `softban` to more flexibility while you sanction a member (abusively or not haha, we don't care).
 
-![Mod](https://media.discordapp.net/attachments/875848985502441543/981164095770337350/mod.png)
+![Mod](https://media.discordapp.net/attachments/955511076261347369/981661183750852658/mod.png)
 
 That's a good feature isn't it ? Nah ?
 Then let's hop to the next one :
 
 ### Fun and entertainement
 
-![Fun](https://media.discordapp.net/attachments/875848985502441543/981164099301957672/images.png)
+![Fun](https://media.discordapp.net/attachments/955511076261347369/981661184249978880/images.png)
 
 **Memes :**
 
@@ -26,7 +26,7 @@ Get the hotest memes from Reddit everyday with the `meme` (or `nmeme` for nsfw c
 
 **Images :**
 
-Want to "awwww" in front of cute animals pictues with your friends (if you have some) ? Then the bot has shibes, cats, birds, foxes just for your needs !
+Want to "awwww" in front of cute animals pictues with your friends (if you have some) ? Then the bot has shibes, cats, birds just for your needs !
 
 **Free nitro :**
 
@@ -42,11 +42,15 @@ There is some wierd commands, like `piss` or `twitter`, we have absolutely no id
 
 ## So what are you waiting for ?
 
-![Invite](https://media.discordapp.net/attachments/875848985502441543/981164096290455592/you_shloud.jpg)
+![Invite](https://media.discordapp.net/attachments/955511076261347369/981661184002494464/you_shloud.jpg)
 
 Invite the bot by clicking right [here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands).
 
 # About this repository
+
+## Motivation
+
+< Text here >
 
 ## Host and code
 
@@ -56,39 +60,24 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 
 ## Prerequisites
 
--   [Python 3.8+ (idealy 3.10+)](https://python.org)
-    
--   [Pycord 2.0.0b7](https://pycord.dev) - Discord API wrapper
-    
-
+- [Python 3.8+ (idealy 3.10+)](https://python.org)
+- [Pycord 2.0.0b7](https://pycord.dev) - Discord API wrapper
 **API wrappers :**
-
--   [Asyncpraw](https://pypi.org/project/asyncpraw/) - to scrap posts from Reddit
-    
--   [Aiowiki](https://github.com/Gelbpunkt/aiowiki) - to get Wikipedia articles
-    
-
+- [Asyncpraw](https://pypi.org/project/asyncpraw/) - to scrap posts from Reddit
+- [Aiowiki](https://github.com/Gelbpunkt/aiowiki) - to get Wikipedia articles
 **Optionally :**
-
--   [Orjson](https://pypi.org/project/orjson/) - faster json serialisation
-    
+- [Orjson](https://pypi.org/project/orjson/) - faster json serialisation
 
 ## Contributors
 
--   [JeanLeShiba](https://github.com/JeanLeShiba) - Owner and main developper of Shibbot
-    
--   [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester and translater
-    
+- [JeanLeShiba](https://github.com/JeanLeShiba) - Owner and main developper of Shibbot
+- [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester and translater
 
 ## Aknowlegement
 
--   [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
-    
--   [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
-    
--   [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
-    
--   [translate.argosopentech.com](https://translate.argosopentech.com) for the host of a LibreTranslate server
-    
+- [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
+- [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
+- [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
+- [translate.argosopentech.com](https://translate.argosopentech.com) for the host of a LibreTranslate server
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

@@ -17,12 +17,12 @@ def endswith(text: str, word: str) -> bool:
 def filter_doubles(_list: list) -> list:
     """Return the list without doubles of the same object."""
     filtered = []
-    for obj in list:
+    for obj in _list:
         if obj not in filtered:
             filtered.append(obj)
     return filtered
 
 
-def remove_chars(string, chars="", replace="") -> str:
+def remove_chars(string: str, chars: str = "", replace: str = "") -> str:
     """Removes characters from string"""
     return re.sub(r"["+chars+"]", replace, string)

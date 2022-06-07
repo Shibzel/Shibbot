@@ -156,7 +156,7 @@ class Config(commands.Cog):
     async def change_prefix(self, ctx: commands.Context, prefix: str = None):
         text = self.client.fl(await self.client.get_lang(ctx)).change_prefix
         if not prefix:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -164,7 +164,7 @@ class Config(commands.Cog):
                 )
             )
         elif len(prefix) > 8:
-            embed_text = text["checks"]["length_exceeded"]["embed"]
+            embed_text = text["checks"]["length_exceeded"]
             return await ctx.reply(
                 embed=discord.Embed(
                     title=embed_text["title"],

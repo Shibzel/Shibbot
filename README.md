@@ -9,7 +9,7 @@ Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapp
 ### Moderation
 
 Shibbot will help you moderate your server(s) efficiently : it has all the classics moderation commands (there is a lot of them, really), such as `kick`, `tempmute`, `ban`, you know, the basic ones.
-But it also has less popular ones : `nuke` (try it, it's really funny), `multikick`, `softban` to more flexibility while you sanction a member (abusively or not haha, we don't care).
+But it also has less popular ones : `nuke` (kadaboom haha), `multikick`, `softban` to more flexibility while you sanction a member (abusively or not haha, we don't care).
 
 ![Mod](https://media.discordapp.net/attachments/955511076261347369/981661183750852658/mod.png)
 
@@ -28,11 +28,7 @@ Get the hotest memes from Reddit everyday with the `meme` (or `nmeme` for nsfw c
 
 Want to "awwww" in front of cute animals pictues with your friends (if you have some) ? Then the bot has shibes, cats, birds just for your needs !
 
-**Free nitro :**
-
-Gives you a nitro code that comes straight from the depths of the darkweb. Is it illegal ? Don't worry about that.
-
-What's that ?**
+**What's that ?**
 
 There is some wierd commands, like `piss` or `twitter`, we have absolutely no ideas why they exists neither what they do. Maybe you should try them out.
 
@@ -62,11 +58,16 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 
 - [Python 3.8+ (idealy 3.10+)](https://python.org)
 - [Pycord 2.0.0b7](https://pycord.dev) - Discord API wrapper
+
 **API wrappers :**
+
 - [Asyncpraw](https://pypi.org/project/asyncpraw/) - to scrap posts from Reddit
 - [Aiowiki](https://github.com/Gelbpunkt/aiowiki) - to get Wikipedia articles
-**Optionally :**
-- [Orjson](https://pypi.org/project/orjson/) - faster json serialisation
+- [AioLibreTrans](https://github.com/JeanLeShiba/aioLibreTranslate) - for translation in different languages
+
+**Others :**
+
+- Aioslite, Psutil, Cchardet, Orjson, Brotlipy
 
 ## Contributors
 
@@ -78,6 +79,6 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 - [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
 - [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
 - [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
-- [translate.argosopentech.com](https://translate.argosopentech.com) for the host of a LibreTranslate server
+- [argosopentech.com](https://translate.argosopentech.com) for the host of a [LibreTranslate](https://libretranslate.com/) server
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

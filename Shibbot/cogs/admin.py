@@ -78,8 +78,7 @@ class CogEnabledEmbed(discord.Embed):
         super().__init__(
             title="Admin",
             description=f"Cog `{plugin}` has been {state} successfully.",
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
 
 
 class CogErrorEmbed(discord.Embed):
@@ -89,5 +88,4 @@ class CogErrorEmbed(discord.Embed):
         super().__init__(
             title="Admin",
             description=f"An error has occurred :\n```{type(error)}: {error}```",
-            color=discord.Color.red()
-        )
+            color=discord.Color.red())

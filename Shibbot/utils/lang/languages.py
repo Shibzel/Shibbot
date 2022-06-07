@@ -3,6 +3,8 @@
 
 class English:
     def __init__(self):
+        self.DEFAULT_REQUESTED_FOOTER = "Requested by {author}."
+
         # ping.py cog
         self.ping = {
             "embed": {
@@ -50,6 +52,69 @@ class English:
             }
         }
 
+        # tools.py cog
+        self.urbain_dictionary = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a word to search on Urban Dictionary !\nUsage : `udict [word]`"
+                }
+            },
+            "embed": {
+                "fields": [
+                    {
+                        "name": "Definition of {word} by '{author}'"
+                    },
+                    {
+                        "name": "Example"
+                    }
+                ]
+            },
+            "buttons": {
+                "next": "Next Definition",
+                "previous": "Previous"
+            }
+        }
+
+        # fun.py cog
+        self.get_random_number = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a numbers or two !\nUsage : `randint [x] <y>`"
+
+                }
+            }
+        }
+        self.shibes_viewer = {
+            "buttons": {
+                "previous": "Previous one",
+                "next": "Next Shibe"
+            }
+        }
+        self.cats_viewer = {
+            "buttons": {
+                "previous": "Previous one",
+                "next": "Next Cat"
+            }
+        }
+        self.birds_viewer = {
+            "buttons": {
+                "previous": "Previous one",
+                "next": "Next Birb"
+            }
+        }
+        self.meme_viewer = {
+            "buttons": {
+                "previous": "Previous Meme",
+                "next": "Next Meme"
+            }
+        }
+        self.nsfw_meme_viewer = {
+            "buttons": {
+                "previous": "Previous Meme",
+                "next": "Next Meme"
+            }
+        }
+
         # config.py cog
         self.plugins = {
             "embed": {
@@ -75,15 +140,13 @@ class English:
         self.change_prefix = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a prefix to change (must be lower than 8 caracters) !\nUsage : `prefix [prefix]`"
-                    }
+                    "description": "Gimme a prefix to change (must be lower than 8 caracters) !\nUsage : `prefix [prefix]`"
+
                 },
                 "length_exceeded": {
-                    "embed": {
-                        "title": "Oops...",
-                        "description": "The prefix must have less than 8 caracters !"
-                    }
+                    "title": "Oops...",
+                    "description": "The prefix must have less than 8 caracters !"
+
                 }
             },
             "embed": {
@@ -94,9 +157,8 @@ class English:
         self.change_logs_channel = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a logs channel to define ! Usage : `logs [channel]`"
-                    }
+                    "description": "Gimme a logs channel to define ! Usage : `logs [channel]`"
+
                 }
             },
             "embed": {
@@ -148,23 +210,19 @@ class English:
         self.clear_messages = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a number of messages to clear and optionally an user !\nUsage : `clear [amount] <user>`"
-                    }
+                    "description": "Gimme a number of messages to clear and optionally an user !\nUsage : `clear [amount] <user>`"
                 }
             },
             "member_clear": {
-                "embed": {
-                    "title": "Done !",
-                    "description": "Deleted `{n_messages}` messages of {member}.",
-                    "footer": "The messages older than 2 weeks cannot be deleted by the bot (Discord restrictions)."
-                }
+                "title": "Done !",
+                "description": "Deleted `{n_messages}` messages of {member}.",
+                "footer": "The messages older than 2 weeks cannot be deleted by the bot (Discord restrictions)."
+
             },
             "channel_clear": {
-                "embed": {
-                    "title": "Done !",
-                    "description": "Removed `{n_messages}` messages in this channel."
-                }
+                "title": "Done !",
+                "description": "Removed `{n_messages}` messages in this channel."
+
             }
         }
         self.nuke_channel = {
@@ -184,9 +242,7 @@ class English:
         self.warn_member = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a member to warn !\nUsage : `warn [member] <reason>`"
-                    }
+                    "description": "Gimme a member to warn !\nUsage : `warn [member] <reason>`"
                 }
             },
             "embed": {
@@ -194,23 +250,17 @@ class English:
                 "description": "<a:verified:836312937332867072> You've warned {member}. They now have `{n_warns}` warn(s) !\nReason : {reason}"
             },
             "log": {
-                "embed": {
-                    "action": "Warn n°{n_warns}",
-                    "description": "{member} (id : `{member_id}`) has been warned by {mod}.\nReason : {reason}."
-                }
+                "action": "Warn n°{n_warns}",
+                "description": "{member} (id : `{member_id}`) has been warned by {mod}.\nReason : {reason}."
             },
             "pm": {
-                "embed": {
-                    "description": "You've been warned on **{guild}**.\nReason : {reason}."
-                }
+                "description": "You've been warned on **{guild}**.\nReason : {reason}."
             }
         }
         self.clear_user_warns = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a user with warns to clean !\nUsage : `clearwarns [member] <reason>`"
-                    }
+                    "description": "Gimme a user with warns to clean !\nUsage : `clearwarns [member] <reason>`"
                 }
             },
             "embed": {
@@ -218,18 +268,14 @@ class English:
                 "description": "All the infractions of {member} has been removed."
             },
             "log": {
-                "embed": {
-                    "action": "Warns clear",
-                    "description": "{mod} cleared all the warns of {member}.\nReason : {reason}."
-                }
+                "action": "Warns clear",
+                "description": "{mod} cleared all the warns of {member}.\nReason : {reason}."
             }
         }
         self.show_warnings = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a user to search !\nUsage : `warnings [member] <reason>`"
-                    }
+                    "description": "Gimme a user to search !\nUsage : `warnings [member] <reason>`"
                 }
             },
             "embed": {
@@ -254,15 +300,12 @@ class English:
         self.mute_member = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a member to mute !\nUsage: `mute[member] <reason>`"
-                    }
+                    "description": "Gimme a member to mute !\nUsage: `mute[member] <reason>`"
+
                 },
                 "already_muted": {
-                    "embed": {
-                        "title": "Oops...",
-                        "description": "This member is already muted !"
-                    }
+                    "title": "Oops...",
+                    "description": "This member is already muted !"
                 }
             },
             "embed": {
@@ -270,29 +313,21 @@ class English:
                 "description": "Just muted {member}.\nReason : {reason}"
             },
             "log": {
-                "embed": {
-                    "action": "Mute",
-                    "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nReason : {reason}."
-                }
+                "action": "Mute",
+                "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nReason : {reason}."
             },
             "pm": {
-                "embed": {
-                    "description": "You've been muted on **{guild}**.\nReason : {reason}."
-                }
+                "description": "You've been muted on **{guild}**.\nReason : {reason}."
             }
         }
         self.tempmute_member = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a member to tempmute !\nUsage: `tmute [member] [duration] <reason>`"
-                    }
+                    "description": "Gimme a member to tempmute !\nUsage: `tmute [member] [duration] <reason>`"
                 },
                 "already_muted": {
-                    "embed": {
-                        "title": "Oops...",
-                        "description": "This member is already muted !"
-                    }
+                    "title": "Oops...",
+                    "description": "This member is already muted !"
                 }
             },
             "embed": {
@@ -300,29 +335,21 @@ class English:
                 "description": "{member} is now tempmuted for `{duration}`.\nReason : {reason}"
             },
             "log": {
-                "embed": {
-                    "action": "Tempmute",
-                    "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nReason : {reason}."
-                }
+                "action": "Tempmute",
+                "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nReason : {reason}."
             },
             "pm": {
-                "embed": {
-                    "description": "You've been tempmuted on **{guild}** for `{duration}`.\nReason : {reason}."
-                }
+                "description": "You've been tempmuted on **{guild}** for `{duration}`.\nReason : {reason}."
             }
         }
         self.unmute_member = {
             "checks": {
                 "missing_args": {
-                    "embed": {
-                        "description": "Gimme a member to unmute !\nUsage: `tmute [member]`"
-                    }
+                    "description": "Gimme a member to unmute !\nUsage: `tmute [member]`"
                 },
                 "not_muted": {
-                    "embed": {
-                        "title": "Oops...",
-                        "description": "This member is not muted !"
-                    }
+                    "title": "Oops...",
+                    "description": "This member is not muted !"
                 }
             },
             "embed": {
@@ -330,9 +357,7 @@ class English:
                 "description": "{member} is now unmuted."
             },
             "pm": {
-                "embed": {
-                    "description": "You've been unmuted from **{guild}**."
-                }
+                "description": "You've been unmuted from **{guild}**."
             }
         }
 

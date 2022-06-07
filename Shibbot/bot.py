@@ -1,7 +1,7 @@
 import datetime
 import sqlite3
 import os as sus
-from typing import Coroutine
+from typing import Coroutine, Union
 
 import aiosqlite
 import discord
@@ -125,14 +125,18 @@ class Shibbot(commands.Bot):
     def _get_prefix(self, ctx: commands.Context) -> Coroutine:
         return get_prefix(self, ctx)
 
-    async def get_lang(self, ctx: commands.Context) -> str:
+    async def get_lang(self, guild_or_context: Union[discord.Guild, commands.Context]) -> str:
         """Gets the langage of a server."""
         try:
-            if ctx.guild or isinstance(ctx, discord.Guild):
+            if isinstance(guild_or_context, commands.Context):
+                guild = guild_or_context.guild
+            elif isinstance(guild_or_context, discord.Guild):
+                guild = guild_or_context
+            if guild:
                 async with self.aiodb() as db:
                     async with db.execute(
                         "SELECT lang FROM guilds WHERE guild_id=?",
-                        (ctx.guild.id,)
+                        (guild.id,)
                     ) as cursor:
                         lang = await cursor.fetchone()
                 if lang:
@@ -185,7 +189,7 @@ def start():
         f"|░░░▀▀█░█▀█░░█░░█▀▄░█▀▄░█░█░░█░░░|\n|░░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░▀░░░|\n"
         f"|░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░|\n --------------------------------\n   ----------------------------\n[-] "
         f"Version : {__version__}")
-    shibbot = Shibbot(test_mode=True)
+    shibbot = Shibbot(test_mode=False)
     shibbot.run()
 
 

@@ -71,5 +71,5 @@ class Reddit:
         _dict = {}
         for key, value in kwargs.items():
             if value:
-                _dict.update({key: submission.getattr(key, None)})
+                _dict.update({key: getattr(submission, key, None)})
         return _dict

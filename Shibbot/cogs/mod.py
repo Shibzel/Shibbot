@@ -21,11 +21,12 @@ def setup(_client):
 def plugin_is_enabled():
     async def predicate(ctx):
         if ctx.guild:
-            client.cursor.execute(
-                f"SELECT enabled FROM mod_plugin WHERE guild_id=?",
-                (ctx.guild.id,)
-            )
-            enabled = client.cursor.fetchone()
+            async with client.aiodb() as db:
+                async with db.execute(
+                    f"SELECT enabled FROM mod_plugin WHERE guild_id=?",
+                    (ctx.guild.id,)
+                ) as cursor:
+                    enabled = await cursor.fetchone()
             if enabled:
                 enabled = enabled[0]
             return enabled

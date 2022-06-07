@@ -78,7 +78,7 @@ class BotEvents(commands.Cog):
                 delete_after=error.cooldown.per
             )
         else:
-            print(type(error))
+            print(f"[x] Unexpected error : {type(error).__name__}: {error}")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
@@ -103,7 +103,7 @@ class BotEvents(commands.Cog):
                 description=text["UserNotFound"]["description"])
         elif isinstance(error, commands.ChannelNotFound):
             embed = ErrorEmbed(
-                description=["textChannelNotFound"]["description"]
+                description=text["textChannelNotFound"]["description"]
             )
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(

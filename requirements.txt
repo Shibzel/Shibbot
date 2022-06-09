@@ -8,4 +8,4 @@ brotlipy==0.7.0
 cchardet==2.1.7
 orjson==3.7.1
 psutil==5.9.1
-py-cord==2.0.0b7
+py-cord==2.0.0rc1

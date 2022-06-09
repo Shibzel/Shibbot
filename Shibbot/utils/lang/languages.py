@@ -74,6 +74,71 @@ class English:
                 "previous": "Previous"
             }
         }
+        self.get_covid_stats = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a country or `world` to get global data !\nUsage : `covid [country]`"
+                }
+            },
+            "loading_embed": {
+                "title": "Wait a second...",
+                "description": "I'm fetching data..."
+            },
+            "embed": {
+                "title": "COVID-19 status of {country}",
+                "description": "Here are the stats :",
+                "fields": [
+                    {
+                        "name": "Cases"
+                    },
+                    {
+                        "name": "Total Cases"
+                    },
+                    {
+                        "name": "Deaths"
+                    },
+                    {
+                        "name": "Total Deaths"
+                    },
+                    {
+                        "name": "Recovered"
+                    },
+                    {
+                        "name": "Active"
+                    },
+                    {
+                        "name": "Critical"
+                    },
+                    {
+                        "name": "Cases per 1/Million"
+                    },
+                    {
+                        "name": "Deaths per 1/Million"
+                    },
+                    {
+                        "name": "Total Tests"
+                    },
+                    {
+                        "name": "Tests per 1/Million"
+                    },
+                    {
+                        "name": "Pay attention :",
+                        "value": "The information given here may not be live and therefore inaccurate. Source : [www.worldometers.info](http://www.worldometers.info)."
+                    }
+                ]
+            }
+        }
+        self.translate_text = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a language and a text to tranlate !\nUsage : `trans [language] [sentence]`"
+                },
+                "bad_args": {
+                    "title": "Try again !",
+                    "description": "No support for the provided language."
+                },
+            },
+        }
 
         # fun.py cog
         self.get_random_number = {

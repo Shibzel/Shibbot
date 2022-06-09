@@ -1,4 +1,3 @@
-"""Basic functions."""
 import re
 
 

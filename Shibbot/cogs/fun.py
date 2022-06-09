@@ -53,7 +53,7 @@ class Fun(commands.Cog):
             try:
                 setattr(self, i, utils.load(f"cache/{i}.json"))
             except (Exception,) as e:
-                setattr(self, i, None)
+                setattr(self, i, [])
                 print(
                     f"[x] Failed loading {i}.json, the command associed to it won't work until it got updated : {str(e)}")
 
@@ -70,7 +70,7 @@ class Fun(commands.Cog):
     async def update_shibe_online(self):
         async def update(i):
             try:
-                urls_list = await utils.get_from_urls([f"https://shibe.online/api/{i}?count=100&urls=true&httpsUrls=true"]*10)
+                urls_list = await utils.get_from_urls([f"https://shibe.online/api/{i}?count=100&urls=true&httpsUrls=true"]*5)
                 urls = []
                 for list in urls_list:
                     urls += list
@@ -96,7 +96,8 @@ class Fun(commands.Cog):
         async def get_filtered_memes(subreds, nsfw=None):
             subs = []
             for submission in await self.reddit.get_subreddits(subreds):
-                if submission.url.endswith((".jpg", ".gif")) and not submission.is_self and submission.score >= 100:
+                # For optimisation purposes we must be more strict
+                if submission.url.endswith((".jpg", ".gif")) and not submission.is_self and submission.score >= 500:
                     if not nsfw or not submission.over_18 == nsfw:
                         subs.append(
                             self.reddit.sub_to_dict(

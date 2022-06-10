@@ -17,7 +17,7 @@ class Config(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 60, commands.BucketType.member)
     async def enable_disable_plugin(self, ctx: commands.Context):
-        text = self.client.fl(await self.client.get_lang(ctx)).plugins
+        text = self.client.fl(await self.client.get_lang(ctx)).enable_disable_plugins
 
         async with self.client.aiodb() as db:
             async def plugin_is_enabled(plugin_name):
@@ -60,6 +60,7 @@ class Config(commands.Cog):
                             )
                     await db.commit()
                     await cursor.close()
+                await interaction.response.send_message(text["done"], ephemeral=True)
 
             options_text = text["options"]
             options = [

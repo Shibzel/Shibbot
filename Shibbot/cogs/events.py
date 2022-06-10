@@ -33,36 +33,42 @@ class BotEvents(commands.Cog):
             activity = discord.Activity(
                 type=discord.ActivityType.watching,
                 name=random.choice(
-                    [f"the version {self.client.version}",  # self.client.website_url,
-                        f"over {len(self.client.guilds)} servers", f"over {len(self.client.users)} users", "/help"]
+                    (f"the version v{self.client.version}",  # self.client.website_url,
+                        f"over {len(self.client.guilds)} servers", f"over {len(self.client.users)} users",
+                        "/help", "shiBbot is bacc !11§!!")
                 )
             )
         else:
             activity = random.choice(
-                [
+                (
                     discord.Activity(
                         type=discord.ActivityType.watching,
                         name=random.choice(
-                            ["after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama",
-                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking (don't have a website tho, that's sad :c)"]
+                            ("after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama",
+                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking (don't have a website tho, that's sad :c)",
+                                "hentai", "your brain cells go")
                         )
                     ),
                     discord.Activity(
                         type=discord.ActivityType.listening,
                         name=random.choice(
-                            ["Jetpack Joyride Main Theme", "Kahoot Lobby Music",
-                                "goofy ahh sound - goofy ahh dj", "Rick Astley - Never Gonna Give You Up", "wenomechainsama"]
+                            ("Jetpack Joyride Main Theme", "Kahoot Lobby Music",
+                                "goofy ahh sound - goofy ahh dj", "Rick Astley - Never Gonna Give You Up", "wenomechainsama")
                         )
                     ),
                     discord.Game(
                         name=random.choice(
-                            ["Sea of Shibbs", f"Five Nights at Doggo's {random.randint(1, 5)}", "Fortinaiti ila Babaji ?", "Amogus ඞ",
-                             "ROBLOSS", "Shibapunk 2077", "HEE HEE HE HA", "Minecraft 2.0", "Shiba Horizon 5", "Portel 2"]
+                            ("Sea of Shibbs", f"Five Nights at Doggo's {random.randint(1, 5)}", "Fortinaiti ila Babaji ?", "Amogus ඞ",
+                             "ROBLOSS", "Shibapunk 2077", "HEE HEE HE HA", "Minecraft 2.0", "Shiba Horizon 5", "Portel 2")
                         )
                     )
-                ]
+                )
             )
-        await self.client.change_presence(activity=activity)
+        await self.client.change_presence(
+            status=discord.Status.online if self.client.latency *
+            1000 < 400 else discord.Status.idle,
+            activity=activity
+        )
 
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx: discord.ApplicationContext, error):
@@ -118,14 +124,15 @@ class BotEvents(commands.Cog):
                     channel=error.channel.mention)
             )
         elif isinstance(error, commands.MissingPermissions):
+            embed_text = text["MissingPermissions"]
             for permission in error.missing_permissions:
                 str_permission = permission.replace("_", " ")
                 if permission == error.missing_permissions[0]:
                     permissions = f"`{str_permission}`"
                 else:
-                    permissions += f" and `{str_permission}`"
+                    permissions += f" {embed_text['and']} `{str_permission}`"
             embed = ErrorEmbed(
-                description=text["MissingPermissions"]["description"].format(
+                description=embed_text["description"].format(
                     permissions=permissions)
             )
         elif isinstance(error, commands.BotMissingPermissions):
@@ -136,8 +143,7 @@ class BotEvents(commands.Cog):
             embed = ErrorEmbed(
                 description=text["BadArgument"]["description"]
             )
-        elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)
-                        ):
+        elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)):
             return
 
         else:

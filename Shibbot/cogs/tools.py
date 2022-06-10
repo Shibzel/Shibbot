@@ -75,7 +75,7 @@ class Tools(commands.Cog):
                 return await ctx.reply(
                     embed=discord.Embed(
                         title=embed_text["title"],
-                        description="X﹏X "+embed_text["description"],
+                        description="ψ(._. )> "+embed_text["description"],
                         color=discord.Color.red()
                     )
                 )
@@ -274,12 +274,12 @@ class Tools(commands.Cog):
                 )
             )
 
-        wiki = aiowiki.Wiki.wikipedia(lang_code)
-        propositions = await wiki.opensearch(article)
+        wiki = aiowiki.Wiki().wikipedia(lang_code)
+        propositions = await wiki.opensearch(article, limit=25)
         if not propositions:
             embed_text = text["checks"]["not_found"]
             embed = discord.Embed(
-                description="X﹏X " +
+                description="ψ(._. )> " +
                 embed_text["description"].format(article=article),
                 color=discord.Color.red()
             )
@@ -298,8 +298,6 @@ class Tools(commands.Cog):
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
             icon_url=ctx.author.avatar if ctx.author.avatar else None
         )
-        propositions = propositions if len(
-            propositions) > 25 else propositions[0:24]
         select_text = text["select"]
         select = discord.ui.Select(
             placeholder=select_text["placeholder"],
@@ -317,19 +315,17 @@ class Tools(commands.Cog):
             if interaction.user.id != ctx.author.id:
                 return
 
-            page = wiki.get_page(select.values[0])
-            summary = asyncio.create_task(page.summary())
-            url = asyncio.create_task(page.urls())
-
             embed_text = text["loading_embed"]
             embed.title = embed_text["title"]
             embed.description = "⏳ "+embed_text["description"]
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)
 
+            page = wiki.get_page(select.values[0])
             embed.title = page.title
-            embed.url = (await url)[0]
-            embed.description = await summary
+            embed.url = (await page.urls())[0]
+            summary = await page.summary()
+            embed.description = summary
             await message.edit(embed=embed, view=None)
             await wiki.close()
 

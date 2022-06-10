@@ -37,7 +37,8 @@ class English:
                 "description": "This channel {channel} isn't for NSFW content ! Kids might be shocked."
             },
             "MissingPermissions": {
-                "description": "You can't do that. You're missing {permissions} permission(s) to run this command."
+                "description": "You can't do that. You're missing {permissions} permission(s) to run this command.",
+                "and": "and"
             },
             "BotMissingPermissions": {
                 "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution."
@@ -160,7 +161,7 @@ class English:
                     "description": "Gimme something to search !\nUsage : `wiki [article]`"
                 },
                 "not_found": {
-                    "description": "I couldn't find anything for '{article}', try again."
+                    "description": "Couldn't find anything for '{article}', try again."
                 }
             },
             "selection_embed": {
@@ -216,7 +217,7 @@ class English:
         }
 
         # config.py cog
-        self.plugins = {
+        self.enable_disable_plugins = {
             "embed": {
                 "title": "Plugins",
                 "description": "Use the bar bellow to select the plugins you want to disable or enable."
@@ -235,7 +236,8 @@ class English:
                     "description": "Useful tools to use directly in a channel."
                 },
                 "placeholder": "Select plugins here :"
-            }
+            },
+            "done": "Done !"
         }
         self.change_prefix = {
             "checks": {
@@ -458,6 +460,41 @@ class English:
             },
             "pm": {
                 "description": "You've been unmuted from **{guild}**."
+            }
+        }
+        self.yeet_member = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a member to kick !\nUsage : `kick [member] <reason>`"
+                }
+            },
+            "embed": {
+                "title": "Kicked !",
+                "description": "{member} has been yeeted out from the server.\nReason : {reason}"
+            },
+            "pm": {
+                "description": "You've been kicked from **{guild}**.\nReason : {reason}"
+            }
+        }
+        self.yeet_members = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme members to kick !\nUsage : `kick [member] <reason>`"
+                }
+            },
+            "embed": {
+                "title": "Multicick command",
+                "fields": [
+                    {
+                        "name": "Sucessful kick(s)"
+                    },
+                    {
+                        "name": "Failed kick(s)"
+                    }
+                ]
+            },
+            "pm": {
+                "description": "You've been kicked from **{guild}**."
             }
         }
 

@@ -142,7 +142,7 @@ class Mod(commands.Cog):
     async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         text = self.client.fl(await self.client.get_lang(ctx)).change_logs_channel
         if not channel:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -271,7 +271,7 @@ class Mod(commands.Cog):
         except:
             raise commands.BadArgument
         if not limit:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -291,7 +291,7 @@ class Mod(commands.Cog):
                     if message.author == member:
                         messages.append(message)
                 deleted_messages = await ctx.channel.delete_messages(messages)
-                embed_text = text["member_clear"]["embed"]
+                embed_text = text["member_clear"]
                 embed = discord.Embed(
                     description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
                         n_messages=len(messages),
@@ -309,7 +309,7 @@ class Mod(commands.Cog):
             else:  # No member, classical clear
                 await ctx.message.delete()
                 deleted_messages = await ctx.channel.purge(limit=limit)
-                embed_text = text["channel_clear"]["embed"]
+                embed_text = text["channel_clear"]
                 embed = discord.Embed(
                     title=embed_text["title"],
                     description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
@@ -406,7 +406,7 @@ class Mod(commands.Cog):
     async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).warn_member
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -443,7 +443,7 @@ class Mod(commands.Cog):
         )
         await ctx.message.delete()
         await ctx.send(embed=embed)
-        embed_text = text["log"]["embed"]
+        embed_text = text["log"]
         await self.log(
             ctx.guild,
             embed=LogEmbed(
@@ -458,7 +458,7 @@ class Mod(commands.Cog):
         )
 
         try:
-            embed_text = text["pm"]["embed"]
+            embed_text = text["pm"]
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
@@ -478,7 +478,7 @@ class Mod(commands.Cog):
     async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).clear_user_warns
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 mbed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -506,7 +506,7 @@ class Mod(commands.Cog):
         )
         await ctx.message.delete()
         await ctx.send(embed=embed)
-        embed_text = text["log"]["embed"]
+        embed_text = text["log"]
         await self.log(
             ctx.guild,
             embed=LogEmbed(
@@ -526,7 +526,7 @@ class Mod(commands.Cog):
     async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
         text = self.client.fl(await self.client.get_lang(ctx)).show_warnings
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -708,7 +708,7 @@ class Mod(commands.Cog):
     async def mute_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).mute_member
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -720,7 +720,7 @@ class Mod(commands.Cog):
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if mute_role in member.roles:
-            embed_text = text["checks"]["already_muted"]["embed"]
+            embed_text = text["checks"]["already_muted"]
             return await ctx.send(
                 embed=discord.Embed(
                     title=embed_text["title"],
@@ -744,7 +744,7 @@ class Mod(commands.Cog):
             icon_url=member.avatar if member.avatar else None
         )
         await ctx.send(embed=embed)
-        embed_text = text["log"]["embed"]
+        embed_text = text["log"]
         await self.log(
             ctx.guild,
             embed=LogEmbed(
@@ -759,7 +759,7 @@ class Mod(commands.Cog):
         )
 
         try:
-            embed_text = text["pm"]["embed"]
+            embed_text = text["pm"]
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
@@ -779,7 +779,7 @@ class Mod(commands.Cog):
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).tempmute_member
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -791,7 +791,7 @@ class Mod(commands.Cog):
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if mute_role in member.roles:
-            embed_text = text["checks"]["already_muted"]["embed"]
+            embed_text = text["checks"]["already_muted"]
             return await ctx.send(
                 embed=discord.Embed(
                     title=embed_text["title"],
@@ -822,7 +822,7 @@ class Mod(commands.Cog):
             icon_url=member.avatar if member.avatar else None
         )
         await ctx.send(embed=embed)
-        embed_text = text["log"]["embed"]
+        embed_text = text["log"]
         await self.log(
             ctx.guild,
             embed=LogEmbed(
@@ -838,7 +838,7 @@ class Mod(commands.Cog):
         )
 
         try:
-            embed_text = text["pm"]["embed"]
+            embed_text = text["pm"]
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
@@ -861,7 +861,7 @@ class Mod(commands.Cog):
         lang = self.client.fl(await self.client.get_lang(ctx))
         text = lang.unmute_member
         if not member:
-            embed_text = text["checks"]["missing_args"]["embed"]
+            embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
@@ -873,7 +873,7 @@ class Mod(commands.Cog):
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if not mute_role in member.roles:
-            embed_text = text["checks"]["not_muted"]["embed"]
+            embed_text = text["checks"]["not_muted"]
             return await ctx.send(
                 embed=discord.Embed(
                     title=embed_text["title"],
@@ -894,7 +894,7 @@ class Mod(commands.Cog):
             icon_url=member.avatar if member.avatar else None
         )
         await ctx.send(embed=embed)
-        embed_text = text["log"]["embed"]
+        embed_text = text["log"]
         embed_text = lang.log_unmute["embed"]
         await self.log(
             member.guild, embed=LogEmbed(
@@ -907,7 +907,7 @@ class Mod(commands.Cog):
         )
 
         try:
-            embed_text = text["pm"]["embed"]
+            embed_text = text["pm"]
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
@@ -918,6 +918,129 @@ class Mod(commands.Cog):
             )
         except:
             pass
+
+    @commands.command(name="kick", aliases=["yeet", "eject"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    async def yeet_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.yeet_member
+        if not member:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            return
+
+        await ctx.message.delete()
+        await member.kick(reason=reason)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+                member=member.mention,
+                reason=reason
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+
+        try:
+            embed_text = text["pm"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild,
+                        reason=reason
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
+
+    @commands.command(name="multikick", aliases=["multiyeet", "mkick"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    async def yeet_member(self, ctx: commands.Context, *members):
+        kicked_members, failed_kicks = [], []
+
+        async def kick_member(member):
+            try:
+                member = commands.MemberConverter().convert(ctx, member)
+                await member.kick()
+                kicked_members.append(member)
+            except:
+                failed_kicks.append(member)
+
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.yeet_members
+        if members == ():
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if self.client.user.id in [member.id for member in members]:
+            return
+
+        await ctx.message.delete()
+        tasks = [kick_member(member) for member in members]
+        await asyncio.gather(*tasks)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            title=embed_text["title"],
+            color=discord.Color.green()
+        )
+        fields_text = embed_text["fields"]
+        if kicked_members != []:
+            embed.add_field(
+                name=fields_text[0]["name"],
+                value=", ".join(
+                    [
+                        member.mention
+                        for member in kicked_members
+                    ]
+                )
+            )
+        if failed_kicks != []:
+            embed.add_field(
+                name=fields_text[1]["name"],
+                value=", ".join(
+                    [
+                        member
+                        for member in failed_kicks
+                    ]
+                )
+            )
+        await ctx.send(embed=embed)
+
+        async def notify_member(member):
+            try:
+                embed_text = text["pm"]
+                await member.send(
+                    embed=discord.Embed(
+                        description=embed_text["description"].format(
+                            guild=ctx.guild
+                        ),
+                        color=discord.Color.dark_gold()
+                    )
+                )
+            except:
+                pass
+        for member in kicked_members:
+            self.client.loop.create_task(notify_member(member))
 
 
 class LogEmbed(discord.Embed):

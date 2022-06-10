@@ -40,7 +40,7 @@ class Reddit:
         return [sub async for sub in subreddit.hot(limit=limit)]
 
     async def get_subreddits(self, subreddits: list, limit_per_subred=1000):
-        """Gets hot submissions from different submissions."""
+        """Gets hot submissions from different subreddits."""
         submissions = []
 
         async def append_submits(subreddit):

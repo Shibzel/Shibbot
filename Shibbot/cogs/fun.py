@@ -89,7 +89,7 @@ class Fun(commands.Cog):
     @tasks.loop(hours=12)
     async def update_reddit_memes(self):
         memes_subs = ("memes", "meme", "History_memes", "HolUp", "dankmemes", "Memes_Of_The_Dank", "ProgrammerHumor", "shitposting",
-                      "GenZMemes", "funny", "cursedmemes", "MemesIRL", "comedyheaven", "Animemes", "pcmemes", "holup", "blursedimages")
+                      "GenZMemes", "funny", "cursedmemes", "MemesIRL", "pcmemes", "holup", "blursedimages", "AdviceAnimals", "okbuddyretard")
         nsfw_memes_subs = ("hentaimemes", "NSFWMemes", "Offensivejokes",
                            "thensfwmemes", "IronicPornMemes", "NSFWMeme")
 
@@ -98,7 +98,7 @@ class Fun(commands.Cog):
             for submission in await self.reddit.get_subreddits(subreds):
                 # For optimisation purposes we must be more strict
                 if submission.url.endswith((".jpg", ".gif")) and not submission.is_self and submission.score >= 500:
-                    if not nsfw or not submission.over_18 == nsfw:
+                    if nsfw is None or not submission.over_18 == nsfw:
                         subs.append(
                             self.reddit.sub_to_dict(
                                 submission=submission,

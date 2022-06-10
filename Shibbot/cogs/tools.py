@@ -1,7 +1,10 @@
+import asyncio
+
 import aiohttp
+import aiowiki
 import discord
 from discord.ext import commands
-import aiolibretrans
+import aiogtrans
 
 from utils import remove_chars, EmbedViewer
 from bot import Shibbot
@@ -55,10 +58,10 @@ class Tools(commands.Cog):
                 )
             )
 
-        async with aiolibretrans.LibreTranslate(target=language) as translator:
+        async with aiogtrans.GoogleTrans(target=language) as translator:
             try:
                 result = await translator.translate(text=sentence)
-            except aiolibretrans.BadRequest:
+            except aiogtrans.UnsupportedLanguage:
                 embed_text = text["checks"]["bad_args"]
                 return await ctx.reply(
                     embed=discord.Embed(
@@ -67,16 +70,35 @@ class Tools(commands.Cog):
                         color=discord.Color.red()
                     )
                 )
-            except aiolibretrans.RequestError:
-                pass  # Service not available
+            except aiogtrans.RequestError:
+                embed_text = text["checks"]["unavailable"]
+                return await ctx.reply(
+                    embed=discord.Embed(
+                        title=embed_text["title"],
+                        description="X﹏X "+embed_text["description"],
+                        color=discord.Color.red()
+                    )
+                )
 
+        embed_text = text["embed"]
         embed = discord.Embed(color=0x4b8cf5)
         embed.set_author(
-            name="Translator", icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Google_Translate_logo.svg/800px-Google_Translate_logo.svg.png")
-        embed.add_field(name="Original text :", value=sentence)
-        embed.add_field(name="Translated :", value=result)
+            name=embed_text["title"],
+            icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png"
+        )
+        fields_text = embed_text["fields"]
+        embed.add_field(
+            name=fields_text[0]["name"],
+            value=sentence
+        )
+        embed.add_field(
+            name=fields_text[1]["name"],
+            value=result
+        )
         embed.set_footer(
-            text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar)
+            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
+        )
         await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(name="urbandict", aliases=["udict"])
@@ -139,7 +161,8 @@ class Tools(commands.Cog):
             )
             embed.set_footer(
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-                icon_url=ctx.author.avatar if ctx.author.avatar else None)
+                icon_url=ctx.author.avatar if ctx.author.avatar else None
+            )
             return embed
 
         button_text = text["buttons"]
@@ -184,7 +207,7 @@ class Tools(commands.Cog):
         message = await ctx.reply(
             embed=discord.Embed(
                 title=embed_text["title"],
-                description=embed_text["description"],
+                description="⏳ "+embed_text["description"],
                 color=discord.Color.dark_red()
             )
         )
@@ -231,6 +254,85 @@ class Tools(commands.Cog):
                         value=fields_text[11]["value"])
         embed.set_footer(
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-            icon_url=ctx.author.avatar
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
         )
         await message.edit(embed=embed)
+
+    @commands.command(name="wikipedia", aliases=["wiki"])
+    @plugin_is_enabled()
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    async def search_on_wikipedia(self, ctx: commands.Context, article=None):
+        lang_code = await self.client.get_lang(ctx)
+        lang = self.client.fl(lang_code)
+        text = lang.search_on_wikipedia
+        if not article:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.gold()
+                )
+            )
+
+        wiki = aiowiki.Wiki.wikipedia(lang_code)
+        propositions = await wiki.opensearch(article)
+        if not propositions:
+            embed_text = text["checks"]["not_found"]
+            embed = discord.Embed(
+                description="X﹏X " +
+                embed_text["description"].format(article=article),
+                color=discord.Color.red()
+            )
+            await wiki.close()
+            return await ctx.reply(embed=embed, mention_author=False)
+        embed_text = text["selection_embed"]
+        embed = discord.Embed(
+            description="↓(>▽<)ﾉ "+embed_text["description"],
+            color=0xffffff
+        )
+        embed.set_author(
+            name="Wikipedia",
+            icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRQPA8Qi7lg9kj1shVj4E4uhH6lblZKa03WOSf0Hqm_XCuQyrd3-wROXjx4qG6bol4kfA&usqp=CAU"
+        )
+        embed.set_footer(
+            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
+        )
+        propositions = propositions if len(
+            propositions) > 25 else propositions[0:24]
+        select_text = text["select"]
+        select = discord.ui.Select(
+            placeholder=select_text["placeholder"],
+            min_values=1,
+            max_values=1,
+            options=[
+                discord.SelectOption(
+                    label=proposition.title)
+                for proposition in propositions
+            ]
+        )
+
+        async def wiki_callback(interaction: discord.Interaction):
+            nonlocal embed
+            if interaction.user.id != ctx.author.id:
+                return
+
+            page = wiki.get_page(select.values[0])
+            summary = asyncio.create_task(page.summary())
+            url = asyncio.create_task(page.urls())
+
+            embed_text = text["loading_embed"]
+            embed.title = embed_text["title"]
+            embed.description = "⏳ "+embed_text["description"]
+            view.disable_all_items()
+            await interaction.response.edit_message(embed=embed, view=view)
+
+            embed.title = page.title
+            embed.url = (await url)[0]
+            embed.description = await summary
+            await message.edit(embed=embed, view=None)
+            await wiki.close()
+
+        select.callback = wiki_callback
+        view = discord.ui.View(select)
+        message = await ctx.reply(embed=embed, view=view)

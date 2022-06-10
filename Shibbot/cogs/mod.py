@@ -51,10 +51,12 @@ class Mod(commands.Cog):
         self.client.loop.create_task(self.resume_sanctions())
 
     async def log(self, guild: discord.Guild, embed):
-        self.client.cursor.execute(
-            f"SELECT logs_channel FROM mod_plugin WHERE guild_id=?",
-            (guild.id,))
-        logs_channel_id = self.client.cursor.fetchone()
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "SELECT logs_channel FROM mod_plugin WHERE guild_id=?",
+                (guild.id,)
+            ):
+                logs_channel_id = self.client.cursor.fetchone()
         if not logs_channel_id:
             return
         logs_channel = guild.get_channel(logs_channel_id[0])
@@ -72,46 +74,47 @@ class Mod(commands.Cog):
             await asyncio.sleep(1.0)
 
         guild: discord.Guild = self.client.get_guild(guild_id)
-        if not guild:
-            self.client.cursor.execute(
-                f"DELETE FROM sanctions WHERE guild_id=?",
-                (guild_id,)
-            )
-            return self.client.db.commit()
+        async with self.client.aiodb() as db:
+            if not guild:
+                async with db.execute(
+                    f"DELETE FROM sanctions WHERE guild_id=?",
+                    (guild_id,)
+                ):
+                    return await db.commit()
 
-        match type:
-            case "tempmute":
-                mute_role: discord.Role = await self.get_mute_role(guild)
-                member: discord.Member = guild.get_member(user_id)
-                if member:
-                    try:
-                        await member.remove_roles(mute_role)
-                    except:
-                        pass
-                    embed_text = self.client.fl(
-                        self.client.get_lang(guild)).log_unmute["embed"]
-                    await self.log(
-                        member.guild, embed=LogEmbed(
-                            embed_text["action"],
-                            embed_text["description"].format(
-                                member=member.mention,
-                                member_id=member.id
+            match type:
+                case "tempmute":
+                    mute_role: discord.Role = await self.get_mute_role(guild)
+                    member: discord.Member = guild.get_member(user_id)
+                    if member:
+                        try:
+                            await member.remove_roles(mute_role)
+                        except:
+                            pass
+                        embed_text = self.client.fl(
+                            self.client.get_lang(guild)).log_unmute["embed"]
+                        await self.log(
+                            member.guild, embed=LogEmbed(
+                                embed_text["action"],
+                                embed_text["description"].format(
+                                    member=member.mention,
+                                    member_id=member.id
+                                )
                             )
                         )
-                    )
-            case "tempban":
-                user = await self.client.get_or_fetch_user(user_id)
-                if user:
-                    try:
-                        await guild.unban(user)
-                    except:
-                        pass
+                case "tempban":
+                    user = await self.client.get_or_fetch_user(user_id)
+                    if user:
+                        try:
+                            await guild.unban(user)
+                        except:
+                            pass
 
-        self.client.cursor.execute(
-            f"DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=? AND duration=?",
-            (guild_id, user_id, type, duration,)
-        )  # Would be easier if the sanction had an id :/
-        self.client.db.commit()
+            async with db.execute(
+                f"DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=? AND duration=?",
+                (guild_id, user_id, type, duration,)
+            ):  # Would be easier if the sanction had an id :/
+                await db.commit()
 
     async def resume_sanctions(self):
         """Resume the temp commands (tban, tmute) if the bot went offline."""

@@ -137,7 +137,42 @@ class English:
                     "title": "Try again !",
                     "description": "No support for the provided language."
                 },
+                "unavalaible": {
+                    "title": "Unavailable...",
+                    "description": "Service unavailable, try again later."
+                }
             },
+            "embed": {
+                "title": "Translate",
+                "fields": [
+                    {
+                        "name": "Original Text :"
+                    },
+                    {
+                        "name": "Translated :"
+                    }
+                ]
+            }
+        }
+        self.search_on_wikipedia = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme something to search !\nUsage : `wiki [article]`"
+                },
+                "not_found": {
+                    "description": "I couldn't find anything for '{article}', try again."
+                }
+            },
+            "selection_embed": {
+                "description": "Use the bar below to get the item you want ! (it won't bite)"
+            },
+            "select": {
+                "placeholder": "Select an article here :"
+            },
+            "loading_embed": {
+                "title": "Wait a second...",
+                "description": "I'm fetching data... That can take a little second."
+            }
         }
 
         # fun.py cog

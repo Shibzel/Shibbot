@@ -59,8 +59,8 @@ class EmbedViewer(discord.ui.View):
         self.page -= 1
         item = self.list_of_items[self.page]
         if item == self.list_of_items[0]:
-            self.next_button.disabled = True
-        self.previous_button.disabled = False
+            self.previous_button.disabled = True
+        self.next_button.disabled = False
         await interaction.response.edit_message(
             embed=self.embed_generator(item),
             view=self

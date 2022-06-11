@@ -15,7 +15,7 @@ class Config(commands.Cog):
     @commands.command(name="enable", aliases=["disable", "plugin", "plugins"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(1, 60, commands.BucketType.member)
+    @commands.cooldown(1, 180, commands.BucketType.member)
     async def enable_disable_plugin(self, ctx: commands.Context):
         text = self.client.fl(await self.client.get_lang(ctx)).enable_disable_plugins
 
@@ -99,7 +99,7 @@ class Config(commands.Cog):
     @commands.command(name="lang", aliases=["setlang"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(1, 60, commands.BucketType.member)
+    @commands.cooldown(1, 180, commands.BucketType.member)
     async def change_language(self, ctx: commands.Context):
         current_lang = await self.client.get_lang(ctx)
         text = self.client.fl(current_lang).change_language
@@ -153,7 +153,7 @@ class Config(commands.Cog):
     @commands.command(name="prefix", aliases=["setprefix"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.cooldown(2, 60, commands.BucketType.member)
     async def change_prefix(self, ctx: commands.Context, prefix: str = None):
         text = self.client.fl(await self.client.get_lang(ctx)).change_prefix
         if not prefix:

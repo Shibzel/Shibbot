@@ -41,7 +41,7 @@ class English:
                 "and": "and"
             },
             "BotMissingPermissions": {
-                "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution."
+                "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution or you're asking to do something impossible."
             },
             "BadArgument": {
                 "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."

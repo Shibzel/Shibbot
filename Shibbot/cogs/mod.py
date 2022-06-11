@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from bot import Shibbot, __version__
 from utils import remove_chars, ArgToDuration
+from utils.models import EmbedViewer
 
 
 client = None
@@ -120,8 +121,9 @@ class Mod(commands.Cog):
         """Resume the temp commands (tban, tmute) if the bot went offline."""
         if not self.sanctions_init:
             self.sanctions_init = True
-            self.client.cursor.execute("SELECT * FROM sanctions")
-            all_sanctions = self.client.cursor.fetchall()
+            async with self.client.aiodb() as db:
+                async with db.execute("SELECT * FROM sanctions") as cursor:
+                    all_sanctions = await cursor.fetchall()
             tasks = [
                 self.add_temp_sanction(
                     *sanction[0:len(sanction)-1],
@@ -138,7 +140,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_channels=True)
-    @commands.cooldown(3, 30, commands.BucketType.member)
+    @commands.cooldown(2, 60, commands.BucketType.member)
     async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         text = self.client.fl(await self.client.get_lang(ctx)).change_logs_channel
         if not channel:
@@ -150,11 +152,12 @@ class Mod(commands.Cog):
                 )
             )
 
-        self.client.cursor.execute(
-            "UPDATE mod_plugin SET logs_channel=? WHERE guild_id=?",
-            (channel.id, ctx.guild.id,)
-        )
-        self.client.db.commit()
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "UPDATE mod_plugin SET logs_channel=? WHERE guild_id=?",
+                (channel.id, ctx.guild.id,)
+            ):
+                await db.commit()
         embed_text = text["embed"]
         await ctx.reply(
             embed=discord.Embed(
@@ -262,7 +265,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
         text = self.client.fl(await self.client.get_lang(ctx)).clear_messages
         try:
@@ -326,7 +329,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_channels=True)
-    @commands.cooldown(1, 15, commands.BucketType.member)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def nuke_channel(self, ctx: commands.Context):
         text = self.client.fl(await self.client.get_lang(ctx)).nuke_channel
         embed_text = text["embed"]
@@ -403,6 +406,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).warn_member
         if not member:
@@ -414,20 +418,24 @@ class Mod(commands.Cog):
                 )
             )
         if member.id == self.client.user.id:
-            return
+            raise commands.BotMissingPermissions
 
-        self.client.cursor.execute(
-            f"SELECT * FROM warns WHERE guild_id=? AND user_id=?",
-            (ctx.guild.id, member.id,)
-        )
-        warns = self.client.cursor.fetchall()
-        nb_warns = len(warns)+1 if warns else 1
-        self.client.cursor.execute(
-            "INSERT INTO warns (guild_id, user_id, reason, date, mod_id) VALUES (?,?,?,?,?)",
-            (ctx.guild.id, member.id, reason,
-             datetime.datetime.utcnow(), ctx.author.id,)
-        )
-        self.client.db.commit()
+        async with self.client.aiodb() as db:
+
+            async with db.execute(
+                f"SELECT * FROM warns WHERE guild_id=? AND user_id=?",
+                (ctx.guild.id, member.id,)
+            ) as cursor:
+                warns = await cursor.fetchall()
+            nb_warns = len(warns)+1 if warns else 1
+
+            async with db.execute(
+                "INSERT INTO warns (guild_id, user_id, reason, date, mod_id) VALUES (?,?,?,?,?)",
+                (ctx.guild.id, member.id, reason,
+                 datetime.datetime.utcnow(), ctx.author.id,)
+            ):
+                await db.commit()
+
         embed_text = text["embed"]
         embed = discord.Embed(
             description=embed_text["description"].format(
@@ -475,6 +483,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).clear_user_warns
         if not member:
@@ -485,8 +494,6 @@ class Mod(commands.Cog):
                     color=discord.Color.dark_gold()
                 )
             )
-        if member.id == self.client.user.id:
-            return
 
         self.client.cursor.execute(
             f"DELETE FROM warns WHERE guild_id=? AND user_id=?",
@@ -523,6 +530,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
         text = self.client.fl(await self.client.get_lang(ctx)).show_warnings
         if not member:
@@ -533,14 +541,13 @@ class Mod(commands.Cog):
                     color=discord.Color.dark_gold()
                 )
             )
-        if member.id == self.client.user.id:
-            return
 
-        self.client.cursor.execute(
-            "SELECT * FROM warns WHERE guild_id=? AND user_id=?",
-            (ctx.guild.id, member.id,)
-        )
-        warns = self.client.cursor.fetchall()
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "SELECT * FROM warns WHERE guild_id=? AND user_id=?",
+                (ctx.guild.id, member.id,)
+            ) as cursor:
+                warns = await cursor.fetchall()
 
         embed_text = text["embed"]
         embed = discord.Embed(
@@ -563,7 +570,6 @@ class Mod(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=embed)
         else:
-            page = 0
             warns.reverse()
 
             sorted_warns = []
@@ -574,12 +580,11 @@ class Mod(commands.Cog):
                     sorted_warns.append(page_warns)
                     page_warns = []
 
-            def generate_warn_page():
-                nonlocal page
+            def generate_warn_page(page_warns):
                 embed._fields = []
                 page_embed = embed
                 field_text = text["embed"]["fields"]["warn"]
-                for warn in sorted_warns[page]:
+                for warn in page_warns:
                     mod = self.client.get_user(warn[4])
                     date_time = datetime.datetime.strptime(
                         warn[3], "%Y-%m-%d %H:%M:%S.%f")
@@ -594,96 +599,65 @@ class Mod(commands.Cog):
                         ),
                         inline=False
                     )
-
                 return page_embed
 
             buttons_text = embed_text["buttons"]
-
-            async def previous_page_callback(interaction: discord.Interaction):
-                if interaction.user.id != ctx.author.id:
-                    return
-
-                nonlocal page
-                page -= 1
-                if page == 0:
-                    previous_page_button.disabled = True
-                await interaction.response.edit_message(
-                    embed=generate_warn_page(),
-                    view=discord.ui.View(
-                        previous_page_button,
-                        next_page_button
-                    )
-                )
             previous_page_button = discord.ui.Button(
                 style=discord.ButtonStyle.blurple,
                 label=buttons_text["previous"],
                 disabled=True
             )
-            previous_page_button.callback = previous_page_callback
-
-            async def next_page_callback(interaction: discord.Interaction):
-                if interaction.user.id != ctx.author.id:
-                    return
-
-                nonlocal page
-                page += 1
-                previous_page_button.disabled = False
-                if sorted_warns[page][-1] == warns[-1]:
-                    next_page_button.disabled = True
-                await interaction.response.edit_message(
-                    embed=generate_warn_page(),
-                    view=discord.ui.View(
-                        previous_page_button,
-                        next_page_button
-                    )
-                )
             next_page_button = discord.ui.Button(
                 style=discord.ButtonStyle.green,
                 label=buttons_text["next"],
                 disabled=True if len(sorted_warns) == 1 else False
             )
-            next_page_button.callback = next_page_callback
+            warn_viewer = EmbedViewer(
+                ctx,
+                sorted_warns,
+                generate_warn_page,
+                next_page_button,
+                previous_page_button
+            )
             await ctx.message.delete()
             await ctx.send(
-                embed=generate_warn_page(),
-                view=discord.ui.View(
-                    previous_page_button,
-                    next_page_button,
-                )
+                embed=warn_viewer.get_first_page(),
+                view=warn_viewer
             )
 
     async def get_mute_role(self, guild: discord.Guild) -> discord.Role:
         """Gets the mute role of a guild."""
-        async def create_mute_role():
-            new_role = await guild.create_role(
-                name="Muted",
-                permissions=discord.Permissions(
-                     send_messages=False,
-                     speak=False,
-                     connect=False,
-                     add_reactions=False
+        async with self.client.aiodb() as db:
+            async def create_mute_role():
+                new_role = await guild.create_role(
+                    name="Muted",
+                    permissions=discord.Permissions(
+                        send_messages=False,
+                        speak=False,
+                        connect=False,
+                        add_reactions=False
+                    )
                 )
-            )
-            self.client.cursor.execute(
-                f"UPDATE mod_plugin SET mute_role=? WHERE guild_id=?",
-                (new_role.id, guild.id,)
-            )
-            self.client.db.commit()
-            return new_role
+                async with db.execute(
+                    f"UPDATE mod_plugin SET mute_role=? WHERE guild_id=?",
+                    (new_role.id, guild.id,)
+                ):
+                    await db.commit()
+                return new_role
 
-        self.client.cursor.execute(
-            f"SELECT mute_role FROM mod_plugin WHERE guild_id=?",
-            (guild.id,)
-        )
-        role_id = self.client.cursor.fetchone()
-        if not role_id:  # If a role id was never set in the db
-            new_role = await create_mute_role()
-            role_id = new_role.id
-        else:
-            role_id = role_id[0]  # If a role was found
-        role = guild.get_role(role_id)
-        if not role:  # If the role doesn't exists anymore
-            role = await create_mute_role()
+            async with db.execute(
+                "SELECT mute_role FROM mod_plugin WHERE guild_id=?",
+                (guild.id,)
+            ) as cursor:
+                role_id = await cursor.fetchone()
+            if not role_id:  # If a role id was never set in the db
+                new_role = await create_mute_role()
+                role_id = new_role.id
+            else:
+                role_id = role_id[0]  # If a role was found
+            role = guild.get_role(role_id)
+            if not role:  # If the role doesn't exists anymore
+                role = await create_mute_role()
         return role
 
     async def set_mute_role(self, ctx: commands.Context, mute_role: discord.Role):
@@ -705,6 +679,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def mute_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).mute_member
         if not member:
@@ -716,7 +691,7 @@ class Mod(commands.Cog):
                 )
             )
         if member.id == self.client.user.id:
-            return
+            raise commands.BotMissingPermissions
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if mute_role in member.roles:
@@ -776,6 +751,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).tempmute_member
         if not member:
@@ -787,7 +763,7 @@ class Mod(commands.Cog):
                 )
             )
         if member.id == self.client.user.id:
-            return
+            raise commands.BotMissingPermissions
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if mute_role in member.roles:
@@ -803,11 +779,12 @@ class Mod(commands.Cog):
         await self.set_mute_role(ctx, mute_role)
         await member.add_roles(mute_role, reason=reason)
         data = (ctx.guild.id, member.id, "tempmute", duration.datetime,)
-        self.client.cursor.execute(
-            "INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)",
-            data
-        )
-        self.client.db.commit()
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)",
+                data
+            ):
+                await db.commit()
         embed_text = text["embed"]
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
@@ -857,6 +834,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def unmute_member(self, ctx: commands.Context, member: discord.Member = None):
         lang = self.client.fl(await self.client.get_lang(ctx))
         text = lang.unmute_member
@@ -869,7 +847,7 @@ class Mod(commands.Cog):
                 )
             )
         if member.id == self.client.user.id:
-            return
+            raise commands.BotMissingPermissions
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if not mute_role in member.roles:
@@ -923,6 +901,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(kick_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def yeet_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         lang = self.client.fl(await self.client.get_lang(ctx))
         text = lang.yeet_member
@@ -935,7 +914,7 @@ class Mod(commands.Cog):
                 )
             )
         if member.id == self.client.user.id:
-            return
+            raise commands.BotMissingPermissions
 
         await ctx.message.delete()
         await member.kick(reason=reason)
@@ -971,7 +950,8 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(kick_members=True)
-    async def yeet_member(self, ctx: commands.Context, *members):
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def yeet_members(self, ctx: commands.Context, *members):
         kicked_members, failed_kicks = [], []
 
         async def kick_member(member):

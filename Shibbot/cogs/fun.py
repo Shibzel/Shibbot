@@ -40,14 +40,11 @@ class Fun(commands.Cog):
         self.client: Shibbot = client
         self.reddit: utils.Reddit = self.client.reddit
 
-        self.shibes = []
-        self.cats = []
-        self.birds = []
-        self.memes = []
-        self.nsfw_memes = []
+        self.shibes, self.cats, self.birds, self.memes, self.nsfw_memes = [], [], [], [], []
 
         self.client.cursor.execute(
             "CREATE TABLE IF NOT EXISTS fun_plugin (guild_id INTEGER PRIMARY KEY, enabled BOOLEAN)")
+        self.client.db.commit()
 
         for i in ("shibes", "cats", "birds", "memes", "nsfw_memes"):
             try:
@@ -55,7 +52,7 @@ class Fun(commands.Cog):
             except (Exception,) as e:
                 setattr(self, i, [])
                 print(
-                    f"[x] Failed loading {i}.json, the command associed to it won't work until it got updated : {str(e)}")
+                    f"[x] Failed loading {i}.json, the command associed to it won't work until it got updated : ({type(e).__name__}: {str(e)})")
 
         self.update_shibe_online.start()
         self.update_reddit_memes.start()
@@ -79,7 +76,8 @@ class Fun(commands.Cog):
                 utils.dump(urls, f"cache/{i}.json")
                 print(f"[-] Sucessfully updated {i} ({len(urls)} images).")
             except Exception as e:
-                print(f"[x] Failed while trying to update {i} : {str(e)}")
+                print(
+                    f"[x] Failed while trying to update {i} : ({type(e).__name__}: {str(e)})")
         start_time = time.time()
         tasks = [update(i) for i in ("shibes", "cats", "birds")]
         await asyncio.gather(*tasks)
@@ -98,7 +96,7 @@ class Fun(commands.Cog):
             for submission in await self.reddit.get_subreddits(subreds):
                 # For optimisation purposes we must be more strict
                 if submission.url.endswith((".jpg", ".gif")) and not submission.is_self and submission.score >= 500:
-                    if nsfw is None or not submission.over_18 == nsfw:
+                    if not nsfw or not submission.over_18 == nsfw:
                         subs.append(
                             self.reddit.sub_to_dict(
                                 submission=submission,
@@ -127,9 +125,15 @@ class Fun(commands.Cog):
         print(
             f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
 
-    @commands.command(name="randomnumber", aliases=["randnum", "randint", "randomnum"])
+    @commands.command(name="avatar", aliases=["av"])
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
+    async def show_avatar(self, ctx: commands.Context, member: discord.User = None):
+        pass
+
+    @commands.command(name="randomnumber", aliases=["randnum", "randint", "randomnum"])
+    @plugin_is_enabled()
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def get_random_number(self, ctx: commands.Context, x=None, y=None):
         try:
             x, y = int(x), int(y) if y else y
@@ -148,7 +152,7 @@ class Fun(commands.Cog):
 
     @commands.command(name="twitter", aliases=["tw"])
     @plugin_is_enabled()
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def ratio_twitter(self, ctx: commands.Context):
         """Twitter."""
         await ctx.message.delete()

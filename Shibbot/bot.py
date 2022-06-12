@@ -115,11 +115,11 @@ class Shibbot(commands.Bot):
             ) as cursor:
                 data = await cursor.fetchone()
             if not data:
-                async with cursor.execute(
+                async with db.execute(
                     "INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)",
                     (guild.id, self.default_prefix, self.default_language)
                 ):
-                    db.commit()
+                    await db.commit()
         return data
 
     def _get_prefix(self, ctx: commands.Context) -> Coroutine:

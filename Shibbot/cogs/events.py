@@ -158,9 +158,10 @@ class BotEvents(commands.Cog):
                 embed = ErrorEmbed(
                     description=text["description"]
                 )
-                embed.set_footer(text=text["footer"].format(
-                    owner=self.client.get_user(self.client.owner_id)
-                )
+                embed.set_footer(
+                    text=text["footer"].format(
+                        owner=self.client.get_user(self.client.owner_id)
+                    )
                 )
 
         try:
@@ -169,18 +170,24 @@ class BotEvents(commands.Cog):
                 label=text["CommandError"]["dissmiss"],
                 emoji="✖"
             )
-            message: discord.Message = await ctx.reply(
-                embed=discord.Embed(
-                    description="⏳",
-                    color=discord.Color.red()
-                )
+
+            temp_embed = discord.Embed(
+                description="⏳",
+                color=discord.Color.red()
             )
+            try:
+                message = await ctx.reply(embed=temp_embed)
+            except:
+                message = await ctx.send(embed=temp_embed)
 
             async def delete_message(interaction: discord.Interaction):
                 await message.delete()
-                reply_message = message.channel.get_partial_message(
-                    message.reference.message_id)
-                await reply_message.delete()
+                try:
+                    reply_message = message.channel.get_partial_message(
+                        message.reference.message_id)
+                    await reply_message.delete()
+                except:
+                    pass
             dismiss_button.callback = delete_message
             view = discord.ui.View(dismiss_button)
             await message.edit(

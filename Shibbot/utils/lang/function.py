@@ -1,4 +1,5 @@
-from .languages import French, English
+from .english import English
+from .french import French
 
 english_inst = English()
 french_inst = French()

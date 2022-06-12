@@ -47,7 +47,7 @@ class English:
                 "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."
             },
             "CommandError": {
-                "description": " Something went wrong, I couldn't do that.",
+                "description": "Something went wrong, I couldn't do that.",
                 "footer": "If the problem persists, contact the owner of the bot : {owner}.",
                 "dissmiss": "dissmiss"
             }
@@ -215,6 +215,11 @@ class English:
                 "next": "Next Meme"
             }
         }
+        self.show_avatar = {
+            "embed": {
+                "description": "{member}'s avatar :"
+            }
+        }
 
         # config.py cog
         self.enable_disable_plugins = {
@@ -237,7 +242,7 @@ class English:
                 },
                 "placeholder": "Select plugins here :"
             },
-            "done": "Done !"
+            "content": "Done !"
         }
         self.change_prefix = {
             "checks": {
@@ -281,7 +286,8 @@ class English:
                     "label": "French"
                 },
                 "placeholder": "Select a language here :"
-            }
+            },
+            "content": "Done !"
         }
 
         # mod.py cog
@@ -479,11 +485,11 @@ class English:
         self.yeet_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to kick !\nUsage : `kick [member] <reason>`"
+                    "description": "Gimme members to kick !\nUsage : `kick [members] <reason>`"
                 }
             },
             "embed": {
-                "title": "Multicick command",
+                "title": "Multikcick command",
                 "fields": [
                     {
                         "name": "Sucessful kick(s)"
@@ -497,15 +503,84 @@ class English:
                 "description": "You've been kicked from **{guild}**."
             }
         }
-
-
-class French(English):
-    def __init__(self):
-        super().__init__()
-
-        self.ping = {
+        self.ban_user = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a user to ban !\nUsage : `ban [user] <reason>`"
+                }
+            },
             "embed": {
-                "title": "🏓 Pong !",
-                "description": "Latence de Shibbot : `{ping}ms`\nUtilisation machine : `CPU: {cpu}%` `RAM: {ram}%`"
+                "title": "Banned !",
+                "description": "Banishing hammer sagged on {member}.\nReason : {reason}"
+            },
+            "pm": {
+                "description": "You've been banned from **{guild}**.\nReason : {reason}"
+            }
+        }
+        self.tempban_member = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a user to tempban !\nUsage: `tban [user] [duration] <reason>`"
+                }
+            },
+            "embed": {
+                "title": "Banned !",
+                "description": "{member} is now tempbanned for `{duration}`.\nReason : {reason}"
+            },
+            "log": {
+                "action": "Tempban",
+                "description": "{member} (id : `{member_id}`) has been tempbanned by {mod} for `{duration}`.\nReason : {reason}."
+            },
+            "pm": {
+                "description": "You've been tempbanned on **{guild}** for `{duration}`.\nReason : {reason}."
+            }
+        }
+        self.softban_member = {
+            "checks": {
+                "missing_args": {
+                    "description": "( ﾉ ﾟｰﾟ)ﾉ Gimme a member to soft-ban !\nUsage : `softban [member] <reason>`"
+                }
+            },
+            "pm": {
+                "description": "You've been soft-banned from **{guild}** for the following reason : '{reason}'.\nUse this link to come back : {invite}"
+            },
+            "embed": {
+                "title": "Tempbanned !",
+                "description": "{member} has been softbanned.\nReason : {reason}"
+            }
+        }
+        self.ban_members = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme members to ban !\nUsage : `mban [members] <reason>`"
+                }
+            },
+            "embed": {
+                "title": "Multiban command",
+                "fields": [
+                    {
+                        "name": "Sucessful ban(s)"
+                    },
+                    {
+                        "name": "Failed ban(s)"
+                    }
+                ]
+            },
+            "pm": {
+                "description": "You've been banned from **{guild}**."
+            }
+        }
+        self.unban_user = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a user to unban !\nUsage: `unban [user]`"
+                }
+            },
+            "embed": {
+                "title": "Muted !",
+                "description": "{member} is now unbanned."
+            },
+            "pm": {
+                "description": "You've been unbanned from **{guild}**."
             }
         }

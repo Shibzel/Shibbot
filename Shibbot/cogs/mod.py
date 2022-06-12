@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from bot import Shibbot, __version__
-from utils import remove_chars, ArgToDuration
+from utils import ArgToDuration
 from utils.models import EmbedViewer
 
 
@@ -51,13 +51,13 @@ class Mod(commands.Cog):
 
         self.client.loop.create_task(self.resume_sanctions())
 
-    async def log(self, guild: discord.Guild, embed):
+    async def log(self, guild: discord.Guild, embed: discord.Embed):
         async with self.client.aiodb() as db:
             async with db.execute(
                 "SELECT logs_channel FROM mod_plugin WHERE guild_id=?",
                 (guild.id,)
-            ):
-                logs_channel_id = self.client.cursor.fetchone()
+            ) as cursor:
+                logs_channel_id = await cursor.fetchone()
         if not logs_channel_id:
             return
         logs_channel = guild.get_channel(logs_channel_id[0])
@@ -67,8 +67,6 @@ class Mod(commands.Cog):
 
     async def add_temp_sanction(self, guild_id: int, user_id: int, type: str, duration: datetime.datetime):
         seconds = (duration - datetime.datetime.utcnow()).total_seconds()
-        if seconds < 1:  # Can't be negative so set to 1 second.
-            seconds = 1
         await asyncio.sleep(seconds)
         while not self.client.bot_is_alive:
             # Verifies each seconds if the bot is connected.
@@ -93,7 +91,7 @@ class Mod(commands.Cog):
                         except:
                             pass
                         embed_text = self.client.fl(
-                            self.client.get_lang(guild)).log_unmute["embed"]
+                            await self.client.get_lang(guild)).log_unmute["embed"]
                         await self.log(
                             member.guild, embed=LogEmbed(
                                 embed_text["action"],
@@ -181,7 +179,7 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
-            embed_text = self.client.fl(self.client.get_lang(
+            embed_text = self.client.fl(await self.client.get_lang(
                 member)).log_on_member_remove["embed"]
             await self.log(
                 member.guild,
@@ -210,7 +208,7 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
-            embed_text = self.client.fl(self.client.get_lang(
+            embed_text = self.client.fl(await self.client.get_lang(
                 guild)).log_on_member_remove["embed"]
             await self.log(
                 guild,
@@ -239,7 +237,7 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
-            embed_text = self.client.fl(self.client.get_lang(
+            embed_text = self.client.fl(await self.client.get_lang(
                 guild)).log_on_member_remove["embed"]
             await self.log(
                 guild,
@@ -260,6 +258,14 @@ class Mod(commands.Cog):
             (guild.id,)
         )
         self.client.db.commit()
+
+    @commands.command(name="normalize")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def normalize_membername(semf, ctx: commands.Context, member: discord.Member = None):
+        await ctx.send("Command not available yet !")
 
     @commands.command(name="clear", aliases=["purge"])
     @commands.guild_only()
@@ -754,7 +760,7 @@ class Mod(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx)).tempmute_member
-        if not member:
+        if not member or not duration:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
@@ -785,6 +791,7 @@ class Mod(commands.Cog):
                 data
             ):
                 await db.commit()
+        self.client.loop.create_task(self.add_temp_sanction(*data))
         embed_text = text["embed"]
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
@@ -828,7 +835,6 @@ class Mod(commands.Cog):
             )
         except:
             pass
-        await self.add_temp_sanction(*data)
 
     @commands.command(name="unmute")
     @commands.guild_only()
@@ -846,8 +852,7 @@ class Mod(commands.Cog):
                     color=discord.Color.dark_gold()
                 )
             )
-        if member.id == self.client.user.id:
-            raise commands.BotMissingPermissions
+
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
         if not mute_role in member.roles:
@@ -872,6 +877,14 @@ class Mod(commands.Cog):
             icon_url=member.avatar if member.avatar else None
         )
         await ctx.send(embed=embed)
+
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?",
+                (ctx.guild.id, member.id, "tempmute",)
+            ):
+                await db.commit()
+
         embed_text = text["log"]
         embed_text = lang.log_unmute["embed"]
         await self.log(
@@ -972,8 +985,6 @@ class Mod(commands.Cog):
                     color=discord.Color.dark_gold()
                 )
             )
-        if self.client.user.id in [member.id for member in members]:
-            return
 
         await ctx.message.delete()
         tasks = [kick_member(member) for member in members]
@@ -1021,6 +1032,314 @@ class Mod(commands.Cog):
                 pass
         for member in kicked_members:
             self.client.loop.create_task(notify_member(member))
+
+    @commands.command(name="ban")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def ban_user(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.ban_user
+        if not member:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            raise commands.BotMissingPermissions
+
+        await ctx.message.delete()
+        await ctx.guild.ban(member, reason=reason)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+                member=member.mention,
+                reason=reason
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+
+        try:
+            embed_text = text["pm"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild,
+                        reason=reason
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
+
+    @commands.command(name="tempban", aliases=["tban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def tempban_member(self, ctx: commands.Context, member: discord.User = None, duration: ArgToDuration = None, *, reason="Unspecified"):
+        text = self.client.fl(await self.client.get_lang(ctx)).tempban_member
+        if not member or not duration:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            raise commands.BotMissingPermissions
+
+        await ctx.message.delete()
+        await ctx.guild.ban(member, reason=reason)
+        data = (ctx.guild.id, member.id, "tempban", duration.datetime,)
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)",
+                data
+            ):
+                await db.commit()
+        self.client.loop.create_task(self.add_temp_sanction(*data))
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+                member=member.mention,
+                duration=duration,
+                reason=reason
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+        embed_text = text["log"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id,
+                    duration=duration,
+                    mod=ctx.author.mention,
+                    reason=reason
+                )
+            )
+        )
+
+        try:
+            embed_text = text["pm"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild.name,
+                        duration=duration,
+                        reason=reason
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
+
+    @commands.command(name="softban", aliases=["sban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def softban_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.softban_member
+        if not member:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        if member.id == self.client.user.id:
+            raise commands.BotMissingPermissions
+
+        await ctx.message.delete()
+        try:
+            embed_text = text["pm"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild,
+                        reason=reason,
+                        invite=await ctx.channel.create_invite(max_uses=1)
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
+        await ctx.guild.ban(member, reason=reason)
+        await ctx.guild.unban(member)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+                member=member.mention,
+                reason=reason
+            ),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+
+    @commands.command(name="multiban", aliases=["mban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def ban_members(self, ctx: commands.Context, *members):
+        banned_members, failed_bans = [], []
+
+        async def ban_member(member):
+            try:
+                member = commands.MemberConverter().convert(ctx, member)
+                await member.ban()
+                banned_members.append(member)
+            except:
+                failed_bans.append(member)
+
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.ban_members
+        if members == ():
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+
+        await ctx.message.delete()
+        tasks = [ban_member(member) for member in members]
+        await asyncio.gather(*tasks)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            title=embed_text["title"],
+            color=discord.Color.green()
+        )
+        fields_text = embed_text["fields"]
+        if banned_members != []:
+            embed.add_field(
+                name=fields_text[0]["name"],
+                value=", ".join(
+                    [
+                        member.mention
+                        for member in banned_members
+                    ]
+                )
+            )
+        if failed_bans != []:
+            embed.add_field(
+                name=fields_text[1]["name"],
+                value=", ".join(
+                    [
+                        member
+                        for member in failed_bans
+                    ]
+                )
+            )
+        await ctx.send(embed=embed)
+
+        async def notify_member(member):
+            try:
+                embed_text = text["pm"]
+                await member.send(
+                    embed=discord.Embed(
+                        description=embed_text["description"].format(
+                            guild=ctx.guild
+                        ),
+                        color=discord.Color.dark_gold()
+                    )
+                )
+            except:
+                pass
+        for member in banned_members:
+            self.client.loop.create_task(notify_member(member))
+
+    @commands.command(name="unmute")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def unban_user(self, ctx: commands.Context, member: discord.Member = None):
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.unban_user
+        if not member:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+
+        await ctx.message.delete()
+        await ctx.guild.unban(member)
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=member.avatar if member.avatar else None
+        )
+        await ctx.send(embed=embed)
+
+        async with self.client.aiodb() as db:
+            async with db.execute(
+                "DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?",
+                (ctx.guild.id, member.id, "tempban",)
+            ):
+                await db.commit()
+
+        embed_text = text["log"]
+        embed_text = lang.log_unmute["embed"]
+        await self.log(
+            member.guild, embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id
+                )
+            )
+        )
+
+        try:
+            embed_text = text["pm"]
+            await member.send(
+                embed=discord.Embed(
+                    description=embed_text["description"].format(
+                        guild=ctx.guild.name
+                    ),
+                    color=discord.Color.dark_gold()
+                )
+            )
+        except:
+            pass
 
 
 class LogEmbed(discord.Embed):

@@ -1,4 +1,5 @@
 import asyncio
+from cmath import e
 import random
 import time
 
@@ -74,7 +75,7 @@ class Fun(commands.Cog):
                 urls = utils.filter_doubles(urls)
                 setattr(self, i, urls)
                 utils.dump(urls, f"cache/{i}.json")
-                print(f"[-] Sucessfully updated {i} ({len(urls)} images).")
+                #print(f"[-] Sucessfully updated {i} ({len(urls)} images).")
             except Exception as e:
                 print(
                     f"[x] Failed while trying to update {i} : ({type(e).__name__}: {str(e)})")
@@ -129,9 +130,20 @@ class Fun(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def show_avatar(self, ctx: commands.Context, member: discord.User = None):
-        pass
+        lang = self.client.fl(await self.client.get_lang(ctx))
+        text = lang.show_avatar
 
-    @commands.command(name="randomnumber", aliases=["randnum", "randint", "randomnum"])
+        member = member if member else ctx.author
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention),
+            color=discord.Color.dark_gold()
+        )
+        embed.set_image(url=member.avatar)
+        await ctx.reply(embed=embed)
+
+    @commands.command(name="randomnumber", aliases=["randnum", "randint", "randnumber", "randomnum"])
     @plugin_is_enabled()
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def get_random_number(self, ctx: commands.Context, x=None, y=None):

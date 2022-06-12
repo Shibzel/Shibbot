@@ -60,7 +60,11 @@ class Config(commands.Cog):
                             )
                     await db.commit()
                     await cursor.close()
-                await interaction.response.send_message(text["done"], ephemeral=True)
+                await interaction.response.send_message(
+                    text["content"],
+                    ephemeral=True,
+                    delete_after=5.0
+                )
 
             options_text = text["options"]
             options = [
@@ -125,6 +129,11 @@ class Config(commands.Cog):
                     (select.values[0], ctx.guild.id,)
                 ):
                     await db.commit()
+            await interaction.response.send_message(
+                text["content"],
+                ephemeral=True,
+                delete_after=5.0
+            )
 
         options_text = text["options"]
         select = discord.ui.Select(

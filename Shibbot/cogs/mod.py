@@ -6,8 +6,7 @@ import discord
 from discord.ext import commands
 
 from bot import Shibbot, __version__
-from utils import ArgToDuration
-from utils.models import EmbedViewer
+from utils import ArgToDuration, EmbedViewer
 
 
 client = None
@@ -140,7 +139,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.cooldown(2, 60, commands.BucketType.member)
     async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
-        text = self.client.fl(await self.client.get_lang(ctx)).change_logs_channel
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).change_logs_channel
         if not channel:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -273,7 +272,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
-        text = self.client.fl(await self.client.get_lang(ctx)).clear_messages
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).clear_messages
         try:
             limit = int(limit)
             limit = limit if limit <= 100 else 100
@@ -337,7 +336,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def nuke_channel(self, ctx: commands.Context):
-        text = self.client.fl(await self.client.get_lang(ctx)).nuke_channel
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).nuke_channel
         embed_text = text["embed"]
         embed = discord.Embed(
             title=embed_text["title"],
@@ -414,7 +413,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        text = self.client.fl(await self.client.get_lang(ctx)).warn_member
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).warn_member
         if not member:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -491,7 +490,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
-        text = self.client.fl(await self.client.get_lang(ctx)).clear_user_warns
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).clear_user_warns
         if not member:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -538,7 +537,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
-        text = self.client.fl(await self.client.get_lang(ctx)).show_warnings
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).show_warnings
         if not member:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -687,7 +686,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def mute_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        text = self.client.fl(await self.client.get_lang(ctx)).mute_member
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).mute_member
         if not member:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -759,7 +758,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
-        text = self.client.fl(await self.client.get_lang(ctx)).tempmute_member
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).tempmute_member
         if not member or not duration:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -842,7 +841,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def unmute_member(self, ctx: commands.Context, member: discord.Member = None):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.unmute_member
         if not member:
             embed_text = text["checks"]["missing_args"]
@@ -916,7 +915,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def yeet_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.yeet_member
         if not member:
             embed_text = text["checks"]["missing_args"]
@@ -975,7 +974,7 @@ class Mod(commands.Cog):
             except:
                 failed_kicks.append(member)
 
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.yeet_members
         if members == ():
             embed_text = text["checks"]["missing_args"]
@@ -1039,7 +1038,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def ban_user(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.ban_user
         if not member:
             embed_text = text["checks"]["missing_args"]
@@ -1088,7 +1087,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempban_member(self, ctx: commands.Context, member: discord.User = None, duration: ArgToDuration = None, *, reason="Unspecified"):
-        text = self.client.fl(await self.client.get_lang(ctx)).tempban_member
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).tempban_member
         if not member or not duration:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
@@ -1160,7 +1159,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def softban_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.softban_member
         if not member:
             embed_text = text["checks"]["missing_args"]
@@ -1220,7 +1219,7 @@ class Mod(commands.Cog):
             except:
                 failed_bans.append(member)
 
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.ban_members
         if members == ():
             embed_text = text["checks"]["missing_args"]
@@ -1278,13 +1277,13 @@ class Mod(commands.Cog):
         for member in banned_members:
             self.client.loop.create_task(notify_member(member))
 
-    @commands.command(name="unmute")
+    @commands.command(name="unban")
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def unban_user(self, ctx: commands.Context, member: discord.Member = None):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.unban_user
         if not member:
             embed_text = text["checks"]["missing_args"]
@@ -1316,18 +1315,6 @@ class Mod(commands.Cog):
             ):
                 await db.commit()
 
-        embed_text = text["log"]
-        embed_text = lang.log_unmute["embed"]
-        await self.log(
-            member.guild, embed=LogEmbed(
-                embed_text["action"],
-                embed_text["description"].format(
-                    member=member.mention,
-                    member_id=member.id
-                )
-            )
-        )
-
         try:
             embed_text = text["pm"]
             await member.send(
@@ -1340,6 +1327,34 @@ class Mod(commands.Cog):
             )
         except:
             pass
+
+    @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def get_guild_info(self, ctx: commands.Context):
+        await ctx.send("Command not available yet !")
+
+    @commands.command(name="userinfo", aliases=["memberinfo", "uinfo"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    async def get_user_info(self, ctx: commands.Context, user: discord.User = None):
+        await ctx.send("Command not available yet !")
+
+    @commands.command(name="roles")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    async def show_roles(self, ctx: commands.Context, member: discord.Member = None):
+        await ctx.send("Command not available yet !")
+
+    @commands.command(name="permissions", aliases=["perms"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    async def show_permissions(self, ctx: commands.Context, member: discord.Member = None):
+        await ctx.send("Command not available yet !")
 
 
 class LogEmbed(discord.Embed):

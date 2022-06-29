@@ -1,5 +1,3 @@
-import asyncio
-
 import aiohttp
 import aiowiki
 import discord
@@ -47,7 +45,7 @@ class Tools(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def translate_text(self, ctx: commands.Context, language=None, *, sentence=None):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.translate_text
         if not language or not sentence:
             embed_text = text["checks"]["missing_args"]
@@ -89,11 +87,13 @@ class Tools(commands.Cog):
         fields_text = embed_text["fields"]
         embed.add_field(
             name=fields_text[0]["name"],
-            value=sentence
+            value=sentence,
+            inline=False
         )
         embed.add_field(
             name=fields_text[1]["name"],
-            value=result
+            value=result,
+            inline=False
         )
         embed.set_footer(
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
@@ -105,7 +105,7 @@ class Tools(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def urbain_dictionary(self, ctx: commands.Context, *, keywords: str = None):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.urbain_dictionary
 
         def clean_string(string):
@@ -192,7 +192,7 @@ class Tools(commands.Cog):
     async def get_covid_stats(self, ctx: commands.Context, country: str = None):
         def codify(value):
             return f"`{'n/a' if value == 0 else value}`"
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.get_covid_stats
         if not country:
             embed_text = text["checks"]["missing_args"]
@@ -262,7 +262,7 @@ class Tools(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def search_on_wikipedia(self, ctx: commands.Context, article=None):
-        lang_code = await self.client.get_lang(ctx)
+        lang_code = await self.client.get_lang(ctx.guild)
         lang = self.client.fl(lang_code)
         text = lang.search_on_wikipedia
         if not article:
@@ -274,7 +274,7 @@ class Tools(commands.Cog):
                 )
             )
 
-        wiki = aiowiki.Wiki().wikipedia(lang_code)
+        wiki = aiowiki.Wiki.wikipedia(lang_code)
         propositions = await wiki.opensearch(article, limit=25)
         if not propositions:
             embed_text = text["checks"]["not_found"]

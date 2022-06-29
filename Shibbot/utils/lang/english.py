@@ -5,6 +5,128 @@ class English:
     def __init__(self):
         self.DEFAULT_REQUESTED_FOOTER = "Requested by {author}."
 
+        # help.py cog
+        self.get_invitation = {
+            "embed": {
+                "title": "Invitation",
+                "description": "Use the buttons below me to hop into. Thank you if you're inviting Shibbot !",
+                "footer": "Actual footage of a happy doggo using Shibbot. | Shibbot • v{version}",
+            },
+            "buttons": {
+                "bot_invite": "Invite me !",
+                "support": "Support server"
+            }
+        }
+        self.bot_info = {
+            "embed": {
+                "title": "About Shibbot",
+                "fields": [
+                    {
+                        "name": "Description",
+                        "value": "Shibbot is a multipurpose bot present on `{n_servers}` servers and written in Python by JeanTheShiba ([dsc.bio](https://dsc.bio/jls), [github](https://github.com/JeanLeShiba)). The goal is to provide a funny, good and modular bot for people managing Discord servers and the members themselves with moderation, fun plugins, utilities... It is still in beta so you can sometimes encounter bugs, if so contact me or join the support server."
+                    },
+                    {
+                        "name": "Specs",
+                        "value": "The bot is currently running on :\n🐍 Python version : `{python_version}`\n❤ Cores : `{n_threads} thread(s)`\n📏 RAM : `{ram_usage}/{n_ram}MB`\n🖥 Hosted in : `{place}`"
+                    },
+                    {
+                        "name": "Support the project",
+                        "value": "This project was was done with no aim to get money so please consider doing [a Paypal donation]({donation_link}) (thank you). If you want to contribute to the project by reporting a bug or improving it, go to [the Github page](https://github.com/JeanLeShiba/Shibbot) or contact me in private message/the support server."
+                    }
+                ]
+            }
+        }
+        self.show_help = {
+            "embed": {
+                "title": "__**Shibbot Help!**__",
+                "description": "**Hi 👋 ! I'm Shibbot**, a multipurpose discord bot that can do stuff like moderation, searches on wikipedia, send memes, etc... Want to learn more about me ? Use `botinfo`, wow.",
+                "fields": [
+                    {
+                        "name": "Commands to get started :",
+                        "value": "- `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server).\n- `lang` : Changes the language.\n- `prefix` : For a custom prefix on this server."
+                    },
+                    {
+                        "name": "What's new ?",
+                        "value": "🇫🇷 French language support\nPossibility to kick or ban in one command\nNormalize a member's username with `username`\nAdded birds and cats, and thinking about capybaras next."
+                    },
+                    {
+                        "name": "Get help :",
+                        "value": "The current prefix is `{prefix}`. To get the list of my commands on a category, click on the bar bellow and select one of the options to jump in ⬇."
+                    }
+                ],
+                "footer": "Shibbot v{version} | Legend: []: required • <> : optional • ⚠ Not available/working yet"
+            },
+            "select": {
+                "placeholder": "Select a category here :",
+                "info": {
+                    "label": "Bot's commands",
+                    "description": "Learn more about the bot and configure it on your server."
+                },
+                "mod": {
+                    "label": "Moderation",
+                    "description": "Allows you to moderate your members with both basic and advanced functions."
+                },
+                "fun": {
+                    "label": "Entertainement",
+                    "description": "Fun commands. Yay."
+                },
+                "tools": {
+                    "label": "Tools",
+                    "description": "Useful tools to use directly in a channel."
+                },
+            },
+            "buttons": {
+                "invite": "Invite me!",
+                "support": "Support Server",
+                "donate": "Donate"
+            },
+            "info": {
+                "description": "**Info & Config :** Learn more about the bot and configure it on your server.",
+                "fields": [
+                    {
+                        "name": "Commands",
+                        "value": """
+- `help`: Shows this command
+- `invite`: Gives a link to invite the bot to your own server or to join the bot's server
+- `ping`: Shows Shibbot's ping
+- `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server)
+- `lang` : Changes the language
+- `prefix` : For a custom prefix on this server"""
+                    }
+                ]
+            },
+            "mod": {
+                "description": "**Moderation :** Allows you to moderate your members with both basic and advanced functions.",
+                "fields": [
+                    {
+                        "name": "Classic commands",
+                        "value": """
+- `clear [amount] <user>` : Clears up to 100 messages in a channel
+- `nuke` : KADABOOMs a maximum 1000 messages in a channel
+- `warn [member] <reason>` : Warns a member
+- `warnings [user]` : Shows the last warnings of an user
+- `clearwarns [user]` : Clears all the warnings of an user
+- `mute [member] <reason>` : Mutes a member
+- `tempmute [member] [duration] <reason>` : Mutes a member for a specified duration
+- `unmute [member] <reason>` : Unmutes a member
+- `kick [member] <reason>` : Kicks a member
+- `ban [user] <reason>` : Bans a member
+- `tempban [member] [duration] <reason>` : Bans a member for a specified duration
+- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invite the user back
+- `unban [user] <reason>` : Remove an user from the ban list"""
+                    },
+                    {
+                        "name": "Specific/advanced commands",
+                        "value": """
+- `perms [member]` : Shows all the permissions of a member
+- `roles [member]` : Shows all the roles of a member
+- `serverinfo` : Shows some info about the server you are currently in
+- `uinfo [user]` : Shows some infos about the specified user"""
+                    }
+                ]
+            }
+        }
+
         # ping.py cog
         self.ping = {
             "embed": {

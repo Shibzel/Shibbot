@@ -1,7 +1,12 @@
+"""
+---------------------------
+Shibbot's launcher file. 
+# Please read the "about this repository" part in README.md before doing or copying anything in this code.
+---------------------------"""
+
 import datetime
 import sqlite3
-import os as sus
-from typing import Coroutine, Union
+import os as sus  # When the import is sus ඞ
 
 import aiosqlite
 import discord
@@ -14,7 +19,7 @@ __author__ = "JeanTheShiba"
 __version__ = "0.3"
 
 
-async def get_prefix(client, ctx) -> str:
+async def get_prefix(client, ctx):
     """Gets the prefix of a server."""
     try:
         if ctx.guild:
@@ -46,6 +51,7 @@ class Shibbot(commands.Bot):
         self.init_at = datetime.datetime.utcnow()
         #self.website_url = "shibbot.xyz"
         self.fl = fl
+        self.support_link = "https://discord.gg/TZNWfJmPwj"
 
         self.discord_conf = self.config["discord"]
         self.default_prefix = "$"
@@ -122,16 +128,12 @@ class Shibbot(commands.Bot):
                     await db.commit()
         return data
 
-    def _get_prefix(self, ctx: commands.Context) -> Coroutine:
+    def _get_prefix(self, ctx: commands.Context):
         return get_prefix(self, ctx)
 
-    async def get_lang(self, guild_or_context: Union[discord.Guild, commands.Context]) -> str:
+    async def get_lang(self, guild: discord.Guild):
         """Gets the langage of a server."""
         try:
-            if isinstance(guild_or_context, commands.Context):
-                guild = guild_or_context.guild
-            elif isinstance(guild_or_context, discord.Guild):
-                guild = guild_or_context
             if guild:
                 async with self.aiodb() as db:
                     async with db.execute(
@@ -195,5 +197,3 @@ def start():
 
 if __name__ == "__main__":
     start()
-
-# Why is there a burger in this folder I can't delete it ?

@@ -17,10 +17,6 @@ class BotEvents(commands.Cog):
         self.activity_is_looping = False
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        pass  # Say hello
-
-    @commands.Cog.listener()
     async def on_ready(self):
         if not self.activity_is_looping:
             await asyncio.sleep(5.5)
@@ -45,7 +41,7 @@ class BotEvents(commands.Cog):
                         type=discord.ActivityType.watching,
                         name=random.choice(
                             ("after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama",
-                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking (don't have a website tho, that's sad :c)",
+                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking, i hope i had a website tho",
                                 "hentai", "your brain cells go")
                         )
                     ),
@@ -72,7 +68,7 @@ class BotEvents(commands.Cog):
 
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx: discord.ApplicationContext, error):
-        text = self.client.fl(await self.client.get_lang(ctx)).on_command_error
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).on_command_error
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
                 description=text["CommandOnCooldown"]["description"].format(
@@ -89,7 +85,7 @@ class BotEvents(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         """Command invoked when an error occurs."""
-        text = self.client.fl(await self.client.get_lang(ctx)).on_command_error
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).on_command_error
         time = None if self.client.test_mode else 20
 
         if isinstance(error, commands.PrivateMessageOnly):

@@ -17,7 +17,7 @@ class Ping(commands.Cog):
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def ping(self, ctx: commands.Context):
         """Checks if the bot is alive."""
-        text = self.client.fl(await self.client.get_lang(ctx)).ping["embed"]
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).ping["embed"]
         await ctx.reply(
             embed=discord.Embed(
                 title=text["title"],

@@ -130,7 +130,7 @@ class Fun(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def show_avatar(self, ctx: commands.Context, member: discord.User = None):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.show_avatar
 
         member = member if member else ctx.author
@@ -153,7 +153,7 @@ class Fun(commands.Cog):
                 y, x = x, 0
             await ctx.reply(f"{random.randint(x, y)} !")
         except:
-            text = self.client.fl(await self.client.get_lang(ctx)).get_random_number
+            text = self.client.fl(await self.client.get_lang(ctx.guild)).get_random_number
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(
                 embed=discord.Embed(
@@ -228,7 +228,7 @@ class Fun(commands.Cog):
     @commands.has_permissions(attach_files=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def shibes_viewer(self, ctx: commands.Context):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.shibes_viewer
         await self.facto_image_viewer(ctx, lang, text, self.shibes)
 
@@ -237,7 +237,7 @@ class Fun(commands.Cog):
     @commands.has_permissions(attach_files=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def cats_viewer(self, ctx: commands.Context):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.cats_viewer
         await self.facto_image_viewer(ctx, lang, text, self.cats)
 
@@ -246,7 +246,7 @@ class Fun(commands.Cog):
     @commands.has_permissions(attach_files=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def birds_viewer(self, ctx: commands.Context):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.birds_viewer
         await self.facto_image_viewer(ctx, lang, text, self.birds)
 
@@ -293,7 +293,7 @@ class Fun(commands.Cog):
     @commands.has_permissions(attach_files=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def meme_viewer(self, ctx: commands.Context):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.meme_viewer
         await self.facto_meme_viewer(ctx, lang, text, self.memes)
 
@@ -303,6 +303,6 @@ class Fun(commands.Cog):
     @commands.has_permissions(attach_files=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def nsfw_meme_viewer(self, ctx: commands.Context):
-        lang = self.client.fl(await self.client.get_lang(ctx))
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.nsfw_meme_viewer
         await self.facto_meme_viewer(ctx, lang, text, self.nsfw_memes)

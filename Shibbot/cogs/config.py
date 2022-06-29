@@ -17,7 +17,7 @@ class Config(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def enable_disable_plugin(self, ctx: commands.Context):
-        text = self.client.fl(await self.client.get_lang(ctx)).enable_disable_plugins
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).enable_disable_plugins
 
         async with self.client.aiodb() as db:
             async def plugin_is_enabled(plugin_name):
@@ -105,7 +105,7 @@ class Config(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 180, commands.BucketType.member)
     async def change_language(self, ctx: commands.Context):
-        current_lang = await self.client.get_lang(ctx)
+        current_lang = await self.client.get_lang(ctx.guild)
         text = self.client.fl(current_lang).change_language
 
         def is_current_language(lang):
@@ -164,7 +164,7 @@ class Config(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(2, 60, commands.BucketType.member)
     async def change_prefix(self, ctx: commands.Context, prefix: str = None):
-        text = self.client.fl(await self.client.get_lang(ctx)).change_prefix
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).change_prefix
         if not prefix:
             embed_text = text["checks"]["missing_args"]
             return await ctx.reply(

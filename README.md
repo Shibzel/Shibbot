@@ -2,6 +2,8 @@
 
 Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapper and SQLite as database.
 
+**Note :** Since I commit only to save my work and not to fix bugs and add features, this program might not fully work.
+
 ![Profile](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
 
 # Features
@@ -57,17 +59,7 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 ## Prerequisites
 
 - [Python 3.8+ (idealy 3.10+)](https://python.org)
-- [Pycord 2.0.0b7](https://pycord.dev) - Discord API wrapper
-
-**API wrappers :**
-
-- [Asyncpraw](https://pypi.org/project/asyncpraw/) - to scrap posts from Reddit
-- [Aiowiki](https://github.com/Gelbpunkt/aiowiki) - to get Wikipedia articles
-- [AioLibreTrans](https://github.com/JeanLeShiba/aioLibreTranslate) - for translation in different languages
-
-**Others :**
-
-- Aioslite, Psutil, Cchardet, Orjson, Brotlipy
+For the libs go check `requirements.txt` or [the dependency graph](https://github.com/JeanLeShiba/Shibbot/network/dependencies).
 
 ## Contributors
 
@@ -79,6 +71,5 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 - [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
 - [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
 - [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
-- [argosopentech.com](https://translate.argosopentech.com) for the host of a [LibreTranslate](https://libretranslate.com/) server
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

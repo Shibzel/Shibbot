@@ -158,18 +158,8 @@ class Help(commands.Cog):
             if interaction.user.id != ctx.author.id:
                 return
 
-            embed_text =
-            if select.values[0] == "info":
-                pass
-
-            elif select.values[0] == "mod":
-                pass
-
-            elif select.values[0] == "fun":
-                pass
-
-            elif select.values[0] == "tools":
-                pass
+            embed_text = text[select.values[0]]
+            pass
 
             await interaction.response.edit_message(embed=embed)
 

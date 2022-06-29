@@ -39,7 +39,6 @@ def plugin_is_enabled():
 class Fun(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
-        self.reddit: utils.Reddit = self.client.reddit
 
         self.shibes, self.cats, self.birds, self.memes, self.nsfw_memes = [], [], [], [], []
 
@@ -87,6 +86,8 @@ class Fun(commands.Cog):
 
     @tasks.loop(hours=12)
     async def update_reddit_memes(self):
+        self.reddit: utils.Reddit = self.client.reddit()
+        # For some reason this func uses A LOT of memory, (~60Mo -> ~300Mo of RAM). To prevent memory outage it must be fixed.
         memes_subs = ("memes", "meme", "History_memes", "HolUp", "dankmemes", "Memes_Of_The_Dank", "ProgrammerHumor", "shitposting",
                       "GenZMemes", "funny", "cursedmemes", "MemesIRL", "pcmemes", "holup", "blursedimages", "AdviceAnimals", "okbuddyretard")
         nsfw_memes_subs = ("hentaimemes", "NSFWMemes", "Offensivejokes",
@@ -95,7 +96,6 @@ class Fun(commands.Cog):
         async def get_filtered_memes(subreds, nsfw=None):
             subs = []
             for submission in await self.reddit.get_subreddits(subreds):
-                # For optimisation purposes we must be more strict
                 if submission.url.endswith((".jpg", ".gif")) and not submission.is_self and submission.score >= 500:
                     if not nsfw or not submission.over_18 == nsfw:
                         subs.append(
@@ -123,6 +123,7 @@ class Fun(commands.Cog):
         start_time = time.time()
         tasks = [update_memes(), update_nsfw_memes()]
         await asyncio.gather(*tasks)
+        await self.reddit.close()
         print(
             f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
 

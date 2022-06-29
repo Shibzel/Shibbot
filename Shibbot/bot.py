@@ -79,14 +79,17 @@ class Shibbot(commands.Bot):
         super().remove_command("help")
 
         self.reddit_conf = self.config["reddit"]
-        self.reddit = Reddit(
-            loop=self.loop,
-            client_id='eHjvFtZ3cYzNbRYyxs4akA',
-            client_secret=self.reddit_conf["client_secret"],
-            user_agent='shibbot',
-            username="JeanTheShiba",
-            password=self.reddit_conf["password"],
-        )
+
+        def reddit():
+            return Reddit(
+                loop=self.loop,
+                client_id='eHjvFtZ3cYzNbRYyxs4akA',
+                client_secret=self.reddit_conf["client_secret"],
+                user_agent='shibbot',
+                username="JeanTheShiba",
+                password=self.reddit_conf["password"],
+            )
+        self.reddit = reddit
 
         self.db_path = "database.sqlite"
 
@@ -107,6 +110,7 @@ class Shibbot(commands.Bot):
             if filename.endswith(".py"):
                 cogname = filename[:-3]
                 try:
+                    # if cogname in ["admin",]:
                     self.load_extension(f"cogs.{cogname}")
                 except Exception as e:
                     print(

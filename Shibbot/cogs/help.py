@@ -1,4 +1,5 @@
 from platform import python_version
+import socket
 
 import requests
 import discord
@@ -82,6 +83,7 @@ class Help(commands.Cog):
             name=fields_text[1]["name"],
             value=fields_text[1]["value"].format(
                 python_version=python_version(),
+                pycord_version=discord.__version__,
                 n_threads=psutil.cpu_count(logical=True),
                 ram_usage=round(psutil.virtual_memory().used/1000000, 2),
                 n_ram=round(psutil.virtual_memory().total/1000000, 2),
@@ -158,8 +160,16 @@ class Help(commands.Cog):
             if interaction.user.id != ctx.author.id:
                 return
 
+            embed._thumbnail = None
             embed_text = text[select.values[0]]
-            pass
+            embed.description = embed_text["description"]
+            embed._fields = []
+            for field in embed_text["fields"]:
+                embed.add_field(
+                    name=field["name"],
+                    value=field["value"],
+                    inline=False
+                )
 
             await interaction.response.edit_message(embed=embed)
 
@@ -179,4 +189,7 @@ class Help(commands.Cog):
         view = discord.ui.View(select, invite_button,
                                support_button, donate_button)
 
-        await ctx.reply(embed=embed, view=view)
+        if isinstance(ctx, (bridge.BridgeExtContext, commands.Context)):
+            return await ctx.reply(embed=embed, view=view)
+        elif isinstance(ctx, (bridge.BridgeApplicationContext, discord.ApplicationContext)):
+            return await ctx.respond(embed=embed, view=view)

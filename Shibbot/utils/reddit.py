@@ -26,7 +26,7 @@ class Reddit:
         await self.reddit.close()
 
     async def requests_clear_loop(self):
-        while self.running is True:
+        while self.running:
             await asyncio.sleep(60.0)
             self.n_of_requests = 0
 
@@ -35,8 +35,8 @@ class Reddit:
         while self.n_of_requests >= self.max_requests:
             # Check every second if the number of requests is back to 0
             await asyncio.sleep(1.0)
-        subreddit = await self.reddit.subreddit(subreddit)
         self.n_of_requests += 1
+        subreddit = await self.reddit.subreddit(subreddit)
         return [sub async for sub in subreddit.hot(limit=limit)]
 
     async def get_subreddits(self, subreddits: list, limit_per_subred=1000):

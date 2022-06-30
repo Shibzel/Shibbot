@@ -1,12 +1,14 @@
 import datetime
 import asyncio
-import datetime
+import re
+from unicodedata import normalize
 
 import discord
 from discord.ext import commands
 
 from bot import Shibbot, __version__
 from utils import ArgToDuration, EmbedViewer
+from utils.functions import relative_timestamp
 
 
 client = None
@@ -208,7 +210,7 @@ class Mod(commands.Cog):
                 break
         if found_entry:
             embed_text = self.client.fl(await self.client.get_lang(
-                guild)).log_on_member_remove["embed"]
+                guild)).log_on_member_ban["embed"]
             await self.log(
                 guild,
                 embed=LogEmbed(
@@ -237,7 +239,7 @@ class Mod(commands.Cog):
                 break
         if found_entry:
             embed_text = self.client.fl(await self.client.get_lang(
-                guild)).log_on_member_remove["embed"]
+                guild)).log_on_member_unban["embed"]
             await self.log(
                 guild,
                 embed=LogEmbed(
@@ -264,7 +266,12 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_nicknames=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def normalize_membername(semf, ctx: commands.Context, member: discord.Member = None):
-        await ctx.send("Command not available yet !")
+        nickname = normalize("NFKC", member.display_name).encode(
+            "ascii", "ignore").decode()
+        nickname = re.sub(r"[^a-zA-Z']+", " ", nickname)
+        if nickname == member.name:
+            pass
+        await member.edit(nick=nickname or "Bad Username")
 
     @commands.command(name="clear", aliases=["purge"])
     @commands.guild_only()
@@ -1037,7 +1044,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(ban_members=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def ban_user(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
+    async def ban_user(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.ban_user
         if not member:
@@ -1282,7 +1289,7 @@ class Mod(commands.Cog):
     @plugin_is_enabled()
     @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
-    async def unban_user(self, ctx: commands.Context, member: discord.Member = None):
+    async def unban_user(self, ctx: commands.Context, member: discord.User = None):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.unban_user
         if not member:
@@ -1361,4 +1368,4 @@ class LogEmbed(discord.Embed):
     def __init__(self, action, _description, _datetime=datetime.datetime.utcnow()):
         super().__init__(title=f"📝 Logs | {action}", description=_description)
         super().set_footer(
-            text=f"Shibbot v{__version__} • {_datetime.strftime('%d %b %Y')}")
+            text=f"Shibbot v{__version__} • {relative_timestamp(_datetime)}")

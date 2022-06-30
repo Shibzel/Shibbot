@@ -1,7 +1,7 @@
 import asyncio
-from cmath import e
 import random
 import time
+import datetime
 
 import discord
 from discord.ext import commands, tasks
@@ -39,6 +39,7 @@ def plugin_is_enabled():
 class Fun(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
+        self.reddit: utils.Reddit = self.client.reddit
 
         self.shibes, self.cats, self.birds, self.memes, self.nsfw_memes = [], [], [], [], []
 
@@ -86,7 +87,6 @@ class Fun(commands.Cog):
 
     @tasks.loop(hours=12)
     async def update_reddit_memes(self):
-        self.reddit: utils.Reddit = self.client.reddit()
         # For some reason this func uses A LOT of memory, (~60Mo -> ~300Mo of RAM). To prevent memory outage it must be fixed.
         memes_subs = ("memes", "meme", "History_memes", "HolUp", "dankmemes", "Memes_Of_The_Dank", "ProgrammerHumor", "shitposting",
                       "GenZMemes", "funny", "cursedmemes", "MemesIRL", "pcmemes", "holup", "blursedimages", "AdviceAnimals", "okbuddyretard")
@@ -123,7 +123,6 @@ class Fun(commands.Cog):
         start_time = time.time()
         tasks = [update_memes(), update_nsfw_memes()]
         await asyncio.gather(*tasks)
-        await self.reddit.close()
         print(
             f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
 
@@ -142,6 +141,11 @@ class Fun(commands.Cog):
             color=discord.Color.dark_gold()
         )
         embed.set_image(url=member.avatar)
+        embed.set_footer(
+            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
+        )
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.reply(embed=embed)
 
     @commands.command(name="randomnumber", aliases=["randnum", "randint", "randnumber", "randomnum"])
@@ -172,7 +176,8 @@ class Fun(commands.Cog):
         words = ["ratio", "nobody asked", "fatherless", "maidenless",
                  "no bitches", "don't care", "L", "ur bad", "poor",
                  "skill issue", "ew", "motherless", "orphan", "friendless",
-                 "lifeless", "you're the reason your dad left", "cry about it", "stay mad", "adios"]
+                 "lifeless", "you're the reason your dad left", "cry about it",
+                 "stay mad", "adios", ]
         random.shuffle(words)
         shuffled_words = words[0:random.randint(3, 5)]
         text = ""
@@ -199,6 +204,7 @@ class Fun(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
+            embed.timestamp = datetime.datetime.utcnow()
             return embed
 
         random.shuffle(urls)
@@ -264,6 +270,7 @@ class Fun(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
+            embed.timestamp = datetime.datetime.utcnow()
             return embed
 
         random.shuffle(dicts)

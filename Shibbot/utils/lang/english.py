@@ -5,6 +5,17 @@ class English:
     def __init__(self):
         self.DEFAULT_REQUESTED_FOOTER = "Requested by {author}."
 
+        # ping.py cog
+        self.ping = {
+            "embed": {
+                "title": "🏓 Pong !",
+                "description": "Shibbot's latency : `{ping}ms`\nMachine load : `CPU: {cpu}%` `RAM: {ram}%`"
+            },
+            "buttons": {
+                "status": "Status Page"
+            }
+        }
+
         # help.py cog
         self.get_invitation = {
             "embed": {
@@ -27,7 +38,7 @@ class English:
                     },
                     {
                         "name": "Specs",
-                        "value": "The bot is currently running on :\n🐍 Python version : `{python_version}`\n❤ Cores : `{n_threads} thread(s)`\n📏 RAM : `{ram_usage}/{n_ram}MB`\n🖥 Hosted in : `{place}`"
+                        "value": "The bot is currently running on :\n🐍 Python version : `{python_version}`\n⚡ Pycord version : `{pycord_version}`\n❤ Cores : `{n_threads} thread(s)`\n📏 RAM : `{ram_usage}/{n_ram}MB`\n🖥 Hosted in : `{place}`"
                     },
                     {
                         "name": "Support the project",
@@ -91,7 +102,7 @@ class English:
 - `ping`: Shows Shibbot's ping
 - `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server)
 - `lang` : Changes the language
-- `prefix` : For a custom prefix on this server"""
+- `prefix [prefix]` : For a custom prefix on this server"""
                     }
                 ]
             },
@@ -101,37 +112,72 @@ class English:
                     {
                         "name": "Classic commands",
                         "value": """
+- `logs [channel]`
 - `clear [amount] <user>` : Clears up to 100 messages in a channel
-- `nuke` : KADABOOMs a maximum 1000 messages in a channel
 - `warn [member] <reason>` : Warns a member
 - `warnings [user]` : Shows the last warnings of an user
 - `clearwarns [user]` : Clears all the warnings of an user
 - `mute [member] <reason>` : Mutes a member
-- `tempmute [member] [duration] <reason>` : Mutes a member for a specified duration
 - `unmute [member] <reason>` : Unmutes a member
 - `kick [member] <reason>` : Kicks a member
 - `ban [user] <reason>` : Bans a member
-- `tempban [member] [duration] <reason>` : Bans a member for a specified duration
-- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invite the user back
 - `unban [user] <reason>` : Remove an user from the ban list"""
+                    },
+                    {
+                        "name": "Temporary commands",
+                        "value": """
+- `tempmute [member] [duration] <reason>` : Mutes a member for a specified duration
+- `tempban [member] [duration] <reason>` : Bans a member for a specified duration
+"""
                     },
                     {
                         "name": "Specific/advanced commands",
                         "value": """
-- `perms [member]` : Shows all the permissions of a member
-- `roles [member]` : Shows all the roles of a member
-- `serverinfo` : Shows some info about the server you are currently in
-- `uinfo [user]` : Shows some infos about the specified user"""
+- `nuke` : KADABOOMs a maximum 1000 messages in a channel
+- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invite the user back
+- `multikick [members separated by a space]` : Kicks multiple members in one command
+- `multiban [members separated by a space]` : Same as `multikick` but for bans"""
+                    },
+                    {
+                        "name": "Info commands",
+                        "value": """
+⚠ - `perms [member]` : Shows all the permissions of a member
+⚠ - `roles [member]` : Shows all the roles of a member
+⚠ - `uinfo [user]` : Shows some infos about the specified user
+⚠ - `serverinfo` : Shows some info about the server you are currently in"""
                     }
                 ]
-            }
-        }
-
-        # ping.py cog
-        self.ping = {
-            "embed": {
-                "title": "🏓 Pong !",
-                "description": "Shibbot's latency : `{ping}ms`\nMachine load : `CPU: {cpu}%` `RAM: {ram}%`"
+            },
+            "fun": {
+                "description": "**Entertainement :** Fun commands. Yay.",
+                "fields": [
+                    {
+                        "name": "Commands",
+                        "value": """
+- `meme` : Gives a random meme stolen from Reddit
+- `nsfwmeme` : Same as `meme` but only with nsfw memes
+- `shiba` : Shows random shibe
+- `bird` : Same as shibe
+- `cat` : Same as cat
+- `piss` : *piss*
+- `avatar <user>` : Shows the avatar of an user
+- `twitter` : ratio + L + fatherless + maidenless
+- `randnum [a] <b>` : Gives a random number between `a` and `b` or `0` and `a` if `b` is not precised"""
+                    }
+                ]
+            },
+            "tools": {
+                "description": "**Tools :** Useful tools to use directly in a channel.",
+                "fields": [
+                    {
+                        "name": "Commands",
+                        "value": """
+- `wikipedia [search]` : Searches an article on wikipedia (in beta, doesn't work well)
+- `translate [language] [sentence]` : Translates sentence into a specified language
+- `covid [country]` : Searches covid cases on a country
+- `urbandict [word]` : Gives the definition of a word found on Urban Dictionary"""
+                    }
+                ]
             }
         }
 

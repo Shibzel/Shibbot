@@ -1,3 +1,4 @@
+import datetime
 import re
 
 
@@ -25,3 +26,11 @@ def filter_doubles(_list: list) -> list:
 def remove_chars(string: str, chars: str = "", replace: str = "") -> str:
     """Removes characters from string"""
     return re.sub(r"["+chars+"]", replace, string)
+
+
+def relative_timestamp(datetime: datetime.datetime) -> str:
+    return f"<t:{int(datetime.timestamp())}:R>"
+
+
+def date_timestamp(datetime: datetime.datetime) -> str:
+    return f"<t:{int(datetime.timestamp())}:f>"

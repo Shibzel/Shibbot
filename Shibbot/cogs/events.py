@@ -17,6 +17,11 @@ class BotEvents(commands.Cog):
         self.activity_is_looping = False
 
     @commands.Cog.listener()
+    async def on_thread_create(self, thread: discord.Thread):
+        """Makes the bot join the thread to listen to the thread's commands."""
+        await thread.join()
+
+    @commands.Cog.listener()
     async def on_ready(self):
         if not self.activity_is_looping:
             await asyncio.sleep(5.5)

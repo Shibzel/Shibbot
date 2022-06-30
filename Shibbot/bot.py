@@ -30,7 +30,7 @@ async def get_prefix(client, ctx):
                 ) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
-                return prefix[0]
+                return commands.when_mentioned_or(prefix[0])(client, ctx.message)
         raise Exception
     except:
         return client.default_prefix
@@ -79,17 +79,14 @@ class Shibbot(commands.Bot):
         super().remove_command("help")
 
         self.reddit_conf = self.config["reddit"]
-
-        def reddit():
-            return Reddit(
-                loop=self.loop,
-                client_id='eHjvFtZ3cYzNbRYyxs4akA',
-                client_secret=self.reddit_conf["client_secret"],
-                user_agent='shibbot',
-                username="JeanTheShiba",
-                password=self.reddit_conf["password"],
-            )
-        self.reddit = reddit
+        self.reddit = Reddit(
+            loop=self.loop,
+            client_id='eHjvFtZ3cYzNbRYyxs4akA',
+            client_secret=self.reddit_conf["client_secret"],
+            user_agent='shibbot',
+            username="JeanTheShiba",
+            password=self.reddit_conf["password"],
+        )
 
         self.db_path = "database.sqlite"
 

@@ -20,7 +20,7 @@ class English:
         self.get_invitation = {
             "embed": {
                 "title": "Invitation",
-                "description": "Use the buttons below me to hop into. Thank you if you're inviting Shibbot !",
+                "description": "Use the buttons below me to hop into. Thanks if you're inviting Shibbot !",
                 "footer": "Actual footage of a happy doggo using Shibbot. | Shibbot • v{version}",
             },
             "buttons": {
@@ -103,6 +103,7 @@ class English:
 - `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server)
 - `lang` : Changes the language
 - `prefix [prefix]` : For a custom prefix on this server
+- `avatar <user>` : Shows the avatar of an user
 - `uinfo [user]` : Shows some infos about the specified user
 - `serverinfo` : Shows some info about the server you are currently in
 """
@@ -135,9 +136,9 @@ class English:
                     {
                         "name": "Specific/advanced commands",
                         "value": """
-- `normalize [member]` : Cleans a member's nickname into normal characters
+- `normalize [member]` : Cleans a member's nickname
 - `nuke` : KADABOOMs a maximum 1000 messages in a channel
-- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invite the user back
+- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invites the user back. Handy if someone got hacked
 - `multikick [members separated by a space]` : Kicks multiple members in one command
 - `multiban [members separated by a space]` : Same as `multikick` but for bans"""
                     },
@@ -157,13 +158,12 @@ class English:
                     {
                         "name": "Commands",
                         "value": """
-- `meme` : Gives a random meme stolen from Reddit
+- `meme` : Gives random memes stolen from Reddit
 - `nsfwmeme` : Same as `meme` but only with nsfw memes
 - `shiba` : Shows random shibe
 - `bird` : Same as shibe
 - `cat` : Same as cat
 - `piss` : *piss*
-- `avatar <user>` : Shows the avatar of an user
 - `twitter` : ratio + L + fatherless + maidenless
 - `randnum [a] <b>` : Gives a random number between `a` and `b` or `0` and `a` if `b` is not precised"""
                     }
@@ -384,11 +384,6 @@ class English:
             "buttons": {
                 "previous": "Previous Meme",
                 "next": "Next Meme"
-            }
-        }
-        self.show_avatar = {
-            "embed": {
-                "description": "{member}'s avatar :"
             }
         }
 
@@ -781,6 +776,11 @@ class English:
         }
 
         # misc.py cog
+        self.show_avatar = {
+            "embed": {
+                "description": "{member}'s avatar :"
+            }
+        }
         self.get_guild_info = {
             "loading_embed": {
                 "description": "Fetching..."

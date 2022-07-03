@@ -13,6 +13,27 @@ class Misc(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
 
+    @commands.command(name="avatar", aliases=["av"])
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    async def show_avatar(self, ctx: commands.Context, member: discord.User = None):
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
+        text = lang.show_avatar
+
+        member = member if member else ctx.author
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention),
+            color=discord.Color.dark_gold()
+        )
+        embed.set_image(url=member.avatar)
+        embed.set_footer(
+            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
+        )
+        embed.timestamp = datetime.datetime.utcnow()
+        await ctx.reply(embed=embed)
+
     @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])
     @commands.guild_only()
     @commands.cooldown(1, 20, commands.BucketType.user)

@@ -179,7 +179,7 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
-            if found_entry.user.id == self.client.user.id:
+            if self.client.user.id in (found_entry.user.id, member.id):
                 return
             embed_text = self.client.fl(await self.client.get_lang(
                 member.guild)).log_on_member_remove["embed"]
@@ -210,7 +210,7 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
-            if found_entry.user.id == self.client.user.id:
+            if self.client.user.id in (found_entry.user.id, user.id):
                 return
             embed_text = self.client.fl(await self.client.get_lang(
                 guild)).log_on_member_ban["embed"]

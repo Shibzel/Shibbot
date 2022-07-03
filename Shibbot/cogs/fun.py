@@ -1,7 +1,6 @@
 import asyncio
 import random
 import time
-import datetime
 import gc
 
 import discord
@@ -125,27 +124,11 @@ class Fun(commands.Cog):
             print("[x] Failed updating memes.")
         gc.collect()
 
-    @commands.command(name="avatar", aliases=["av"])
+    @commands.command()
     @plugin_is_enabled()
-    @commands.cooldown(1, 7, commands.BucketType.member)
-    async def show_avatar(self, ctx: commands.Context, member: discord.User = None):
-        lang = self.client.fl(await self.client.get_lang(ctx.guild))
-        text = lang.show_avatar
-
-        member = member if member else ctx.author
-        embed_text = text["embed"]
-        embed = discord.Embed(
-            description=embed_text["description"].format(
-                member=member.mention),
-            color=discord.Color.dark_gold()
-        )
-        embed.set_image(url=member.avatar)
-        embed.set_footer(
-            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-            icon_url=ctx.author.avatar if ctx.author.avatar else None
-        )
-        embed.timestamp = datetime.datetime.utcnow()
-        await ctx.reply(embed=embed)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def piss(self, ctx: commands.Context):
+        await ctx.reply("*piss*")
 
     @commands.command(name="randomnumber", aliases=["randnum", "randint", "randnumber", "randomnum"])
     @plugin_is_enabled()
@@ -206,7 +189,7 @@ class Fun(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
-            embed.timestamp = datetime.datetime.utcnow()
+
             return embed
 
         random.shuffle(urls)
@@ -272,7 +255,7 @@ class Fun(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
-            embed.timestamp = datetime.datetime.utcnow()
+
             return embed
 
         random.shuffle(dicts)

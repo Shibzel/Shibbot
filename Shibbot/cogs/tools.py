@@ -101,7 +101,7 @@ class Tools(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
-            embed.timestamp = datetime.datetime.utcnow()
+
         return await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(name="urbandict", aliases=["udict"])
@@ -168,7 +168,7 @@ class Tools(commands.Cog):
                         author=ctx.author),
                     icon_url=ctx.author.avatar if ctx.author.avatar else None
                 )
-                embed.timestamp = datetime.datetime.utcnow()
+
                 return embed
 
             button_text = text["buttons"]
@@ -263,7 +263,7 @@ class Tools(commands.Cog):
                 text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
                 icon_url=ctx.author.avatar if ctx.author.avatar else None
             )
-            embed.timestamp = datetime.datetime.utcnow()
+
         return await message.edit(embed=embed)
 
     @commands.command(name="wikipedia", aliases=["wiki"])
@@ -306,7 +306,7 @@ class Tools(commands.Cog):
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
             icon_url=ctx.author.avatar if ctx.author.avatar else None
         )
-        embed.timestamp = datetime.datetime.utcnow()
+
         select_text = text["select"]
         select = discord.ui.Select(
             placeholder=select_text["placeholder"],

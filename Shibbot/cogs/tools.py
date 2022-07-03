@@ -57,52 +57,52 @@ class Tools(commands.Cog):
                     color=discord.Color.dark_gold()
                 )
             )
-
-        async with aiogtrans.GoogleTrans(target=language) as translator:
-            try:
-                result = await translator.translate(text=sentence)
-            except aiogtrans.UnsupportedLanguage:
-                embed_text = text["checks"]["bad_args"]
-                return await ctx.reply(
-                    embed=discord.Embed(
-                        title=embed_text["title"],
-                        description="(#_<-) "+embed_text["description"],
-                        color=discord.Color.red()
+        async with ctx.typing():
+            async with aiogtrans.GoogleTrans(target=language) as translator:
+                try:
+                    result = await translator.translate(text=sentence)
+                except aiogtrans.UnsupportedLanguage:
+                    embed_text = text["checks"]["bad_args"]
+                    return await ctx.reply(
+                        embed=discord.Embed(
+                            title=embed_text["title"],
+                            description="(#_<-) "+embed_text["description"],
+                            color=discord.Color.red()
+                        )
                     )
-                )
-            except aiogtrans.RequestError:
-                embed_text = text["checks"]["unavailable"]
-                return await ctx.reply(
-                    embed=discord.Embed(
-                        title=embed_text["title"],
-                        description="ψ(._. )> "+embed_text["description"],
-                        color=discord.Color.red()
+                except aiogtrans.RequestError:
+                    embed_text = text["checks"]["unavailable"]
+                    return await ctx.reply(
+                        embed=discord.Embed(
+                            title=embed_text["title"],
+                            description="ψ(._. )> "+embed_text["description"],
+                            color=discord.Color.red()
+                        )
                     )
-                )
 
-        embed_text = text["embed"]
-        embed = discord.Embed(color=0x4b8cf5)
-        embed.set_author(
-            name=embed_text["title"],
-            icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png"
-        )
-        fields_text = embed_text["fields"]
-        embed.add_field(
-            name=fields_text[0]["name"],
-            value=sentence,
-            inline=False
-        )
-        embed.add_field(
-            name=fields_text[1]["name"],
-            value=result,
-            inline=False
-        )
-        embed.set_footer(
-            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-            icon_url=ctx.author.avatar if ctx.author.avatar else None
-        )
-        embed.timestamp = datetime.datetime.utcnow()
-        await ctx.reply(embed=embed, mention_author=False)
+            embed_text = text["embed"]
+            embed = discord.Embed(color=0x4b8cf5)
+            embed.set_author(
+                name=embed_text["title"],
+                icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png"
+            )
+            fields_text = embed_text["fields"]
+            embed.add_field(
+                name=fields_text[0]["name"],
+                value=sentence,
+                inline=False
+            )
+            embed.add_field(
+                name=fields_text[1]["name"],
+                value=result,
+                inline=False
+            )
+            embed.set_footer(
+                text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+                icon_url=ctx.author.avatar if ctx.author.avatar else None
+            )
+            embed.timestamp = datetime.datetime.utcnow()
+        return await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(name="urbandict", aliases=["udict"])
     @plugin_is_enabled()
@@ -123,69 +123,71 @@ class Tools(commands.Cog):
                 )
             )
 
-        async with aiohttp.ClientSession(
-            headers={
-                "X-RapidAPI-Host": "mashape-community-urban-dictionary.p.rapidapi.com",
-                "X-RapidAPI-Key": self.client.config["rapidapi"]
-            }
-        ) as session:
-            results = await session.get(
-                "https://mashape-community-urban-dictionary.p.rapidapi.com/define",
-                params={"term": keywords}
+        async with ctx.typing():
+            async with aiohttp.ClientSession(
+                headers={
+                    "X-RapidAPI-Host": "mashape-community-urban-dictionary.p.rapidapi.com",
+                    "X-RapidAPI-Key": self.client.config["rapidapi"]
+                }
+            ) as session:
+                results = await session.get(
+                    "https://mashape-community-urban-dictionary.p.rapidapi.com/define",
+                    params={"term": keywords}
+                )
+                try:
+                    json_results = (await results.json())["list"]
+                except:
+                    raise commands.BadArgument
+
+            fields_text = text["embed"]["fields"]
+
+            def generate_embed(definition):
+                embed = discord.Embed(color=0x2faaee)
+                embed.set_author(
+                    name="Urban Dictionary",
+                    icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg",
+                    url=definition["permalink"]
+                )
+
+                word_definition = clean_string(definition["definition"])
+                example = clean_string(definition["example"])
+                embed.add_field(
+                    name=fields_text[0]["name"].format(
+                        word=definition["word"],
+                        author=definition["author"],
+                    ),
+                    value=word_definition if len(
+                        word_definition) < 400 else word_definition[:400]+"..."
+                )
+                embed.add_field(
+                    name=fields_text[1]["name"], value=example if len(
+                        example) < 400 else example[:400]+"..."
+                )
+                embed.set_footer(
+                    text=lang.DEFAULT_REQUESTED_FOOTER.format(
+                        author=ctx.author),
+                    icon_url=ctx.author.avatar if ctx.author.avatar else None
+                )
+                embed.timestamp = datetime.datetime.utcnow()
+                return embed
+
+            button_text = text["buttons"]
+            next_button = discord.ui.Button(
+                style=discord.ButtonStyle.green,
+                label=button_text["next"])
+            previous_button = discord.ui.Button(
+                style=discord.ButtonStyle.gray,
+                label=button_text["previous"])
+
+            embed_viewer = EmbedViewer(
+                ctx,
+                json_results,
+                generate_embed,
+                next_button,
+                previous_button
             )
-            try:
-                json_results = (await results.json())["list"]
-            except:
-                raise commands.BadArgument
 
-        fields_text = text["embed"]["fields"]
-
-        def generate_embed(definition):
-            embed = discord.Embed(color=0x2faaee)
-            embed.set_author(
-                name="Urban Dictionary",
-                icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg",
-                url=definition["permalink"]
-            )
-
-            word_definition = clean_string(definition["definition"])
-            example = clean_string(definition["example"])
-            embed.add_field(
-                name=fields_text[0]["name"].format(
-                    word=definition["word"],
-                    author=definition["author"],
-                ),
-                value=word_definition if len(
-                    word_definition) < 400 else word_definition[:400]+"..."
-            )
-            embed.add_field(
-                name=fields_text[1]["name"], value=example if len(
-                    example) < 400 else example[:400]+"..."
-            )
-            embed.set_footer(
-                text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-                icon_url=ctx.author.avatar if ctx.author.avatar else None
-            )
-            embed.timestamp = datetime.datetime.utcnow()
-            return embed
-
-        button_text = text["buttons"]
-        next_button = discord.ui.Button(
-            style=discord.ButtonStyle.green,
-            label=button_text["next"])
-        previous_button = discord.ui.Button(
-            style=discord.ButtonStyle.gray,
-            label=button_text["previous"])
-
-        embed_viewer = EmbedViewer(
-            ctx,
-            json_results,
-            generate_embed,
-            next_button,
-            previous_button
-        )
-
-        await ctx.reply(
+        return await ctx.reply(
             embed=embed_viewer.get_first_page(),
             view=embed_viewer
         )
@@ -207,61 +209,62 @@ class Tools(commands.Cog):
                 )
             )
 
-        embed_text = text["loading_embed"]
-        message = await ctx.reply(
-            embed=discord.Embed(
-                title=embed_text["title"],
-                description="⏳ "+embed_text["description"],
+        async with ctx.typing():
+            embed_text = text["loading_embed"]
+            message = await ctx.reply(
+                embed=discord.Embed(
+                    title=embed_text["title"],
+                    description="⏳ "+embed_text["description"],
+                    color=discord.Color.dark_red()
+                )
+            )
+            async with aiohttp.ClientSession() as session:
+                stats = await session.get(f"https://coronavirus-19-api.herokuapp.com/countries/{country}")
+                try:
+                    json_stats = await stats.json()
+                except Exception:
+                    await message.delete()
+                    raise commands.BadArgument
+            embed_text = text["embed"]
+            embed = discord.Embed(
+                description=embed_text["description"],
                 color=discord.Color.dark_red()
             )
-        )
-        async with aiohttp.ClientSession() as session:
-            stats = await session.get(f"https://coronavirus-19-api.herokuapp.com/countries/{country}")
-            try:
-                json_stats = await stats.json()
-            except Exception:
-                await message.delete()
-                raise commands.BadArgument
-        embed_text = text["embed"]
-        embed = discord.Embed(
-            description=embed_text["description"],
-            color=discord.Color.dark_red()
-        )
-        embed.set_author(
-            name=embed_text["title"].format(country=country.upper()),
-            icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6U1D1hdMlpJkyFQ2MAIhzNQe3K7ovo3fN2g&usqp=CAU"
-        )
-        fields_text = embed_text["fields"]
-        embed.add_field(name=fields_text[0]["name"],
-                        value=codify(json_stats["cases"]))
-        embed.add_field(name=fields_text[1]["name"],
-                        value=codify(json_stats["todayCases"]))
-        embed.add_field(name=fields_text[2]["name"],
-                        value=codify(json_stats["deaths"]))
-        embed.add_field(name=fields_text[3]["name"],
-                        value=codify(json_stats["todayDeaths"]))
-        embed.add_field(name=fields_text[4]["name"],
-                        value=codify(json_stats["recovered"]))
-        embed.add_field(name=fields_text[5]["name"],
-                        value=codify(json_stats["active"]))
-        embed.add_field(name=fields_text[6]["name"],
-                        value=codify(json_stats["critical"]))
-        embed.add_field(name=fields_text[7]["name"],
-                        value=codify(json_stats["casesPerOneMillion"]))
-        embed.add_field(name=fields_text[8]["name"],
-                        value=codify(json_stats["deathsPerOneMillion"]))
-        embed.add_field(name=fields_text[9]["name"],
-                        value=codify(json_stats["totalTests"]))
-        embed.add_field(name=fields_text[10]["name"],
-                        value=codify(json_stats["testsPerOneMillion"]))
-        embed.add_field(name=fields_text[11]["name"],
-                        value=fields_text[11]["value"])
-        embed.set_footer(
-            text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-            icon_url=ctx.author.avatar if ctx.author.avatar else None
-        )
-        embed.timestamp = datetime.datetime.utcnow()
-        await message.edit(embed=embed)
+            embed.set_author(
+                name=embed_text["title"].format(country=country.upper()),
+                icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6U1D1hdMlpJkyFQ2MAIhzNQe3K7ovo3fN2g&usqp=CAU"
+            )
+            fields_text = embed_text["fields"]
+            embed.add_field(name=fields_text[0]["name"],
+                            value=codify(json_stats["cases"]))
+            embed.add_field(name=fields_text[1]["name"],
+                            value=codify(json_stats["todayCases"]))
+            embed.add_field(name=fields_text[2]["name"],
+                            value=codify(json_stats["deaths"]))
+            embed.add_field(name=fields_text[3]["name"],
+                            value=codify(json_stats["todayDeaths"]))
+            embed.add_field(name=fields_text[4]["name"],
+                            value=codify(json_stats["recovered"]))
+            embed.add_field(name=fields_text[5]["name"],
+                            value=codify(json_stats["active"]))
+            embed.add_field(name=fields_text[6]["name"],
+                            value=codify(json_stats["critical"]))
+            embed.add_field(name=fields_text[7]["name"],
+                            value=codify(json_stats["casesPerOneMillion"]))
+            embed.add_field(name=fields_text[8]["name"],
+                            value=codify(json_stats["deathsPerOneMillion"]))
+            embed.add_field(name=fields_text[9]["name"],
+                            value=codify(json_stats["totalTests"]))
+            embed.add_field(name=fields_text[10]["name"],
+                            value=codify(json_stats["testsPerOneMillion"]))
+            embed.add_field(name=fields_text[11]["name"],
+                            value=fields_text[11]["value"])
+            embed.set_footer(
+                text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
+                icon_url=ctx.author.avatar if ctx.author.avatar else None
+            )
+            embed.timestamp = datetime.datetime.utcnow()
+        return await message.edit(embed=embed)
 
     @commands.command(name="wikipedia", aliases=["wiki"])
     @plugin_is_enabled()
@@ -321,19 +324,20 @@ class Tools(commands.Cog):
             if interaction.user.id != ctx.author.id:
                 return
 
-            embed_text = text["loading_embed"]
-            embed.title = embed_text["title"]
-            embed.description = "⏳ "+embed_text["description"]
-            view.disable_all_items()
-            await interaction.response.edit_message(embed=embed, view=view)
+            async with ctx.typing():
+                embed_text = text["loading_embed"]
+                embed.title = embed_text["title"]
+                embed.description = "⏳ "+embed_text["description"]
+                view.disable_all_items()
+                await interaction.response.edit_message(embed=embed, view=view)
 
-            page = wiki.get_page(select.values[0])
-            embed.title = page.title
-            embed.url = (await page.urls())[0]
-            summary = await page.summary()
-            embed.description = summary
-            await message.edit(embed=embed, view=None)
-            await wiki.close()
+                page = wiki.get_page(select.values[0])
+                embed.title = page.title
+                embed.url = (await page.urls())[0]
+                summary = await page.summary()
+                embed.description = summary
+                await wiki.close()
+            return await message.edit(embed=embed, view=None)
 
         select.callback = wiki_callback
         view = discord.ui.View(select)

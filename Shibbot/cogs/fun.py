@@ -2,6 +2,7 @@ import asyncio
 import random
 import time
 import datetime
+import gc
 
 import discord
 from discord.ext import commands, tasks
@@ -57,12 +58,6 @@ class Fun(commands.Cog):
 
         self.update_shibe_online.start()
         self.update_reddit_memes.start()
-
-    @commands.Cog.listener()
-    @plugin_is_enabled()
-    async def on_message(self, message):
-        if message.content == "(╯°□°）╯︵ ┻━┻":
-            await message.reply("┬─┬ ノ( ゜-゜ノ)")
 
     @tasks.loop(hours=4)
     async def update_shibe_online(self):
@@ -121,10 +116,14 @@ class Fun(commands.Cog):
                 utils.dump(subs, "cache/nsfw_memes.json")
 
         start_time = time.time()
-        tasks = [update_memes(), update_nsfw_memes()]
-        await asyncio.gather(*tasks)
-        print(
-            f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
+        try:
+            tasks = [update_memes(), update_nsfw_memes()]
+            await asyncio.gather(*tasks)
+            print(
+                f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
+        except:
+            print("[x] Failed updating memes.")
+        gc.collect()
 
     @commands.command(name="avatar", aliases=["av"])
     @plugin_is_enabled()
@@ -156,7 +155,10 @@ class Fun(commands.Cog):
             x, y = int(x), int(y) if y else y
             if not y:
                 y, x = x, 0
-            await ctx.reply(f"{random.randint(x, y)} !")
+            response = random.randint(x, y)
+            async with ctx.typing():
+                await asyncio.sleep(1.5)
+            return await ctx.reply(f"{response} !")
         except:
             text = self.client.fl(await self.client.get_lang(ctx.guild)).get_random_number
             embed_text = text["checks"]["missing_args"]

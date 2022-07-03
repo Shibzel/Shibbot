@@ -141,14 +141,14 @@ class Config(commands.Cog):
             options=[
                 discord.SelectOption(
                     label=options_text["en"]["label"],
-                    description="english : Hello everyone !",
+                    description="english : I have kids in my basement.",
                     value="en",
                     emoji="🇬🇧",
                     default=is_current_language("en")
                 ),
                 discord.SelectOption(
                     label=options_text["fr"]["label"],
-                    description="french : Bonjour à tous !",
+                    description="french : J'ai des enfants dans ma cave.",
                     value="fr",
                     emoji="🇫🇷",
                     default=is_current_language("fr")

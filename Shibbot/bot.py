@@ -30,7 +30,7 @@ async def get_prefix(client, ctx):
                 ) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
-                return commands.when_mentioned_or(prefix[0])(client, ctx.message)
+                return prefix[0]
         raise Exception
     except:
         return client.default_prefix

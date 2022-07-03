@@ -1,5 +1,4 @@
 from platform import python_version
-import socket
 
 import requests
 import discord

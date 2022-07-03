@@ -1,14 +1,13 @@
 import datetime
 import asyncio
 import re
-from unicodedata import normalize
+import unicodedata
 
 import discord
 from discord.ext import commands
 
 from bot import Shibbot, __version__
 from utils import ArgToDuration, EmbedViewer
-from utils.functions import relative_timestamp
 
 
 client = None
@@ -180,8 +179,10 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
+            if found_entry.user.id == self.client.user.id:
+                return
             embed_text = self.client.fl(await self.client.get_lang(
-                member)).log_on_member_remove["embed"]
+                member.guild)).log_on_member_remove["embed"]
             await self.log(
                 member.guild,
                 embed=LogEmbed(
@@ -209,6 +210,8 @@ class Mod(commands.Cog):
                 found_entry = entry
                 break
         if found_entry:
+            if found_entry.user.id == self.client.user.id:
+                return
             embed_text = self.client.fl(await self.client.get_lang(
                 guild)).log_on_member_ban["embed"]
             await self.log(
@@ -260,26 +263,14 @@ class Mod(commands.Cog):
         )
         self.client.db.commit()
 
-    @commands.command(name="normalize")
-    @commands.guild_only()
-    @plugin_is_enabled()
-    @commands.has_permissions(manage_nicknames=True)
-    @commands.cooldown(1, 3, commands.BucketType.member)
-    async def normalize_membername(semf, ctx: commands.Context, member: discord.Member = None):
-        nickname = normalize("NFKC", member.display_name).encode(
-            "ascii", "ignore").decode()
-        nickname = re.sub(r"[^a-zA-Z']+", " ", nickname)
-        if nickname == member.name:
-            pass
-        await member.edit(nick=nickname or "Bad Username")
-
     @commands.command(name="clear", aliases=["purge"])
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
-        text = self.client.fl(await self.client.get_lang(ctx.guild)).clear_messages
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
+        text = lang.clear_messages
         try:
             limit = int(limit)
             limit = limit if limit <= 100 else 100
@@ -332,10 +323,23 @@ class Mod(commands.Cog):
                     ),
                     color=discord.Color.green()
                 )
-            return await ctx.send(
-                embed=embed,
-                delete_after=10.0
+        await ctx.send(
+            embed=embed,
+            delete_after=10.0
+        )
+
+        embed_text = lang.log_purge["embed"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                _description=embed_text["description"].format(
+                    mod=ctx.author.mention,
+                    n_message=len(deleted_messages),
+                    channel=ctx.channel.mention
+                )
             )
+        )
 
     @commands.command(name="nuke")
     @commands.guild_only()
@@ -343,7 +347,8 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def nuke_channel(self, ctx: commands.Context):
-        text = self.client.fl(await self.client.get_lang(ctx.guild)).nuke_channel
+        lang = self.client.fl(await self.client.get_lang(ctx.guild))
+        text = lang.nuke_channel
         embed_text = text["embed"]
         embed = discord.Embed(
             title=embed_text["title"],
@@ -403,6 +408,19 @@ class Mod(commands.Cog):
             await interaction.channel.send(
                 embed=embed,
                 delete_after=10
+            )
+
+            embed_text = lang.log_purge["embed"]
+            await self.log(
+                ctx.guild,
+                embed=LogEmbed(
+                    embed_text["action"],
+                    _description=embed_text["description"].format(
+                        mod=ctx.author.mention,
+                        n_message=len(deleted_messages),
+                        channel=ctx.channel.mention
+                    )
+                )
             )
         kadaboom_button.callback = kadaboom_callback
 
@@ -538,7 +556,7 @@ class Mod(commands.Cog):
             )
         )
 
-    @commands.command(name="warnings", aliases=["infractions"])
+    @commands.command(name="warnings", aliases=["infractions", "swarn"])
     @commands.guild_only()
     @plugin_is_enabled()
     @commands.has_permissions(manage_messages=True)
@@ -891,7 +909,6 @@ class Mod(commands.Cog):
             ):
                 await db.commit()
 
-        embed_text = text["log"]
         embed_text = lang.log_unmute["embed"]
         await self.log(
             member.guild, embed=LogEmbed(
@@ -951,6 +968,21 @@ class Mod(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+        embed_text = self.client.fl(await self.client.get_lang(
+            ctx.guild)).log_on_member_remove["embed"]
+        await self.log(
+            member.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id,
+                    mod=ctx.author.mention,
+                    reason=reason
+                )
+            )
+        )
+
         try:
             embed_text = text["pm"]
             await member.send(
@@ -978,6 +1010,18 @@ class Mod(commands.Cog):
                 member = commands.MemberConverter().convert(ctx, member)
                 await member.kick()
                 kicked_members.append(member)
+                await self.log(
+                    ctx.guild,
+                    embed=LogEmbed(
+                        embed_text["action"],
+                        embed_text["description"].format(
+                            member=member.mention,
+                            member_id=member.id,
+                            mod=ctx.author.mention,
+                            reason="Multickick command."
+                        )
+                    )
+                )
             except:
                 failed_kicks.append(member)
 
@@ -1073,6 +1117,21 @@ class Mod(commands.Cog):
             icon_url=member.avatar if member.avatar else None
         )
         await ctx.send(embed=embed)
+
+        embed_text = self.client.fl(await self.client.get_lang(
+            ctx.guild)).log_on_member_ban["embed"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id,
+                    mod=ctx.author.mention,
+                    reason=reason
+                )
+            )
+        )
 
         try:
             embed_text = text["pm"]
@@ -1210,6 +1269,20 @@ class Mod(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+        embed_text = text["log"]
+        await self.log(
+            ctx.guild,
+            embed=LogEmbed(
+                embed_text["action"],
+                embed_text["description"].format(
+                    member=member.mention,
+                    member_id=member.id,
+                    mod=ctx.author.mention,
+                    reason=reason
+                )
+            )
+        )
+
     @commands.command(name="multiban", aliases=["mban"])
     @commands.guild_only()
     @plugin_is_enabled()
@@ -1223,6 +1296,18 @@ class Mod(commands.Cog):
                 member = commands.MemberConverter().convert(ctx, member)
                 await member.ban()
                 banned_members.append(member)
+                await self.log(
+                    ctx.guild,
+                    embed=LogEmbed(
+                        embed_text["action"],
+                        embed_text["description"].format(
+                            member=member.mention,
+                            member_id=member.id,
+                            mod=ctx.author.mention,
+                            reason="Multiban command."
+                        )
+                    )
+                )
             except:
                 failed_bans.append(member)
 
@@ -1335,20 +1420,6 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])
-    @commands.guild_only()
-    @plugin_is_enabled()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def get_guild_info(self, ctx: commands.Context):
-        await ctx.send("Command not available yet !")
-
-    @commands.command(name="userinfo", aliases=["memberinfo", "uinfo"])
-    @commands.guild_only()
-    @plugin_is_enabled()
-    @commands.cooldown(1, 7, commands.BucketType.user)
-    async def get_user_info(self, ctx: commands.Context, user: discord.User = None):
-        await ctx.send("Command not available yet !")
-
     @commands.command(name="roles")
     @commands.guild_only()
     @plugin_is_enabled()
@@ -1363,9 +1434,51 @@ class Mod(commands.Cog):
     async def show_permissions(self, ctx: commands.Context, member: discord.Member = None):
         await ctx.send("Command not available yet !")
 
+    @commands.command(name="normalize")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def normalize_nickname(self, ctx: commands.Context, member: discord.Member = None):
+        text = self.client.fl(await self.client.get_lang(ctx.guild)).normalize_nickname
+        if not member:
+            embed_text = text["checks"]["missing_args"]
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
+                    color=discord.Color.dark_gold()
+                )
+            )
+        nickname = unicodedata.normalize("NFKC", member.display_name).encode(
+            "ascii", "ignore").decode()
+        nickname = re.sub(r"[^a-zA-Z']+", " ", nickname)
+        if nickname == member.name:
+            embed_text = text["checks"]["already_normal"]
+            embed = discord.Embed(
+                title=embed_text["title"],
+                description=embed_text["description"].format(
+                    nickname=member.display_name),
+                color=discord.Color.red()
+            )
+            return await ctx.reply(embed=embed)
+
+        await member.edit(nick=nickname or "Bad Username")
+        embed_text = text["embed"]
+        embed = discord.Embed(
+            description=embed_text["description"].format(
+                member=member.mention),
+            color=discord.Color.green()
+        )
+        embed.set_author(
+            name=embed_text["title"],
+            icon_url=ctx.author.avatar if ctx.author.avatar else None
+        )
+        await ctx.reply(embed=embed)
+
 
 class LogEmbed(discord.Embed):
     def __init__(self, action, _description, _datetime=datetime.datetime.utcnow()):
         super().__init__(title=f"📝 Logs | {action}", description=_description)
-        super().set_footer(
-            text=f"Shibbot v{__version__} • {relative_timestamp(_datetime)}")
+        self.set_footer(
+            text=f"Shibbot v{__version__}")
+        self.timestamp = datetime.datetime.utcnow()

@@ -1,3 +1,5 @@
+import asyncio
+
 import orjson
 import discord
 from discord.ext import commands
@@ -13,6 +15,16 @@ def setup(client):
 class Admin(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
+
+    @commands.command()
+    async def dm_clear(self, ctx: commands.Context):
+        messages = []
+        async for message in ctx.channel.history(limit=None):
+            if message.author == self.client.user:
+                messages.append(message)
+        tasks = [message.delete() for message in messages]
+        await asyncio.gather(*tasks)
+        await ctx.send("Done !")
 
     @commands.command()
     @commands.is_owner()

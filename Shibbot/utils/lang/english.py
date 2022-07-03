@@ -102,7 +102,10 @@ class English:
 - `ping`: Shows Shibbot's ping
 - `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server)
 - `lang` : Changes the language
-- `prefix [prefix]` : For a custom prefix on this server"""
+- `prefix [prefix]` : For a custom prefix on this server
+- `uinfo [user]` : Shows some infos about the specified user
+- `serverinfo` : Shows some info about the server you are currently in
+"""
                     }
                 ]
             },
@@ -112,10 +115,9 @@ class English:
                     {
                         "name": "Classic commands",
                         "value": """
-- `logs [channel]`
+- `logs [channel]` : Defines or changes the logs channel for moderation
 - `clear [amount] <user>` : Clears up to 100 messages in a channel
 - `warn [member] <reason>` : Warns a member
-- `warnings [user]` : Shows the last warnings of an user
 - `clearwarns [user]` : Clears all the warnings of an user
 - `mute [member] <reason>` : Mutes a member
 - `unmute [member] <reason>` : Unmutes a member
@@ -133,6 +135,7 @@ class English:
                     {
                         "name": "Specific/advanced commands",
                         "value": """
+- `normalize [member]` : Cleans a member's nickname into normal characters
 - `nuke` : KADABOOMs a maximum 1000 messages in a channel
 - `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invite the user back
 - `multikick [members separated by a space]` : Kicks multiple members in one command
@@ -141,10 +144,10 @@ class English:
                     {
                         "name": "Info commands",
                         "value": """
+- `warnings [user]` : Shows the warnings of an user
 ⚠ - `perms [member]` : Shows all the permissions of a member
 ⚠ - `roles [member]` : Shows all the roles of a member
-⚠ - `uinfo [user]` : Shows some infos about the specified user
-⚠ - `serverinfo` : Shows some info about the server you are currently in"""
+"""
                     }
                 ]
             },
@@ -420,7 +423,7 @@ class English:
                 },
                 "length_exceeded": {
                     "title": "Oops...",
-                    "description": "The prefix must have less than 8 caracters !"
+                    "description": "The prefix must have less than 8 characters !"
 
                 }
             },
@@ -483,6 +486,12 @@ class English:
                 "description": "{member} (id : `{member_id}`) has been unmuted."
             }
         }
+        self.log_purge = {
+            "embed": {
+                "action": "Purge",
+                "description": "{mod} purged {n_message} messages in {channel}."
+            },
+        }
         self.clear_messages = {
             "checks": {
                 "missing_args": {
@@ -498,7 +507,6 @@ class English:
             "channel_clear": {
                 "title": "Done !",
                 "description": "Removed `{n_messages}` messages in this channel."
-
             }
         }
         self.nuke_channel = {
@@ -715,6 +723,10 @@ class English:
             "embed": {
                 "title": "Tempbanned !",
                 "description": "{member} has been softbanned.\nReason : {reason}"
+            },
+            "log": {
+                "action": "Softban",
+                "description": "{member} (id : `{member_id}`) has been softbanned by {mod}.\nReason : {reason}."
             }
         }
         self.ban_members = {
@@ -750,5 +762,66 @@ class English:
             },
             "pm": {
                 "description": "You've been unbanned from **{guild}**."
+            }
+        }
+        self.normalize_nickname = {
+            "checks": {
+                "missing_args": {
+                    "description": "Gimme a member with a nickname to normalize.\nUsage : `normalize [member]`."
+                },
+                "already_normal": {
+                    "title": "Hm.",
+                    "description": "`{nickname}` seems normal for me, nothing changed."
+                }
+            },
+            "embed": {
+                "title": "Normalized !",
+                "description": "I cleaned {member} nickname."
+            }
+        }
+
+        # misc.py cog
+        self.get_guild_info = {
+            "loading_embed": {
+                "description": "Fetching..."
+            },
+            "embed": {
+                "title": "Server Info",
+                "description": "Some information about **{guild}** :",
+                "fields": [
+                    {
+                        "name": "__Main information__",
+                        "value": "**🔍 Name :** `{guild_name}`\n**🆔 ID :** `{guild_id}`\n**⏲ Created on :** {date_creation_date} ({relative_creation_date})\n**💥 Owner :** {owner} (id : `{owner_id}`)\n**💎 Boost tier :** `{premium_tier}` (with `{premium_sub_tier} boosts`)\n**🔐 Verification level :** `{verification_level}`"
+                    },
+                    {
+                        "name": "__Statistics__",
+                        "value": "**:busts_in_silhouette: Member count :** `{member_count} members`\n**- 🧔 Hoomans :** `{humain_count} ({humain_count_percent}%)`\n**- 🤖 Bots :** `{bot_count} ({bot_count_percent}%)`\n**📚 Total channels :** `{channel_count}`\n**- 🗃 Categories :** `{category_count}`\n**- 💬 Text :** `{text_count} ({text_count_percent}%)`\n**- 🔊 Voice :** `{voice_count} ({voice_count_percent}%)`"
+                    },
+                    {
+                        "name": "__Roles__"
+                    },
+                    {
+                        "name": "__Emojis__",
+                        "value": "(。_。) No emoji found."
+                    }
+                ]
+            }
+        }
+        self.get_user_info = {
+            "loading_embed": {
+                "description": "Searching..."
+            },
+            "embed": {
+                "title": "User info",
+                "fields": [
+                    {
+                        "name": "__Main information__",
+                        "value": "**#️⃣ Username and tag :** `{user}`\n**🆔 ID :** `{user_id}`\n**⏲ Account created on :** {date_creation_date} ({relative_creation_date})\n**🤖 Is a bot :** `{is_bot}`\n**:busts_in_silhouette: Servers in common :** `{common_serv}`"
+                    },
+                    {
+                        "name": "__Member related info__",
+                        "value": "**🎭 Nickname :** `{nickname}`\n**🚪Joined the server on :** {joined_at} ({relative_joined_at})\n**🎨 Activity :** `{activity}`\n**Status :** `{status}`\n**Top role :** {top_role}"
+                    }
+                ]
             }
         }

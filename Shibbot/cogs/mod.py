@@ -879,7 +879,7 @@ class Mod(commands.Cog):
 
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
-        if not mute_role in member.roles:
+        if mute_role not in member.roles:
             embed_text = text["checks"]["not_muted"]
             return await ctx.send(
                 embed=discord.Embed(

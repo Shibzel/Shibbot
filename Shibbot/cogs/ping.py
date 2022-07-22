@@ -17,7 +17,6 @@ class Ping(commands.Cog):
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def ping(self, ctx: commands.Context):
         """Checks if the bot is alive."""
-        # try:
         text = self.client.fl(await self.client.get_lang(ctx.guild)).ping
         embed_text = text["embed"]
         embed = discord.Embed(
@@ -38,5 +37,3 @@ class Ping(commands.Cog):
                 )
             )
         )
-        # except:
-        #     await ctx.send(f"It seems that I'm encountering problems, ping : {round(self.client.latency*1000, 2)}ms.\nStatus : https://stats.uptimerobot.com/lmJ8oH1MgK")

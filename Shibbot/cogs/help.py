@@ -1,6 +1,7 @@
 from platform import python_version
+import asyncio
 
-import requests
+import aiohttp
 import discord
 from discord.ext import commands, bridge
 import psutil
@@ -16,14 +17,20 @@ class Help(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
 
-        self.location = None
-        try:
-            result = requests.get(
-                "http://ip-api.com/json/?fields=country,city")
-            json_result = result.json()
-            self.location = f"{json_result['city']}, {json_result['country']}"
-        except:
-            pass
+        self.location = "Unknown"
+        self.client.loop(self.get_location())
+
+    async def get_location(self):
+        session = aiohttp.ClientSession()
+        while True:
+            try:
+                result = await session.get(
+                    "http://ip-api.com/json/?fields=country,city")
+                json_result = result.json()
+                self.location = f"{json_result['city']}, {json_result['country']}"
+                break
+            except:
+                await asyncio.sleep(40)
 
     @commands.command(name="invite", aliases=["support", "botinvite"])
     @commands.cooldown(1, 7, commands.BucketType.member)

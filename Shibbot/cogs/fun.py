@@ -81,7 +81,6 @@ class Fun(commands.Cog):
 
     @tasks.loop(hours=12)
     async def update_reddit_memes(self):
-        # For some reason this func uses A LOT of memory, (~60Mo -> ~300Mo of RAM). To prevent memory outage it must be fixed.
         memes_subs = ("memes", "meme", "History_memes", "HolUp", "dankmemes", "Memes_Of_The_Dank", "ProgrammerHumor", "shitposting",
                       "GenZMemes", "funny", "cursedmemes", "MemesIRL", "pcmemes", "holup", "blursedimages", "AdviceAnimals", "okbuddyretard")
         nsfw_memes_subs = ("hentaimemes", "NSFWMemes", "Offensivejokes",
@@ -128,7 +127,7 @@ class Fun(commands.Cog):
     @plugin_is_enabled()
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def piss(self, ctx: commands.Context):
-        await ctx.reply("*piss*")
+        await ctx.reply("*piss*")  # Very mature
 
     @commands.command(name="randomnumber", aliases=["randnum", "randint", "randnumber", "randomnum"])
     @plugin_is_enabled()
@@ -192,7 +191,7 @@ class Fun(commands.Cog):
 
             return embed
 
-        random.shuffle(urls)
+        urls = random.sample(urls, len(urls))
 
         button_text = text["buttons"]
         next_button = discord.ui.Button(
@@ -258,7 +257,7 @@ class Fun(commands.Cog):
 
             return embed
 
-        random.shuffle(dicts)
+        dicts = random.sample(dicts, len(dicts))
 
         button_text = text["buttons"]
         next_button = discord.ui.Button(

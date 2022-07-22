@@ -1,4 +1,5 @@
 import asyncio
+import gc
 
 import orjson
 import discord
@@ -30,6 +31,12 @@ class Admin(commands.Cog):
     @commands.is_owner()
     async def owner(self, ctx):
         await ctx.reply(f"Hey <@!{self.client.owner_id}>, I know you ! You wrote my code !")
+
+    @commands.command()
+    @commands.is_owner()
+    async def gc(self, ctx):
+        gc.collect()
+        await ctx.send("Done !")
 
     @commands.command()
     @commands.is_owner()

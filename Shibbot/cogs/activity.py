@@ -12,6 +12,9 @@ def setup(client):
 
 
 class ChangeActivity(commands.Cog):
+    """Loops the bot's activity every x seconds.
+    This is separated from the rest so we don't have to reload an entire cog just to change the list of possible activities."""
+
     def __init__(self, client):
         self.client: Shibbot = client
         self.activity_is_looping = False
@@ -31,7 +34,7 @@ class ChangeActivity(commands.Cog):
                 name=random.choice(
                     (f"the version v{self.client.version}",  # self.client.website_url,
                         f"over {len(self.client.guilds)} servers", f"over {len(self.client.users)} users",
-                        "/help", "shiBbot is bacc !11§!!")
+                        "/help", "shiBbot is bacc !11§!!", "new features coming",)
                 )
             )
         else:
@@ -41,7 +44,7 @@ class ChangeActivity(commands.Cog):
                         type=discord.ActivityType.watching,
                         name=random.choice(
                             ("after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama",
-                                "inside your soul", "to but rare fish", "mee6.xyz, nah i'm joking, i hope i had a website tho",
+                                "inside your soul", "to buy rare fish", "mee6.xyz, nah i'm joking, i hope i had a website tho",
                                 "hentai", "your brain cells go")
                         )
                     ),
@@ -49,13 +52,14 @@ class ChangeActivity(commands.Cog):
                         type=discord.ActivityType.listening,
                         name=random.choice(
                             ("Jetpack Joyride Main Theme", "Kahoot Lobby Music",
-                                "goofy ahh sound - goofy ahh dj", "Rick Astley - Never Gonna Give You Up", "wenomechainsama")
+                             "Never Gonna Give You Up", "wenomechainsama", "some edm shit")
                         )
                     ),
                     discord.Game(
                         name=random.choice(
                             ("Sea of Shibbs", f"Five Nights at Doggo's {random.randint(1, 5)}", "Fortinaiti ila Babaji ?", "Amogus ඞ",
-                             "ROBLOSS", "Shibapunk 2077", "HEE HEE HE HA", "Minecraft 2.0", "Shiba Horizon 5", "Portel 2")
+                             "ROBLOSS", "Shibapunk 2077", "HEE HEE HE HA", "Minecraft 2.0", "Shiba Horizon 5", "Portel 2", "Underpants",
+                             "Genshit Impact", "Absolutely accurate battle simulator")
                         )
                     )
                 )

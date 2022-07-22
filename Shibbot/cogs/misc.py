@@ -31,7 +31,6 @@ class Misc(commands.Cog):
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
             icon_url=ctx.author.avatar if ctx.author.avatar else None
         )
-        embed.timestamp = datetime.datetime.utcnow()
         await ctx.reply(embed=embed)
 
     @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])

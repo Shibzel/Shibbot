@@ -31,17 +31,7 @@ class BotEvents(commands.Cog):
             else:
                 return
 
-        async with self.client.aiodb() as db:
-            async with db.execute(
-                "SELECT prefix FROM guilds WHERE guild_id=?",
-                (guild.id,)
-            ) as cursor:
-                prefix = await cursor.fetchone()
-            if prefix:
-                prefix = prefix[0]
-            else:
-                prefix = self.client.default_prefix
-
+        prefix = self.client._get_prefix(guild)
         embed = discord.Embed(
             title="Wow !",
             color=discord.Color.dark_gold()

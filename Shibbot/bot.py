@@ -1,39 +1,48 @@
 """
 ---------------------------
-Shibbot's launcher file. 
+Shibbot's core file.
 # Please read the "about this repository" part in README.md before doing or copying anything in this code.
+
+License: MIT, see LICENSE for more details.
 ---------------------------"""
+
+__title__ = "Shibbot"
+__author__ = "JeanTheShiba"
+__version__ = "0.3"
+__license__ = "MIT"
+__copyright__ = "Copyright (c) 2022 JeanTheShiba"
 
 import datetime
 import sqlite3
 import os as sus  # When the import is sus ඞ
 
 import aiosqlite
+# The Pycord module, our (maintained) API wrapper for this bot.
+# There is some differences with discord.py, if you're not familiar with this fork see the documentation at https://docs.pycord.dev/
 import discord
 from discord.ext import commands
 
 import utils
 from utils import Reddit, fl
 
-__author__ = "JeanTheShiba"
-__version__ = "0.3"
 
-
-async def get_prefix(client, ctx):
+async def get_prefix(client, has_guild):
     """Gets the prefix of a server."""
     try:
-        if ctx.guild:
+        guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(
+            has_guild, "guild", None)
+        if guild:
             async with client.aiodb() as db:
                 async with db.execute(
                     "SELECT prefix FROM guilds WHERE guild_id=?",
-                    (ctx.guild.id,)
+                    (guild.id,)
                 ) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
                 return prefix[0]
-        raise Exception
     except:
-        return client.default_prefix
+        pass
+    return client.default_prefix
 
 
 class Shibbot(commands.Bot):
@@ -58,20 +67,17 @@ class Shibbot(commands.Bot):
         self.default_language = "en"
         self.invite_bot_url = None
         self.token = self.discord_conf["release"] if not test_mode else self.discord_conf["snapshot"]
-        self.bot_is_alive = None
+        self.bot_is_alive = None  # None means not initialized yet
         super().__init__(
             command_prefix=get_prefix,
             owner_id=380044496370532353,  # It's me :O
-            allowed_mentions=discord.AllowedMentions(
-                roles=False,
-                users=True,
-                everyone=False,
-                replied_user=False
-            ),
+            # Being mentionned by a bot is very annoying, that's why all is set to None.
+            allowed_mentions=discord.AllowedMentions.none(),
             intents=discord.Intents.all(),
             case_insensitive=True,
             activity=discord.Streaming(
                 name="connecting...",
+                # Don't put this link on your browser, there's no need.
                 url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
             ),
             *args, **kwargs
@@ -89,6 +95,9 @@ class Shibbot(commands.Bot):
         )
 
         self.db_path = "database.sqlite"
+        # Why using an SQLite database ?
+        # Since the the bot is in developpement it is a lot more easier to use a file as a database because it is portable.
+        # If the bot gets more popular maybe i'll change for a MySQL or Postgres db
 
         def aiosqlite_conn() -> aiosqlite.Connection:
             # aioSQLite for asynchronous stuff
@@ -129,8 +138,8 @@ class Shibbot(commands.Bot):
                     await db.commit()
         return data
 
-    def _get_prefix(self, ctx: commands.Context):
-        return get_prefix(self, ctx)
+    def _get_prefix(self, has_guild):
+        return get_prefix(self, has_guild)
 
     async def get_lang(self, guild: discord.Guild):
         """Gets the langage of a server."""
@@ -146,7 +155,8 @@ class Shibbot(commands.Bot):
                     return lang[0]
             raise Exception
         except:
-            return self.default_language
+            pass
+        return self.default_language
 
     async def on_guild_join(self, guild: discord.Guild):
         """Triggered when the bot joins a guild"""
@@ -157,7 +167,7 @@ class Shibbot(commands.Bot):
         print(f"- Left {guild.name} ({guild.id})")
 
     async def on_ready(self):
-        """Runs when the bot has successfully connected to Discord API"""
+        """Runs when the bot has successfully connected to Discord API."""
         print(
             f"   ----------------------------\n[+] Ready. \n[-] Connected as : {super().user}\n[-] Id : {super().user.id}")
         if self.bot_is_alive is None:
@@ -169,7 +179,6 @@ class Shibbot(commands.Bot):
         self.bot_is_alive = True
 
     async def on_disconnect(self):
-        """Says when the bot is disconnected."""
         if self.bot_is_alive != False:
             print("[x] Bot disconnected.")
             self.bot_is_alive = False
@@ -183,18 +192,3 @@ class Shibbot(commands.Bot):
         except Exception as e:
             self.db.close()
             print(f"[-] Program finished : ({type(e).__name__}: {e})")
-
-
-def start():
-    """Starts the bot with a beautiful ASCII art."""
-    print(
-        f" ________________________________\n|░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░|\n|░░░█▀▀░█░█░▀█▀░█▀▄░█▀▄░█▀█░▀█▀░░|\n"
-        f"|░░░▀▀█░█▀█░░█░░█▀▄░█▀▄░█░█░░█░░░|\n|░░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░▀░░░|\n"
-        f"|░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░|\n --------------------------------\n   ----------------------------\n[-] "
-        f"Version : {__version__}")
-    shibbot = Shibbot(test_mode=True)
-    shibbot.run()
-
-
-if __name__ == "__main__":
-    start()

@@ -9,13 +9,13 @@ from discord.ext import commands
 from bot import Shibbot, __version__
 from utils import ArgToDuration, EmbedViewer
 
-
 client = None
 
 
 def setup(_client):
     global client
     client = _client
+
     client.add_cog(Mod(client))
 
 
@@ -23,10 +23,7 @@ def plugin_is_enabled():
     async def predicate(ctx):
         if ctx.guild:
             async with client.aiodb() as db:
-                async with db.execute(
-                    f"SELECT enabled FROM mod_plugin WHERE guild_id=?",
-                    (ctx.guild.id,)
-                ) as cursor:
+                async with db.execute(f"SELECT enabled FROM mod_plugin WHERE guild_id=?", (ctx.guild.id,)) as cursor:
                     enabled = await cursor.fetchone()
             if enabled:
                 enabled = enabled[0]
@@ -53,10 +50,7 @@ class Mod(commands.Cog):
 
     async def log(self, guild: discord.Guild, embed: discord.Embed):
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "SELECT logs_channel FROM mod_plugin WHERE guild_id=?",
-                (guild.id,)
-            ) as cursor:
+            async with db.execute("SELECT logs_channel FROM mod_plugin WHERE guild_id=?", (guild.id,)) as cursor:
                 logs_channel_id = await cursor.fetchone()
         if not logs_channel_id:
             return
@@ -75,10 +69,7 @@ class Mod(commands.Cog):
         guild: discord.Guild = self.client.get_guild(guild_id)
         async with self.client.aiodb() as db:
             if not guild:
-                async with db.execute(
-                    f"DELETE FROM sanctions WHERE guild_id=?",
-                    (guild_id,)
-                ):
+                async with db.execute(f"DELETE FROM sanctions WHERE guild_id=?", (guild_id,)):
                     return await db.commit()
 
             match type:
@@ -97,10 +88,7 @@ class Mod(commands.Cog):
                                 embed_text["action"],
                                 embed_text["description"].format(
                                     member=member.mention,
-                                    member_id=member.id
-                                )
-                            )
-                        )
+                                    member_id=member.id)))
                 case "tempban":
                     user = await self.client.get_or_fetch_user(user_id)
                     if user:
@@ -109,10 +97,8 @@ class Mod(commands.Cog):
                         except:
                             pass
 
-            async with db.execute(
-                f"DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=? AND duration=?",
-                (guild_id, user_id, type, duration,)
-            ):  # Would be easier if the sanction had an id :/
+            # Would be easier if the sanction had an id :/
+            async with db.execute(f"DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=? AND duration=?", (guild_id, user_id, type, duration,)):
                 await db.commit()
 
     async def resume_sanctions(self):
@@ -126,9 +112,7 @@ class Mod(commands.Cog):
                 self.add_temp_sanction(
                     *sanction[0:len(sanction)-1],
                     duration=datetime.datetime.strptime(
-                        sanction[3], "%Y-%m-%d %H:%M:%S.%f"
-                    )
-                ) for sanction in all_sanctions
+                        sanction[3], "%Y-%m-%d %H:%M:%S.%f")) for sanction in all_sanctions
             ]
             print(
                 f"[+] Resuming tempmute and tempban sanctions ({len(tasks)} ones).")
@@ -146,15 +130,10 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "UPDATE mod_plugin SET logs_channel=? WHERE guild_id=?",
-                (channel.id, ctx.guild.id,)
-            ):
+            async with db.execute("UPDATE mod_plugin SET logs_channel=? WHERE guild_id=?", (channel.id, ctx.guild.id,)):
                 await db.commit()
         embed_text = text["embed"]
         await ctx.reply(
@@ -162,9 +141,7 @@ class Mod(commands.Cog):
                 title=embed_text["title"],
                 description=f"<a:verified:836312937332867072> " +
                 embed_text["description"].format(channel=channel.mention),
-                color=discord.Color.green()
-            )
-        )
+                color=discord.Color.green()))
 
     @commands.Cog.listener()
     @plugin_is_enabled()
@@ -172,9 +149,8 @@ class Mod(commands.Cog):
         await asyncio.sleep(0.5)
         found_entry = None
         async for entry in member.guild.audit_logs(
-            action=discord.AuditLogAction.kick,
-            limit=50
-        ):
+                action=discord.AuditLogAction.kick,
+                limit=50):
             if entry.target.id == member.id:
                 found_entry = entry
                 break
@@ -191,11 +167,8 @@ class Mod(commands.Cog):
                         member=member.mention,
                         member_id=member.id,
                         mod=found_entry.user.mention,
-                        reason=found_entry.reason
-                    ),
-                    found_entry.created_at
-                )
-            )
+                        reason=found_entry.reason),
+                    found_entry.created_at))
 
     @commands.Cog.listener()
     @plugin_is_enabled()
@@ -203,9 +176,8 @@ class Mod(commands.Cog):
         await asyncio.sleep(0.5)
         found_entry = None
         async for entry in guild.audit_logs(
-            action=discord.AuditLogAction.ban,
-            limit=50
-        ):
+                action=discord.AuditLogAction.ban,
+                limit=50):
             if entry.target.id == user.id:
                 found_entry = entry
                 break
@@ -222,11 +194,8 @@ class Mod(commands.Cog):
                         member=user.mention,
                         member_id=user.id,
                         mod=found_entry.user.mention,
-                        reason=found_entry.reason
-                    ),
-                    found_entry.created_at
-                )
-            )
+                        reason=found_entry.reason),
+                    found_entry.created_at))
 
     @commands.Cog.listener()
     @plugin_is_enabled()
@@ -234,9 +203,8 @@ class Mod(commands.Cog):
         await asyncio.sleep(0.5)
         found_entry = None
         async for entry in guild.audit_logs(
-            action=discord.AuditLogAction.unban,
-            limit=50
-        ):
+                action=discord.AuditLogAction.unban,
+                limit=50):
             if entry.target.id == user.id:
                 found_entry = entry
                 break
@@ -249,18 +217,14 @@ class Mod(commands.Cog):
                     embed_text["action"],
                     embed_text["description"].format(
                         member=user.mention,
-                        member_id=user.id
-                    ),
-                    found_entry.created_at
-                )
-            )
+                        member_id=user.id),
+                    found_entry.created_at))
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
         self.client.cursor.execute(
             f"DELETE FROM sanctions WHERE guild_id=?",
-            (guild.id,)
-        )
+            (guild.id,))
         self.client.db.commit()
 
     @commands.command(name="clear", aliases=["purge"])
@@ -281,9 +245,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.red()
-                )
-            )
+                    color=discord.Color.red()))
 
         async with ctx.typing():
             if member:
@@ -301,14 +263,11 @@ class Mod(commands.Cog):
                 embed = discord.Embed(
                     description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
                         n_messages=len(messages),
-                        member=member.mention
-                    ),
-                    color=discord.Color.green()
-                )
+                        member=member.mention),
+                    color=discord.Color.green())
                 embed.set_author(
                     name=embed_text["title"],
-                    icon_url=member.avatar if member.avatar else None
-                )
+                    icon_url=member.avatar if member.avatar else None)
                 if older_than_two_weeks:
                     embed.set_footer(
                         text=embed_text["footer"])
@@ -319,14 +278,11 @@ class Mod(commands.Cog):
                 embed = discord.Embed(
                     title=embed_text["title"],
                     description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
-                        n_messages=len(deleted_messages)
-                    ),
-                    color=discord.Color.green()
-                )
+                        n_messages=len(deleted_messages)),
+                    color=discord.Color.green())
         await ctx.send(
             embed=embed,
-            delete_after=10.0
-        )
+            delete_after=10.0)
 
         embed_text = lang.log_purge["embed"]
         await self.log(
@@ -336,10 +292,7 @@ class Mod(commands.Cog):
                 _description=embed_text["description"].format(
                     mod=ctx.author.mention,
                     n_message=len(deleted_messages),
-                    channel=ctx.channel.mention
-                )
-            )
-        )
+                    channel=ctx.channel.mention)))
 
     @commands.command(name="nuke")
     @commands.guild_only()
@@ -353,17 +306,14 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             title=embed_text["title"],
             description=embed_text["description"],
-            color=discord.Color.red()
-        )
+            color=discord.Color.red())
         buttons_text = text["buttons"]
         no_button = discord.ui.Button(
             label=buttons_text["no"],
-            style=discord.ButtonStyle.green
-        )
+            style=discord.ButtonStyle.green)
         kadaboom_button = discord.ui.Button(
             label=buttons_text["yes"],
-            style=discord.ButtonStyle.danger
-        )
+            style=discord.ButtonStyle.danger)
 
         async def go_back_callback(interaction: discord.Interaction):
             if interaction.user.id != ctx.author.id:
@@ -373,9 +323,7 @@ class Mod(commands.Cog):
             await interaction.response.edit_message(
                 view=discord.ui.View(
                     no_button,
-                    kadaboom_button
-                )
-            )
+                    kadaboom_button))
         no_button.callback = go_back_callback
 
         async def kadaboom_callback(interaction: discord.Interaction):
@@ -387,9 +335,7 @@ class Mod(commands.Cog):
                 await interaction.response.edit_message(
                     view=discord.ui.View(
                         no_button,
-                        kadaboom_button
-                    )
-                )
+                        kadaboom_button))
                 await interaction.channel.send(content="3 !")
                 await asyncio.sleep(2.0)
                 await interaction.channel.send(content="2 !")
@@ -401,14 +347,11 @@ class Mod(commands.Cog):
             embed = discord.Embed(
                 title=embed_text["title"],
                 description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
-                    n_messages=len(deleted_messages)
-                ),
-                color=discord.Color.red()
-            )
+                    n_messages=len(deleted_messages)),
+                color=discord.Color.red())
             await interaction.channel.send(
                 embed=embed,
-                delete_after=10
-            )
+                delete_after=10)
 
             embed_text = lang.log_purge["embed"]
             await self.log(
@@ -418,19 +361,14 @@ class Mod(commands.Cog):
                     _description=embed_text["description"].format(
                         mod=ctx.author.mention,
                         n_message=len(deleted_messages),
-                        channel=ctx.channel.mention
-                    )
-                )
-            )
+                        channel=ctx.channel.mention)))
         kadaboom_button.callback = kadaboom_callback
 
         await ctx.reply(
             embed=embed,
             view=discord.ui.View(
                 no_button,
-                kadaboom_button
-            )
-        )
+                kadaboom_button))
 
     @commands.command(name="warn")
     @commands.guild_only()
@@ -444,26 +382,18 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
 
         async with self.client.aiodb() as db:
 
-            async with db.execute(
-                f"SELECT * FROM warns WHERE guild_id=? AND user_id=?",
-                (ctx.guild.id, member.id,)
-            ) as cursor:
+            async with db.execute(f"SELECT * FROM warns WHERE guild_id=? AND user_id=?", (ctx.guild.id, member.id,)) as cursor:
                 warns = await cursor.fetchall()
             nb_warns = len(warns)+1 if warns else 1
 
-            async with db.execute(
-                "INSERT INTO warns (guild_id, user_id, reason, date, mod_id) VALUES (?,?,?,?,?)",
-                (ctx.guild.id, member.id, reason,
-                 datetime.datetime.utcnow(), ctx.author.id,)
-            ):
+            async with db.execute("INSERT INTO warns (guild_id, user_id, reason, date, mod_id) VALUES (?,?,?,?,?)",
+                                  (ctx.guild.id, member.id, reason, datetime.datetime.utcnow(), ctx.author.id,)):
                 await db.commit()
 
         embed_text = text["embed"]
@@ -471,14 +401,11 @@ class Mod(commands.Cog):
             description=embed_text["description"].format(
                 member=member.mention,
                 n_warns=nb_warns,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.message.delete()
         await ctx.send(embed=embed)
         embed_text = text["log"]
@@ -490,10 +417,7 @@ class Mod(commands.Cog):
                     member=member.mention,
                     member_id=member.id,
                     mod=ctx.message.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -501,11 +425,8 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     description=embed_text["description"].format(
                         guild=ctx.guild.name,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -521,26 +442,20 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 mbed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         self.client.cursor.execute(
             f"DELETE FROM warns WHERE guild_id=? AND user_id=?",
-            (ctx.guild.id, member.id,)
-        )
+            (ctx.guild.id, member.id,))
         self.client.db.commit()
         embed_text = text["embed"]
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
-                member=member.mention
-            ),
-            color=discord.Color.green()
-        )
+                member=member.mention),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.message.delete()
         await ctx.send(embed=embed)
         embed_text = text["log"]
@@ -551,10 +466,7 @@ class Mod(commands.Cog):
                 embed_text["description"].format(
                     mod=ctx.message.author.mention,
                     member=member.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
     @commands.command(name="warnings", aliases=["infractions", "swarn"])
     @commands.guild_only()
@@ -568,35 +480,26 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "SELECT * FROM warns WHERE guild_id=? AND user_id=?",
-                (ctx.guild.id, member.id,)
-            ) as cursor:
+            async with db.execute("SELECT * FROM warns WHERE guild_id=? AND user_id=?", (ctx.guild.id, member.id,)) as cursor:
                 warns = await cursor.fetchall()
 
         embed_text = text["embed"]
         embed = discord.Embed(
             description=embed_text["description"].format(
                 member=member.mention,
-                member_id=member.id
-            ),
-            color=discord.Color.dark_gold()
-        )
+                member_id=member.id),
+            color=discord.Color.dark_gold())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         if not warns:
             field_text = embed_text["fields"]["no_infra"]
             embed.add_field(
                 name="No infraction",
-                value="(⊙ˍ⊙) "+field_text["value"]
-            )
+                value="(⊙ˍ⊙) "+field_text["value"])
             await ctx.message.delete()
             await ctx.send(embed=embed)
         else:
@@ -620,40 +523,33 @@ class Mod(commands.Cog):
                         warn[3], "%Y-%m-%d %H:%M:%S.%f")
                     page_embed.add_field(
                         name=field_text["name"].format(
-                            n_warn=warns.index(warn)+1
-                        ),
+                            n_warn=warns.index(warn)+1),
                         value=field_text["value"].format(
                             reason=warn[2],
                             mod=mod.mention if mod else f"<@!{warn[4]}>",
-                            date=date_time.strftime("%d %b %Y")
-                        ),
-                        inline=False
-                    )
+                            date=date_time.strftime("%d %b %Y")),
+                        inline=False)
                 return page_embed
 
             buttons_text = embed_text["buttons"]
             previous_page_button = discord.ui.Button(
                 style=discord.ButtonStyle.blurple,
                 label=buttons_text["previous"],
-                disabled=True
-            )
+                disabled=True)
             next_page_button = discord.ui.Button(
                 style=discord.ButtonStyle.green,
                 label=buttons_text["next"],
-                disabled=True if len(sorted_warns) == 1 else False
-            )
+                disabled=True if len(sorted_warns) == 1 else False)
             warn_viewer = EmbedViewer(
                 ctx,
                 sorted_warns,
                 generate_warn_page,
                 next_page_button,
-                previous_page_button
-            )
+                previous_page_button)
             await ctx.message.delete()
             await ctx.send(
                 embed=warn_viewer.get_first_page(),
-                view=warn_viewer
-            )
+                view=warn_viewer)
 
     async def get_mute_role(self, guild: discord.Guild) -> discord.Role:
         """Gets the mute role of a guild."""
@@ -665,20 +561,12 @@ class Mod(commands.Cog):
                         send_messages=False,
                         speak=False,
                         connect=False,
-                        add_reactions=False
-                    )
-                )
-                async with db.execute(
-                    f"UPDATE mod_plugin SET mute_role=? WHERE guild_id=?",
-                    (new_role.id, guild.id,)
-                ):
+                        add_reactions=False))
+                async with db.execute(f"UPDATE mod_plugin SET mute_role=? WHERE guild_id=?", (new_role.id, guild.id,)):
                     await db.commit()
                 return new_role
 
-            async with db.execute(
-                "SELECT mute_role FROM mod_plugin WHERE guild_id=?",
-                (guild.id,)
-            ) as cursor:
+            async with db.execute("SELECT mute_role FROM mod_plugin WHERE guild_id=?", (guild.id,)) as cursor:
                 role_id = await cursor.fetchone()
             if not role_id:  # If a role id was never set in the db
                 new_role = await create_mute_role()
@@ -698,9 +586,7 @@ class Mod(commands.Cog):
                     send_messages=False,
                     speak=False,
                     connect=False,
-                    add_reactions=False
-                )
-            )
+                    add_reactions=False))
             for channel in ctx.guild.channels
         ]
         await asyncio.gather(*tasks)
@@ -717,9 +603,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
         await ctx.message.delete()
@@ -730,24 +614,19 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     title=embed_text["title"],
                     description="ಠ_ಠ "+embed_text["description"],
-                    color=discord.Color.red()
-                )
-            )
+                    color=discord.Color.red()))
 
-        await self.set_mute_role(ctx, mute_role)
         await member.add_roles(mute_role, reason=reason)
+        self.client.loop.create_task(self.set_mute_role(ctx, mute_role))
         embed_text = text["embed"]
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
         embed_text = text["log"]
         await self.log(
@@ -758,10 +637,7 @@ class Mod(commands.Cog):
                     member=member.mention,
                     member_id=member.id,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -769,11 +645,8 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     description=embed_text["description"].format(
                         guild=ctx.guild.name,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -789,9 +662,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
         await ctx.message.delete()
@@ -802,18 +673,13 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     title=embed_text["title"],
                     description="ಠ_ಠ "+embed_text["description"],
-                    color=discord.Color.red()
-                )
-            )
+                    color=discord.Color.red()))
 
-        await self.set_mute_role(ctx, mute_role)
         await member.add_roles(mute_role, reason=reason)
+        self.client.loop.create_task(self.set_mute_role(ctx, mute_role))
         data = (ctx.guild.id, member.id, "tempmute", duration.datetime,)
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)",
-                data
-            ):
+            async with db.execute("INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)", data):
                 await db.commit()
         self.client.loop.create_task(self.add_temp_sanction(*data))
         embed_text = text["embed"]
@@ -821,14 +687,11 @@ class Mod(commands.Cog):
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
                 duration=duration,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
         embed_text = text["log"]
         await self.log(
@@ -840,10 +703,7 @@ class Mod(commands.Cog):
                     member_id=member.id,
                     duration=duration,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -852,11 +712,8 @@ class Mod(commands.Cog):
                     description=embed_text["description"].format(
                         guild=ctx.guild.name,
                         duration=duration,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -873,9 +730,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
@@ -885,28 +740,21 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     title=embed_text["title"],
                     description="ಠ_ಠ "+embed_text["description"],
-                    color=discord.Color.red()
-                )
-            )
+                    color=discord.Color.red()))
 
         await member.remove_roles(mute_role)
         embed_text = text["embed"]
         embed = discord.Embed(
             description=embed_text["description"].format(
                 member=member.mention),
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
 
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?",
-                (ctx.guild.id, member.id, "tempmute",)
-            ):
+            async with db.execute("DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?", (ctx.guild.id, member.id, "tempmute",)):
                 await db.commit()
 
         embed_text = lang.log_unmute["embed"]
@@ -915,21 +763,15 @@ class Mod(commands.Cog):
                 embed_text["action"],
                 embed_text["description"].format(
                     member=member.mention,
-                    member_id=member.id
-                )
-            )
-        )
+                    member_id=member.id)))
 
         try:
             embed_text = text["pm"]
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
-                        guild=ctx.guild.name
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        guild=ctx.guild.name),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -946,9 +788,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
 
@@ -958,14 +798,11 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
 
         embed_text = self.client.fl(await self.client.get_lang(
@@ -978,10 +815,7 @@ class Mod(commands.Cog):
                     member=member.mention,
                     member_id=member.id,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -989,11 +823,8 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     description=embed_text["description"].format(
                         guild=ctx.guild,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -1018,10 +849,7 @@ class Mod(commands.Cog):
                             member=member.mention,
                             member_id=member.id,
                             mod=ctx.author.mention,
-                            reason="Multickick command."
-                        )
-                    )
-                )
+                            reason="Multickick command.")))
             except:
                 failed_kicks.append(member)
 
@@ -1032,9 +860,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         await ctx.message.delete()
         tasks = [kick_member(member) for member in members]
@@ -1042,8 +868,7 @@ class Mod(commands.Cog):
         embed_text = text["embed"]
         embed = discord.Embed(
             title=embed_text["title"],
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
         fields_text = embed_text["fields"]
         if kicked_members != []:
             embed.add_field(
@@ -1052,9 +877,7 @@ class Mod(commands.Cog):
                     [
                         member.mention
                         for member in kicked_members
-                    ]
-                )
-            )
+                    ]))
         if failed_kicks != []:
             embed.add_field(
                 name=fields_text[1]["name"],
@@ -1062,9 +885,7 @@ class Mod(commands.Cog):
                     [
                         member
                         for member in failed_kicks
-                    ]
-                )
-            )
+                    ]))
         await ctx.send(embed=embed)
 
         async def notify_member(member):
@@ -1073,11 +894,8 @@ class Mod(commands.Cog):
                 await member.send(
                     embed=discord.Embed(
                         description=embed_text["description"].format(
-                            guild=ctx.guild
-                        ),
-                        color=discord.Color.dark_gold()
-                    )
-                )
+                            guild=ctx.guild),
+                        color=discord.Color.dark_gold()))
             except:
                 pass
         for member in kicked_members:
@@ -1096,9 +914,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
 
@@ -1108,14 +924,11 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
 
         embed_text = self.client.fl(await self.client.get_lang(
@@ -1128,10 +941,7 @@ class Mod(commands.Cog):
                     member=member.mention,
                     member_id=member.id,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -1139,11 +949,8 @@ class Mod(commands.Cog):
                 embed=discord.Embed(
                     description=embed_text["description"].format(
                         guild=ctx.guild,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -1159,9 +966,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
 
@@ -1169,10 +974,7 @@ class Mod(commands.Cog):
         await ctx.guild.ban(member, reason=reason)
         data = (ctx.guild.id, member.id, "tempban", duration.datetime,)
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)",
-                data
-            ):
+            async with db.execute("INSERT INTO sanctions (guild_id, user_id, type, duration) VALUES (?,?,?,?)", data):
                 await db.commit()
         self.client.loop.create_task(self.add_temp_sanction(*data))
         embed_text = text["embed"]
@@ -1180,14 +982,11 @@ class Mod(commands.Cog):
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
                 duration=duration,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
         embed_text = text["log"]
         await self.log(
@@ -1199,10 +998,7 @@ class Mod(commands.Cog):
                     member_id=member.id,
                     duration=duration,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
         try:
             embed_text = text["pm"]
@@ -1211,11 +1007,8 @@ class Mod(commands.Cog):
                     description=embed_text["description"].format(
                         guild=ctx.guild.name,
                         duration=duration,
-                        reason=reason
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        reason=reason),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -1232,9 +1025,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
         if member.id == self.client.user.id:
             raise commands.BotMissingPermissions
 
@@ -1246,11 +1037,8 @@ class Mod(commands.Cog):
                     description=embed_text["description"].format(
                         guild=ctx.guild,
                         reason=reason,
-                        invite=await ctx.channel.create_invite(max_uses=1)
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        invite=await ctx.channel.create_invite(max_uses=1)),
+                    color=discord.Color.dark_gold()))
         except:
             pass
         await ctx.guild.ban(member, reason=reason)
@@ -1259,14 +1047,11 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             description="<a:verified:836312937332867072> "+embed_text["description"].format(
                 member=member.mention,
-                reason=reason
-            ),
-            color=discord.Color.green()
-        )
+                reason=reason),
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
 
         embed_text = text["log"]
@@ -1278,10 +1063,7 @@ class Mod(commands.Cog):
                     member=member.mention,
                     member_id=member.id,
                     mod=ctx.author.mention,
-                    reason=reason
-                )
-            )
-        )
+                    reason=reason)))
 
     @commands.command(name="multiban", aliases=["mban"])
     @commands.guild_only()
@@ -1304,10 +1086,7 @@ class Mod(commands.Cog):
                             member=member.mention,
                             member_id=member.id,
                             mod=ctx.author.mention,
-                            reason="Multiban command."
-                        )
-                    )
-                )
+                            reason="Multiban command.")))
             except:
                 failed_bans.append(member)
 
@@ -1318,9 +1097,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         await ctx.message.delete()
         tasks = [ban_member(member) for member in members]
@@ -1328,8 +1105,7 @@ class Mod(commands.Cog):
         embed_text = text["embed"]
         embed = discord.Embed(
             title=embed_text["title"],
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
         fields_text = embed_text["fields"]
         if banned_members != []:
             embed.add_field(
@@ -1338,9 +1114,7 @@ class Mod(commands.Cog):
                     [
                         member.mention
                         for member in banned_members
-                    ]
-                )
-            )
+                    ]))
         if failed_bans != []:
             embed.add_field(
                 name=fields_text[1]["name"],
@@ -1348,9 +1122,7 @@ class Mod(commands.Cog):
                     [
                         member
                         for member in failed_bans
-                    ]
-                )
-            )
+                    ]))
         await ctx.send(embed=embed)
 
         async def notify_member(member):
@@ -1359,11 +1131,8 @@ class Mod(commands.Cog):
                 await member.send(
                     embed=discord.Embed(
                         description=embed_text["description"].format(
-                            guild=ctx.guild
-                        ),
-                        color=discord.Color.dark_gold()
-                    )
-                )
+                            guild=ctx.guild),
+                        color=discord.Color.dark_gold()))
             except:
                 pass
         for member in banned_members:
@@ -1382,9 +1151,7 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
+                    color=discord.Color.dark_gold()))
 
         await ctx.message.delete()
         await ctx.guild.unban(member)
@@ -1392,19 +1159,14 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             description=embed_text["description"].format(
                 member=member.mention),
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=member.avatar if member.avatar else None
-        )
+            icon_url=member.avatar if member.avatar else None)
         await ctx.send(embed=embed)
 
         async with self.client.aiodb() as db:
-            async with db.execute(
-                "DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?",
-                (ctx.guild.id, member.id, "tempban",)
-            ):
+            async with db.execute("DELETE FROM sanctions WHERE guild_id=? AND user_id=? AND type=?", (ctx.guild.id, member.id, "tempban",)):
                 await db.commit()
 
         try:
@@ -1412,11 +1174,8 @@ class Mod(commands.Cog):
             await member.send(
                 embed=discord.Embed(
                     description=embed_text["description"].format(
-                        guild=ctx.guild.name
-                    ),
-                    color=discord.Color.dark_gold()
-                )
-            )
+                        guild=ctx.guild.name),
+                    color=discord.Color.dark_gold()))
         except:
             pass
 
@@ -1446,11 +1205,9 @@ class Mod(commands.Cog):
             return await ctx.reply(
                 embed=discord.Embed(
                     description="( ﾉ ﾟｰﾟ)ﾉ "+embed_text["description"],
-                    color=discord.Color.dark_gold()
-                )
-            )
-        nickname = unicodedata.normalize("NFKC", member.display_name).encode(
-            "ascii", "ignore").decode()
+                    color=discord.Color.dark_gold()))
+        nickname = unicodedata.normalize(
+            "NFKC", member.display_name).encode("ascii", "ignore").decode()
         nickname = re.sub(r"[^a-zA-Z']+", " ", nickname)
         if nickname == member.name:
             embed_text = text["checks"]["already_normal"]
@@ -1458,8 +1215,7 @@ class Mod(commands.Cog):
                 title=embed_text["title"],
                 description=embed_text["description"].format(
                     nickname=member.display_name),
-                color=discord.Color.red()
-            )
+                color=discord.Color.red())
             return await ctx.reply(embed=embed)
 
         await member.edit(nick=nickname or "Bad Username")
@@ -1467,18 +1223,15 @@ class Mod(commands.Cog):
         embed = discord.Embed(
             description=embed_text["description"].format(
                 member=member.mention),
-            color=discord.Color.green()
-        )
+            color=discord.Color.green())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=ctx.author.avatar if ctx.author.avatar else None
-        )
+            icon_url=ctx.author.avatar if ctx.author.avatar else None)
         await ctx.reply(embed=embed)
 
 
 class LogEmbed(discord.Embed):
     def __init__(self, action, _description, _datetime=datetime.datetime.utcnow()):
         super().__init__(title=f"📝 Logs | {action}", description=_description)
-        self.set_footer(
-            text=f"Shibbot v{__version__}")
-        self.timestamp = datetime.datetime.utcnow()
+        self.set_footer(text=f"Shibbot v{__version__}")
+        self.timestamp = _datetime

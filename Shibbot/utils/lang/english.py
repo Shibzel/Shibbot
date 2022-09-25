@@ -58,7 +58,7 @@ class English:
                     },
                     {
                         "name": "What's new ?",
-                        "value": "🇫🇷 French language support\nPossibility to kick or ban in one command\nNormalize a member's username with `username`\nAdded birds and cats, and thinking about capybaras next."
+                        "value": "🇫🇷 French language support\nPossibility to kick or ban multiple members in one command\nNormalize a member's username with `username`\nAdded birds and cats"
                     },
                     {
                         "name": "Get help :",

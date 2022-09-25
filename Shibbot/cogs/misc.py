@@ -24,13 +24,11 @@ class Misc(commands.Cog):
         embed = discord.Embed(
             description=embed_text["description"].format(
                 member=member.mention),
-            color=discord.Color.dark_gold()
-        )
+            color=discord.Color.dark_gold())
         embed.set_image(url=member.avatar)
         embed.set_footer(
             text=lang.DEFAULT_REQUESTED_FOOTER.format(author=ctx.author),
-            icon_url=ctx.author.avatar if ctx.author.avatar else None
-        )
+            icon_url=ctx.author.avatar if ctx.author.avatar else None)
         await ctx.reply(embed=embed)
 
     @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])
@@ -46,8 +44,7 @@ class Misc(commands.Cog):
             embed_text = text["loading_embed"]
             embed = discord.Embed(
                 description="⌛ "+embed_text["description"],
-                color=discord.Color.dark_gold()
-            )
+                color=discord.Color.dark_gold())
             message = await ctx.reply(embed=embed)
 
             embed_text = text["embed"]
@@ -69,9 +66,7 @@ class Misc(commands.Cog):
                     owner_id=guild.owner.id,
                     premium_tier=guild.premium_tier,
                     premium_sub_tier=guild.premium_subscription_count,
-                    verification_level=guild.verification_level
-                )
-            )
+                    verification_level=guild.verification_level))
 
             members = guild.members
             member_count, humain_count, bot_count = len(members), 0, 0
@@ -105,9 +100,7 @@ class Misc(commands.Cog):
                     text_count=text_count,
                     text_count_percent=round(text_count/channel_count*100, 2),
                     voice_count=voice_count,
-                    voice_count_percent=round(voice_count/channel_count*100, 2)
-                )
-            )
+                    voice_count_percent=round(voice_count/channel_count*100, 2)))
 
             roles_str = ""
             roles = guild.roles
@@ -122,8 +115,7 @@ class Misc(commands.Cog):
             embed.add_field(
                 name=fields_text[2]["name"],
                 value=roles_str,
-                inline=False
-            )
+                inline=False)
 
             emojis_str = ""
             for emoji in guild.emojis:
@@ -135,8 +127,7 @@ class Misc(commands.Cog):
                 emojis_str = _emojis_str
             embed.add_field(
                 name=fields_text[3]["name"],
-                value=emojis_str if emojis_str != "" else fields_text[3]["value"]
-            )
+                value=emojis_str if emojis_str != "" else fields_text[3]["value"])
 
         return await message.edit(embed=embed)
 
@@ -159,11 +150,9 @@ class Misc(commands.Cog):
             embed_text = text["loading_embed"]
             embed = discord.Embed(
                 description="⌛ "+embed_text["description"],
-                color=discord.Color.dark_gold()
-            )
+                color=discord.Color.dark_gold())
             message = await ctx.reply(
-                embed=embed
-            )
+                embed=embed)
 
             embed_text = text["embed"]
             embed.title = embed_text["title"]
@@ -180,9 +169,7 @@ class Misc(commands.Cog):
                     relative_creation_date=relative_timestamp(
                         user.created_at),
                     is_bot='✔' if user.bot else '❌',
-                    common_serv=len(user.mutual_guilds)
-                )
-            )
+                    common_serv=len(user.mutual_guilds)))
             if potential_member:
                 embed.add_field(
                     name=fields_text[1]["name"],
@@ -192,9 +179,7 @@ class Misc(commands.Cog):
                         relative_joined_at=relative_timestamp(user.joined_at),
                         activity=user.activity.name if user.activity else 'none',
                         status=user.status,
-                        top_role=user.top_role.mention
-                    )
-                )
+                        top_role=user.top_role.mention))
             if user.banner:
                 embed.set_image(url=user.banner.url)
         return await message.edit(embed=embed)

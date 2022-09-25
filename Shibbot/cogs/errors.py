@@ -18,13 +18,10 @@ class Error(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
                 description=text["CommandOnCooldown"]["description"].format(
-                    secs=round(error.cooldown.get_retry_after(), 2)
-                )
-            )
+                    secs=round(error.cooldown.get_retry_after(), 2)))
             return await ctx.respond(
                 embed=embed,
-                delete_after=error.cooldown.per
-            )
+                delete_after=error.cooldown.per)
         else:
             print(f"[x] Unexpected error : {type(error).__name__}: {error}")
 
@@ -36,35 +33,28 @@ class Error(commands.Cog):
 
         if isinstance(error, commands.PrivateMessageOnly):
             embed = ErrorEmbed(
-                description=text["PrivateMessageOnly"]["description"]
-            )
+                description=text["PrivateMessageOnly"]["description"])
         elif isinstance(error, commands.NoPrivateMessage):
             embed = ErrorEmbed(
-                description=text["NoPrivateMessage"]["description"]
-            )
+                description=text["NoPrivateMessage"]["description"])
         elif isinstance(error, commands.NotOwner):
             embed = ErrorEmbed(
                 description=text["NotOwner"]["description"])
-        elif isinstance(error, (commands.MemberNotFound, commands.UserNotFound)
-                        ):
+        elif isinstance(error, (commands.MemberNotFound, commands.UserNotFound)):
             embed = ErrorEmbed(
                 description=text["UserNotFound"]["description"])
         elif isinstance(error, commands.ChannelNotFound):
             embed = ErrorEmbed(
-                description=text["textChannelNotFound"]["description"]
-            )
+                description=text["textChannelNotFound"]["description"])
         if isinstance(error, commands.CommandOnCooldown):
             embed = ErrorEmbed(
                 description=text["CommandOnCooldown"]["description"].format(
-                    secs=round(error.cooldown.get_retry_after(), 2)
-                )
-            )
+                    secs=round(error.cooldown.get_retry_after(), 2)))
             time = error.cooldown.per
         elif isinstance(error, commands.NSFWChannelRequired):
             embed = ErrorEmbed(
                 description=text["NSFWChannelRequired"]["description"].format(
-                    channel=error.channel.mention)
-            )
+                    channel=error.channel.mention))
         elif isinstance(error, commands.MissingPermissions):
             embed_text = text["MissingPermissions"]
             for permission in error.missing_permissions:
@@ -75,16 +65,13 @@ class Error(commands.Cog):
                     permissions += f" {embed_text['and']} `{str_permission}`"
             embed = ErrorEmbed(
                 description=embed_text["description"].format(
-                    permissions=permissions)
-            )
+                    permissions=permissions))
         elif isinstance(error, commands.BotMissingPermissions):
             embed = ErrorEmbed(
-                description=text["BotMissingPermissions"]["description"]
-            )
+                description=text["BotMissingPermissions"]["description"])
         elif isinstance(error, commands.BadArgument):
             embed = ErrorEmbed(
-                description=text["BadArgument"]["description"]
-            )
+                description=text["BadArgument"]["description"])
         elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)):
             return
 
@@ -93,30 +80,24 @@ class Error(commands.Cog):
                 embed = discord.Embed(
                     title="Error",
                     description=f"Something went wrong :\n```{type(error).__name__}: {error}```",
-                    color=discord.Color.red()
-                )
+                    color=discord.Color.red())
             else:
                 text = text["CommandError"]
                 embed = ErrorEmbed(
-                    description=text["description"]
-                )
+                    description=text["description"])
                 embed.set_footer(
                     text=text["footer"].format(
-                        owner=self.client.get_user(self.client.owner_id)
-                    )
-                )
+                        owner=self.client.get_user(self.client.owner_id)))
 
         try:
             dismiss_button = discord.ui.Button(
                 style=discord.ButtonStyle.danger,
                 label=text["CommandError"]["dissmiss"],
-                emoji="✖"
-            )
+                emoji="✖")
 
             temp_embed = discord.Embed(
                 description="⏳",
-                color=discord.Color.red()
-            )
+                color=discord.Color.red())
             try:
                 message = await ctx.reply(embed=temp_embed)
             except:
@@ -135,8 +116,7 @@ class Error(commands.Cog):
             await message.edit(
                 embed=embed,
                 view=view,
-                delete_after=time
-            )
+                delete_after=time)
         except:
             print(f"[x] Unexpected error : {type(error).__name__}: {error}")
 

@@ -8,7 +8,7 @@ License: MIT, see LICENSE for more details.
 
 __title__ = "Shibbot"
 __author__ = "JeanTheShiba"
-__version__ = "0.3"
+__version__ = "0.3.2"
 __license__ = "MIT"
 __copyright__ = "Copyright (c) 2022 JeanTheShiba"
 
@@ -17,26 +17,23 @@ import sqlite3
 import os as sus  # When the import is sus ඞ
 
 import aiosqlite
-# The Pycord module, our (maintained) API wrapper for this bot.
-# There is some differences with discord.py, if you're not familiar with this fork see the documentation at https://docs.pycord.dev/
+# The Pycord module, an (maintained) API wrapper that we will use for this bot.
+# There is some differences with discord.py, if you're not familiar with this fork see their documentation at https://docs.pycord.dev/
 import discord
 from discord.ext import commands
 
 import utils
-from utils import Reddit, fl
+from utils import Reddit, fl, AVAILABLE_LANGUAGES
 
 
 async def get_prefix(client, has_guild):
     """Gets the prefix of a server."""
     try:
-        guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(
-            has_guild, "guild", None)
+        guild = has_guild if isinstance(
+            has_guild, discord.Guild) else getattr(has_guild, "guild", None)
         if guild:
             async with client.aiodb() as db:
-                async with db.execute(
-                    "SELECT prefix FROM guilds WHERE guild_id=?",
-                    (guild.id,)
-                ) as cursor:
+                async with db.execute("SELECT prefix FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
                 return prefix[0]
@@ -48,12 +45,7 @@ async def get_prefix(client, has_guild):
 class Shibbot(commands.Bot):
     """Subclass of `commands.Bot`, our little Shibbot :3."""
 
-    def __init__(
-        self,
-        test_mode: bool = False,
-        *args,
-        **kwargs,
-    ):
+    def __init__(self, test_mode: bool = False, *args, **kwargs,):
         self.version = __version__
         self.test_mode = test_mode
         self.config = utils.load("config.json")
@@ -80,24 +72,16 @@ class Shibbot(commands.Bot):
                 # Don't put this link on your browser, there's no need.
                 url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
             ),
-            *args, **kwargs
-        )
+            *args, **kwargs)
         super().remove_command("help")
 
         self.reddit_conf = self.config["reddit"]
-        self.reddit = Reddit(
-            loop=self.loop,
-            client_id='eHjvFtZ3cYzNbRYyxs4akA',
-            client_secret=self.reddit_conf["client_secret"],
-            user_agent='shibbot',
-            username="JeanTheShiba",
-            password=self.reddit_conf["password"],
-        )
+        self.reddit = Reddit(loop=self.loop, **self.reddit_conf)
 
         self.db_path = "database.sqlite"
-        # Why using an SQLite database ?
-        # Since the the bot is in developpement it is a lot more easier to use a file as a database because it is portable.
-        # If the bot gets more popular maybe i'll change for a MySQL or Postgres db
+        # Why using a SQLite database ?
+        # Since the the bot is in developpement it is a lot more easier to use a file as a database because it is portable and easier to use.
+        # If the bot gets more popular maybe i'll rewrite the code to bounce from SQLite to PostgreSQL or MySql
 
         def aiosqlite_conn() -> aiosqlite.Connection:
             # aioSQLite for asynchronous stuff
@@ -125,16 +109,12 @@ class Shibbot(commands.Bot):
     async def fetch_guild(self, guild: discord.Guild):
         """Used to fetch a guild's data or insert a guild into the guild's table."""
         async with self.aiodb() as db:
-            async with db.execute(
-                f"SELECT * FROM guilds WHERE guild_id=?",
-                (guild.id,)
-            ) as cursor:
+            async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                 data = await cursor.fetchone()
             if not data:
-                async with db.execute(
-                    "INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)",
-                    (guild.id, self.default_prefix, self.default_language)
-                ):
+                # lang = guild.language if guild.language in AVAILABLE_LANGUAGES.keys(
+                # ) else self.default_language
+                async with db.execute("INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)", (guild.id, self.default_prefix, self.default_language)):
                     await db.commit()
         return data
 
@@ -146,14 +126,10 @@ class Shibbot(commands.Bot):
         try:
             if guild:
                 async with self.aiodb() as db:
-                    async with db.execute(
-                        "SELECT lang FROM guilds WHERE guild_id=?",
-                        (guild.id,)
-                    ) as cursor:
+                    async with db.execute("SELECT lang FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                         lang = await cursor.fetchone()
                 if lang:
                     return lang[0]
-            raise Exception
         except:
             pass
         return self.default_language
@@ -185,10 +161,7 @@ class Shibbot(commands.Bot):
 
     def run(self):
         try:
-            super().run(
-                self.token,
-                reconnect=True
-            )
+            super().run(self.token, reconnect=True)
         except Exception as e:
             self.db.close()
             print(f"[-] Program finished : ({type(e).__name__}: {e})")

@@ -19,7 +19,7 @@ class French(English):
         self.get_invitation = {
             "embed": {
                 "title": "Invitation",
-                "description": "Utilisez les bouttons ci-dessous pour vous y rendre. Merci si vous invitez Shibbot !",
+                "description": "Utilisez les boutons ci-dessous pour vous y rendre. Merci si vous invitez Shibbot !",
                 "footer": "Image de Shiba appréciant les fonctionnalités de Shibbot. | Shibbot • v{version}",
             },
             "buttons": {
@@ -33,7 +33,7 @@ class French(English):
                 "fields": [
                     {
                         "name": "Description",
-                        "value": "Shibbot est un bot multifonction présent sur `{n_servers}` serveurs et écrit en Python par JeanLeShiba ([dsc.bio](https://dsc.bio/jls), [github](https://github.com/JeanLeShiba)). Le but est de proposer un bot drôle et fun avec de nombreuses fonctionnalités pour les personnes qui gèrent un serveur et les membres eux-mêmes avec des plugins de modération, des utilitaires, du divertissement... Le projet est toujours en beta donc si vous rencontrez des problèmes contactez le propriétaire en mp ou via le serveur de support."
+                        "value": "Shibbot est un bot multifonction présent sur `{n_servers}` serveurs et écrit en Python par JeanLeShiba ([dsc.bio](https://dsc.bio/jls), [github](https://github.com/JeanLeShiba)). Le but est de proposer un bot cool et fun avec de nombreuses fonctionnalités pour les personnes qui gèrent un serveur et les membres eux-mêmes avec des plugins de modération, des utilitaires, du divertissement... Le projet est toujours en bêta donc si vous rencontrez des problèmes contactez le propriétaire en mp ou via le serveur de support."
                     },
                     {
                         "name": "Specs",
@@ -41,7 +41,7 @@ class French(English):
                     },
                     {
                         "name": "Supportez le projet",
-                        "value": "Tout ceci a été réalisé bénévelement sans but de se faire de l'argent donc pour continuer à faire vivre le projet considérez faire [un don Paypal]({donation_link}) (merci). Dans le cas où vous voudriez contribuer en trouvant des bugs ou améliorer le code, rendez-vous sur [la page Github](https://github.com/JeanLeShiba/Shibbot) ou contactez moi par l'un des moyens cités ci-dessus."
+                        "value": "Tout ceci a été réalisé bénévolement sans but de se faire de l'argent, donc pour continuer à faire vivre le projet, considérez faire [un don Paypal]({donation_link}) (merci). Dans le cas où vous voudriez contribuer en trouvant des bugs ou améliorer le code, rendez-vous sur [la page Github](https://github.com/JeanLeShiba/Shibbot) ou contactez moi par l'un des moyens cités ci-dessus."
                     }
                 ]
             }
@@ -52,132 +52,132 @@ class French(English):
                 "description": "**Salut 👋 ! Je suis Shibbot**, un bot capable de faire des choses comme de la modération, des recherches sur Wikipédia, envoyer des memes, etc... Vous souhaitez en apprendre plus sur moi ? Utilisez `botinfo`, wow.",
                 "fields": [
                     {
-                        "name": "Commands to get started :",
-                        "value": "- `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server).\n- `lang` : Changes the language.\n- `prefix` : For a custom prefix on this server."
+                        "name": "Commandes :",
+                        "value": "- `plugins` : Pour activer ou désactiver les plugins du bot (utiliser si le bot est là pour la première fois sur le serveur).\n- `lang` : Change la langue.\n- `prefix` : Pour définir un préfixe personnalisé sur ce serveur."
                     },
                     {
-                        "name": "What's new ?",
-                        "value": "🇫🇷 French language support\nPossibility to kick or ban in one command\nNormalize a member's username with `username`\nAdded birds and cats, and thinking about capybaras next."
+                        "name": "Quoi de neuf ?",
+                        "value": "🇫🇷 Support en Français\nPossibilité de kick/ban en une commande\nNormaliser le pseudo d'un membre avec `username`\nChats et Oiseaux ajoutés, Les Capybaras seront peut être ajoutés par la suite."
                     },
                     {
-                        "name": "Get help :",
-                        "value": "The current prefix is `{prefix}`. To get the list of my commands on a category, click on the bar bellow and select one of the options to jump in ⬇."
+                        "name": "Obtenir de l'aide :",
+                        "value": "Le préfixe actuel est `{prefix}`. Pour obtenir la liste des commandes d'une catégorie, cliquez sur la barre si dessous puis sur une des options pour commencer ⬇."
                     }
                 ],
-                "footer": "Shibbot v{version} | Legend: []: required • <> : optional • ⚠ Not available/working yet"
+                "footer": "Shibbot v{version} | Légende: []: requis • <> : optionel • ⚠ Indisponible / Ne marche pas encore"
             },
             "select": {
-                "placeholder": "Select a category here :",
+                "placeholder": "Sélectionner une catégorie ici :",
                 "info": {
-                    "label": "Bot's commands",
-                    "description": "Learn more about the bot and configure it on your server."
+                    "label": "Commandes du bot",
+                    "description": "Apprenez en plus sur Shibbot et configurez le sur votre serveur"
                 },
                 "mod": {
-                    "label": "Moderation",
-                    "description": "Allows you to moderate your members with both basic and advanced functions."
+                    "label": "Modération",
+                    "description": "Vous permet de modérer votre serveur et ses utilisateurs."
                 },
                 "fun": {
-                    "label": "Entertainement",
-                    "description": "Fun commands. Yay."
+                    "label": "Amusements",
+                    "description": "Commandes amusantes. Yay :D"
                 },
                 "tools": {
-                    "label": "Tools",
-                    "description": "Useful tools to use directly in a channel."
+                    "label": "Outils",
+                    "description": "Outils utiles à utiliser directement dans un salon."
                 },
             },
             "buttons": {
-                "invite": "Invite me!",
-                "support": "Support Server",
-                "donate": "Donate"
+                "invite": "Invitez-moi !",
+                "support": "Serveur de Support",
+                "donate": "Faire un don"
             },
             "info": {
-                "description": "**Info & Config :** Learn more about the bot and configure it on your server.",
+                "description": "**Infos & Configuration :** Apprenez en plus sur Shibbot et configurez le sur votre serveur.",
                 "fields": [
                     {
                         "name": "Commands",
                         "value": """
-- `help`: Shows this command
-- `invite`: Gives a link to invite the bot to your own server or to join the bot's server
-- `ping`: Shows Shibbot's ping
-- `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on this server)
-- `lang` : Changes the language
-- `prefix [prefix]` : For a custom prefix on this server
-- `avatar <user>` : Shows the avatar of an user
-- `uinfo [user]` : Shows some infos about the specified user
-- `serverinfo` : Shows some info about the server you are currently in
+- `help`: Montre cette page
+- `invite`: Envoie un lien d'invitation du bot pour l'inviter sur votre serveur ou accéder au serveur de support
+- `ping`: Montre le ping de Shibbot
+- `plugins` : Pour activer ou désactiver les plugins du bot sur ce serveur (à utiliser si le bot vient de rejoindre pour la première fois)
+- `lang` : Change la langue du bot
+- `prefix [prefix]` : Pour définir un préfixe personnalisé sur ce serveur
+- `avatar <user>` : Montre l'avatar d'un utilisateur
+- `uinfo [user]` : Montre des informations sur l'utilisateur spécifié
+- `serverinfo` : Montre des informations sur ce serveur
 """
                     }
                 ]
             },
             "mod": {
-                "description": "**Moderation :** Allows you to moderate your members with both basic and advanced functions.",
+                "description": "**Modération :** Vous permet de gérer les membres et le serveur avec des commandes simples et des commandes complexes.",
                 "fields": [
                     {
-                        "name": "Classic commands",
+                        "name": "Commandes classiques",
                         "value": """
-- `logs [channel]` : Defines or changes the logs channel for moderation
-- `clear [amount] <user>` : Clears up to 100 messages in a channel
-- `warn [member] <reason>` : Warns a member
-- `clearwarns [user]` : Clears all the warnings of an user
-- `mute [member] <reason>` : Mutes a member
-- `unmute [member] <reason>` : Unmutes a member
-- `kick [member] <reason>` : Kicks a member
-- `ban [user] <reason>` : Bans a member
-- `unban [user] <reason>` : Remove an user from the ban list"""
+- `logs [channel]` : Définit ou change le salon de journalisation de ce serveur
+- `clear [amount] <user>` : Supprime jusqu'à 100 messages à la fois dans le salon
+- `warn [member] <reason>` : Avertit un membre
+- `clearwarns [user]` : Supprime les avertissements d'un membre
+- `mute [member] <reason>` : Rend un memebre muet
+- `unmute [member] <reason>` : Rend la parole à un membre
+- `kick [member] <reason>` : Expulse un membre
+- `ban [user] <reason>` : Bannit un membre
+- `unban [user] <reason>` : Retire un utilisateur de la liste des bannis"""
                     },
                     {
-                        "name": "Temporary commands",
+                        "name": "Commandes à durée limitée",
                         "value": """
-- `tempmute [member] [duration] <reason>` : Mutes a member for a specified duration
-- `tempban [member] [duration] <reason>` : Bans a member for a specified duration
+- `tempmute [member] [duration] <reason>` : Rend un membre muet pour la durée spécifiée
+- `tempban [member] [duration] <reason>` : Bannit un membre pour la durée spécifiée
 """
                     },
                     {
-                        "name": "Specific/advanced commands",
+                        "name": "Commandes spécifiques / Plus complexes",
                         "value": """
-- `normalize [member]` : Cleans a member's nickname
-- `nuke` : KADABOOMs a maximum 1000 messages in a channel
-- `softban [member] <reason>` : Kicks a member from the server, deletes all messages last 24 hours old and invites the user back. Handy if someone got hacked
-- `multikick [members separated by a space]` : Kicks multiple members in one command
-- `multiban [members separated by a space]` : Same as `multikick` but for bans"""
+- `normalize [member]` : Rétablit le nom par défaut d'un membre
+- `nuke` : KADABOOM de jusqu'à 1000 messages dans le salon (dangereux)
+- `softban [member] <reason>` : Kick un membre du serveur, supprime tous ses messages des dernières 24h et le réinvite. Utile pour un utilisateur qui s'est fait hacker par exemple
+- `multikick [members separated by a space]` : Expulse plusieurs membres en une seule commande
+- `multiban [members separated by a space]` : Bannit plusieurs membres en une commande. Équivalent plus violent de multikick"""
                     },
                     {
-                        "name": "Info commands",
+                        "name": "Commandes d'informations",
                         "value": """
-- `warnings [user]` : Shows the warnings of an user
-⚠ - `perms [member]` : Shows all the permissions of a member
-⚠ - `roles [member]` : Shows all the roles of a member
+- `warnings [user]` : Liste les avertissements d'un membre
+⚠ - `perms [member]` : Liste les permissions d'un membre
+⚠ - `roles [member]` : Liste les rôles d'un membre
 """
                     }
                 ]
             },
             "fun": {
-                "description": "**Entertainement :** Fun commands. Yay.",
+                "description": "**Amusement :** Commandes amusantes. Yay :D",
                 "fields": [
                     {
-                        "name": "Commands",
+                        "name": "Commandes",
                         "value": """
-- `meme` : Gives random memes stolen from Reddit
-- `nsfwmeme` : Same as `meme` but only with nsfw memes
-- `shiba` : Shows random shibe
-- `bird` : Same as shibe
-- `cat` : Same as cat
+- `meme` : Donne un meme aléatoire volé des subreddits les plus drôles
+- `nsfwmeme` : Même commande que `meme` mais donne des memes plus adultes / nsfw
+- `shiba` : Montre un Shibadorable
+- `bird` : Montre un Woiseau
+- `cat` : Montre un Chawwww
 - `piss` : *piss*
 - `twitter` : ratio + L + fatherless + maidenless
-- `randnum [a] <b>` : Gives a random number between `a` and `b` or `0` and `a` if `b` is not precised"""
+- `randnum [a] <b>` : Donne un nombre entre `a` et `b` ou `0` et `a` si `b` n'est pas précisé"""
                     }
                 ]
             },
             "tools": {
-                "description": "**Tools :** Useful tools to use directly in a channel.",
+                "description": "**Outils :** Outils utiles à utiliser directement dans un salon.",
                 "fields": [
                     {
-                        "name": "Commands",
+                        "name": "Commandes",
                         "value": """
-- `wikipedia [search]` : Searches an article on wikipedia (in beta, doesn't work well)
-- `translate [language] [sentence]` : Translates sentence into a specified language
-- `covid [country]` : Searches covid cases on a country
-- `urbandict [word]` : Gives the definition of a word found on Urban Dictionary"""
+- `wikipedia [search]` : Recherche un article sur Wikipédia
+- `translate [language] [sentence]` : Traduit une phrase dans le langage spécifié
+- `covid [country]` : Cherche les cas de covid dans un pays spécifié
+- `urbandict [word]` : Donne la définition d'un mot dans l'Urban Dictionnary"""
                     }
                 ]
             }
@@ -186,40 +186,40 @@ class French(English):
         # events.py cog
         self.on_command_error = {
             "CommandOnCooldown": {
-                "description": "Wait, wait ! This command is on cooldown, you cannot use it until this message disappears (`{secs} second(s)`)."
+                "description": "Hé, attends ! Cette commande est en refroidissement, Il faut attendre que ce message disparaisse pour utiliser à nouveau la commande (`{secs} second(s)`)."
             },
             "PrivateMessageOnly": {
-                "description": "This command is dm only."
+                "description": "Cette commande est réservée aux messages privés."
             },
             "NoPrivateMessage": {
-                "description": "This command is guild only."
+                "description": "Cette commande est réservée aux serveurs."
             },
             "NotOwner": {
-                "description": "You're not my owner, you can't use this command."
+                "description": "Tu n'es pas mon créateur, tu ne peux utilser cette commande."
             },
             "UserNotFound": {
-                "description": "Couldn't find that user."
+                "description": "Je n'ai pas pu trouver cet utilisateur."
             },
             "ChannelNotFound": {
-                "description": "Couldn't find that channel."
+                "description": "Je n'ai pas pu trouver ce salon."
             },
             "NSFWChannelRequired": {
-                "description": "This channel {channel} isn't for NSFW content ! Kids might be shocked."
+                "description": "Le salon {channel} n'autorise pas le contenu nsfw ! Les âmes sensibles pourraient être choquées."
             },
             "MissingPermissions": {
-                "description": "You can't do that. You're missing {permissions} permission(s) to run this command.",
-                "and": "and"
+                "description": "Il vous manque la/les permission(s) {permissions} pour utiliser cette commande.",
+                "and": "et"
             },
             "BotMissingPermissions": {
-                "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution or you're asking to do something impossible."
+                "description": "On dirait qu'il me manque les permissions nécessaires à la réalisation de cette commande. Il faudrait déplacer mon rôle plus haut dans la liste de rôles, ou la commande n'est pas réalisable"
             },
             "BadArgument": {
-                "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."
+                "description": "Désolé, mauvais argument, la commande `help` pourrait vous aider."
             },
             "CommandError": {
-                "description": "Something went wrong, I couldn't do that.",
-                "footer": "If the problem persists, contact the owner of the bot : {owner}.",
-                "dissmiss": "dissmiss"
+                "description": "Une erreur m'a empêché de faire ça.",
+                "footer": "Si le problème persiste, contactez le créateur de Shibbot : {owner}.",
+                "dissmiss": "Annuler"
             }
         }
 
@@ -227,74 +227,74 @@ class French(English):
         self.urbain_dictionary = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a word to search on Urban Dictionary !\nUsage : `udict [word]`"
+                    "description": "Me donner un mot à chercher sur l'Urban Dictionnary !\nUsage : `udict [mot]`"
                 }
             },
             "embed": {
                 "fields": [
                     {
-                        "name": "Definition of {word} by '{author}'"
+                        "name": "Définition de {word} par '{author}'"
                     },
                     {
-                        "name": "Example"
+                        "name": "Exemple"
                     }
                 ]
             },
             "buttons": {
-                "next": "Next Definition",
-                "previous": "Previous"
+                "next": "Prochaine Définition",
+                "previous": "Définition Précédente"
             }
         }
         self.get_covid_stats = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a country or `world` to get global data !\nUsage : `covid [country]`"
+                    "description": "Donnez moi un pays ou utilisez `world` pour obtenir les données mondiales !\nUsage : `covid [pays]`"
                 }
             },
             "loading_embed": {
-                "title": "Wait a second...",
-                "description": "I'm fetching data..."
+                "title": "Veuillez patienter...",
+                "description": "Je récupère les données..."
             },
             "embed": {
-                "title": "COVID-19 status of {country}",
-                "description": "Here are the stats :",
+                "title": "Statut COVID-19 pour le pays {country}",
+                "description": "Voilà les Statistiques :",
                 "fields": [
                     {
-                        "name": "Cases"
+                        "name": "Cas"
                     },
                     {
-                        "name": "Total Cases"
+                        "name": "Nombre total de cas"
                     },
                     {
-                        "name": "Deaths"
+                        "name": "Morts"
                     },
                     {
-                        "name": "Total Deaths"
+                        "name": "Nombre total de morts"
                     },
                     {
-                        "name": "Recovered"
+                        "name": "Soignés"
                     },
                     {
-                        "name": "Active"
+                        "name": "Actifs"
                     },
                     {
-                        "name": "Critical"
+                        "name": "Cas critiques"
                     },
                     {
-                        "name": "Cases per 1/Million"
+                        "name": "Cas pour 1 Million"
                     },
                     {
-                        "name": "Deaths per 1/Million"
+                        "name": "Morts pour 1 Million"
                     },
                     {
-                        "name": "Total Tests"
+                        "name": "Tests totaux"
                     },
                     {
-                        "name": "Tests per 1/Million"
+                        "name": "Tests pour 1 Million"
                     },
                     {
-                        "name": "Pay attention :",
-                        "value": "The information given here may not be live and therefore inaccurate. Source : [www.worldometers.info](http://www.worldometers.info)."
+                        "name": "Prenez garde :",
+                        "value": "L'information donnée ici peut ne pas être à jour et précise. Source : [www.worldometers.info](http://www.worldometers.info)."
                     }
                 ]
             }
@@ -302,25 +302,25 @@ class French(English):
         self.translate_text = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a language and a text to tranlate !\nUsage : `trans [language] [sentence]`"
+                    "description": "Donnez moi un langage et du texte à traduire !\nUsage : `trans [language] [sentence]`"
                 },
                 "bad_args": {
-                    "title": "Try again !",
-                    "description": "No support for the provided language."
+                    "title": "Essayez encore !",
+                    "description": "Pas de support pour le langage spécifié."
                 },
                 "unavalaible": {
-                    "title": "Unavailable...",
-                    "description": "Service unavailable, try again later."
+                    "title": "Indisponibloe...",
+                    "description": "Service indisponible, réessayez plus tard."
                 }
             },
             "embed": {
-                "title": "Translate",
+                "title": "Traduction",
                 "fields": [
                     {
-                        "name": "Original Text :"
+                        "name": "Texte originel :"
                     },
                     {
-                        "name": "Translated :"
+                        "name": "Texte traduit :"
                     }
                 ]
             }
@@ -328,21 +328,21 @@ class French(English):
         self.search_on_wikipedia = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme something to search !\nUsage : `wiki [article]`"
+                    "description": "Donnez moi quelque chose à chercher !\nUsage : `wiki [article]`"
                 },
                 "not_found": {
-                    "description": "Couldn't find anything for '{article}', try again."
+                    "description": "Je n'ai rien put trouver pour '{article}', Réessayez."
                 }
             },
             "selection_embed": {
-                "description": "Use the bar below to get the item you want ! (it won't bite)"
+                "description": "Utilisez la barre ci dessous pour obtenir l'objet de votre choix ! (Il ne mordra pas)"
             },
             "select": {
-                "placeholder": "Select an article here :"
+                "placeholder": "Sélectionnez un article ici :"
             },
             "loading_embed": {
-                "title": "Wait a second...",
-                "description": "I'm fetching data... That can take a little second."
+                "title": "Veuillez patienter...",
+                "description": "Je récupère les données... ça peut prendre une petite seconde."
             }
         }
 
@@ -350,39 +350,39 @@ class French(English):
         self.get_random_number = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a numbers or two !\nUsage : `randint [x] <y>`"
+                    "description": "Donnez moi un nombre ou deux !\nUsage : `randint [x] <y>`"
 
                 }
             }
         }
         self.shibes_viewer = {
             "buttons": {
-                "previous": "Previous one",
-                "next": "Next Shibe"
+                "previous": "Shiba précédent",
+                "next": "Shiba suivant"
             }
         }
         self.cats_viewer = {
             "buttons": {
-                "previous": "Previous one",
-                "next": "Next Cat"
+                "previous": "Chat précédent",
+                "next": "Chat suivant"
             }
         }
         self.birds_viewer = {
             "buttons": {
-                "previous": "Previous one",
-                "next": "Next Birb"
+                "previous": "Oiseau précédent",
+                "next": "Oiseau suivant"
             }
         }
         self.meme_viewer = {
             "buttons": {
-                "previous": "Previous Meme",
-                "next": "Next Meme"
+                "previous": "Meme précédent",
+                "next": "Meme suivant"
             }
         }
         self.nsfw_meme_viewer = {
             "buttons": {
-                "previous": "Previous Meme",
-                "next": "Next Meme"
+                "previous": "Meme précédent",
+                "next": "Meme suivant"
             }
         }
 
@@ -390,20 +390,20 @@ class French(English):
         self.enable_disable_plugins = {
             "embed": {
                 "title": "Plugins",
-                "description": "Use the bar bellow to select the plugins you want to disable or enable."
+                "description": "Utilisez la barre ci dessous pour choisir les plugins que vous souhaitez activer ou désactiver."
             },
             "options": {
                 "mod": {
-                    "label": "Moderation",
-                    "description": "Allows you to moderate your members with both basic and advanced functions."
+                    "label": "Modération",
+                    "description": "Vous permet de gérer les membres et le serveur."
                 },
                 "fun": {
-                    "label": "Fun",
-                    "description": "Fun commands. Yay."
+                    "label": "Amusement",
+                    "description": "Commandes amusantes. Yay :D"
                 },
                 "tools": {
-                    "label": "Tools",
-                    "description": "Useful tools to use directly in a channel."
+                    "label": "Outils",
+                    "description": "Outils utiles à utiliser directement dans un salon."
                 },
                 "placeholder": "Select plugins here :"
             },

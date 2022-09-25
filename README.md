@@ -24,7 +24,7 @@ Then let's hop to the next one :
 
 **Memes :**
 
-Get the hotest memes from Reddit everyday with the `meme` (or `nmeme` for nsfw content) command, the bot scraps memes everyday to the Reddit so they're fresh as... as... ice ? Dunno we're in lack of inspiration.
+Get the hotest memes from Reddit everyday with the `meme` (or `nmeme` for nsfw content) command, the bot scraps memes everyday to Reddit.
 
 **Images :**
 
@@ -32,7 +32,7 @@ Want to "awwww" in front of cute animals pictues with your friends (if you have 
 
 **What's that ?**
 
-There is some wierd commands, like `piss` or `twitter`, we have absolutely no ideas why they exists neither what they do. Maybe you should try them out.
+There is some wierd commands, like `piss` or `twitter`, we have absolutely no ideas why they exists neither what they do. Maybe you should try them out or not...
 
 ### Tools
 
@@ -48,7 +48,7 @@ Invite the bot by clicking right [here](https://discord.com/api/oauth2/authorize
 
 ## Motivation
 
-< Text here >
+Idk I just wanted to make a Discord bot for myself and the others
 
 ## Host and code
 
@@ -59,12 +59,12 @@ Of, course you can inspire your code on mine, I didn't said that this is the bes
 ## Prerequisites
 
 - [Python 3.8+ (idealy 3.10+)](https://python.org)
-For the libs go check `requirements.txt` or [the dependency graph](https://github.com/JeanLeShiba/Shibbot/network/dependencies).
+  For the libs go check `requirements.txt` or [the dependency graph](https://github.com/JeanLeShiba/Shibbot/network/dependencies).
 
 ## Contributors
 
 - [JeanLeShiba](https://github.com/JeanLeShiba) - Owner and main developper of Shibbot
-- [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester and translater
+- [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester, translater and text quality reviewer
 
 ## Aknowlegement
 

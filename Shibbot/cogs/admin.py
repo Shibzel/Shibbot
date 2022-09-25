@@ -18,6 +18,7 @@ class Admin(commands.Cog):
         self.client: Shibbot = client
 
     @commands.command()
+    @commands.dm_only()
     async def dm_clear(self, ctx: commands.Context):
         messages = []
         async for message in ctx.channel.history(limit=None):
@@ -79,25 +80,17 @@ class Admin(commands.Cog):
                 }
             )
         path = "cache/guilds.json"
-        utils.dump(
-            list,
-            path,
-            option=orjson.OPT_INDENT_2
-        )
-        await ctx.send(
-            content=f"Number total of guilds = {len(self.client.guilds)}",
-            file=discord.File(path)
-        )
+        utils.dump(list, path, option=orjson.OPT_INDENT_2)
+        await ctx.send(content=f"Total number of guilds : {len(self.client.guilds)}", file=discord.File(path))
 
 
 class CogEnabledEmbed(discord.Embed):
     """Just a subclass of discord.Embed for when a cog loads."""
 
     def __init__(self, plugin, state):
-        super().__init__(
-            title="Admin",
-            description=f"Cog `{plugin}` has been {state} successfully.",
-            color=discord.Color.green())
+        super().__init__(title="Admin",
+                         description=f"Cog `{plugin}` has been {state} successfully.",
+                         color=discord.Color.green())
 
 
 class CogErrorEmbed(discord.Embed):

@@ -23,10 +23,7 @@ def plugin_is_enabled():
     async def predicate(ctx):
         if ctx.guild:
             async with client.aiodb() as db:
-                async with db.execute(
-                    f"SELECT enabled FROM fun_plugin WHERE guild_id=?",
-                    (ctx.guild.id,)
-                ) as cursor:
+                async with db.execute(f"SELECT enabled FROM fun_plugin WHERE guild_id=?", (ctx.guild.id,)) as cursor:
                     enabled = await cursor.fetchone()
             if enabled:
                 enabled = enabled[0]
@@ -41,7 +38,7 @@ class Fun(commands.Cog):
         self.client: Shibbot = client
         self.reddit: utils.Reddit = self.client.reddit
 
-        self.shibes, self.cats, self.birds, self.memes, self.nsfw_memes = [], [], [], [], []
+        self.shibes = self.cats = self.birds = self.memes = self.nsfw_memes = []
 
         self.client.cursor.execute(
             "CREATE TABLE IF NOT EXISTS fun_plugin (guild_id INTEGER PRIMARY KEY, enabled BOOLEAN)")
@@ -58,7 +55,7 @@ class Fun(commands.Cog):
         self.update_shibe_online.start()
         self.update_reddit_memes.start()
 
-    @tasks.loop(hours=4)
+    @tasks.loop(hours=24)
     async def update_shibe_online(self):
         async def update(i):
             try:
@@ -79,12 +76,14 @@ class Fun(commands.Cog):
         print(
             f"[+] All images updated (took {(time.time() - start_time):.2f} sec).")
 
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=24)
     async def update_reddit_memes(self):
         memes_subs = ("memes", "meme", "History_memes", "HolUp", "dankmemes", "Memes_Of_The_Dank", "ProgrammerHumor", "shitposting",
                       "GenZMemes", "funny", "cursedmemes", "MemesIRL", "pcmemes", "holup", "blursedimages", "AdviceAnimals", "okbuddyretard")
-        nsfw_memes_subs = ("hentaimemes", "NSFWMemes", "Offensivejokes",
-                           "thensfwmemes", "IronicPornMemes", "NSFWMeme")
+        nsfw_memes_subs = ("hentaimemes", "NSFWMemes",  # "Offensivejokes",
+                           "thensfwmemes",
+                           # "IronicPornMemes",
+                           "NSFWMeme")
 
         async def get_filtered_memes(subreds, nsfw=None):
             subs = []
@@ -102,25 +101,30 @@ class Fun(commands.Cog):
             return subs
 
         async def update_memes():
-            subs = await get_filtered_memes(memes_subs, nsfw=False)
-            if subs != []:
-                self.memes = subs
-                utils.dump(subs, "cache/memes.json")
+            try:
+                subs = await get_filtered_memes(memes_subs, nsfw=False)
+                if subs != []:
+                    self.memes = subs
+                    utils.dump(subs, "cache/memes.json")
+            except Exception as e:
+                print(
+                    f"[x] Failed updating memes : {type(e).__name__}: {str(e)}")
 
         async def update_nsfw_memes():
-            subs = await get_filtered_memes(nsfw_memes_subs, nsfw=None)
-            if subs != []:
-                self.nsfw_memes = subs
-                utils.dump(subs, "cache/nsfw_memes.json")
+            try:
+                subs = await get_filtered_memes(nsfw_memes_subs, nsfw=None)
+                if subs != []:
+                    self.nsfw_memes = subs
+                    utils.dump(subs, "cache/nsfw_memes.json")
+            except Exception as e:
+                print(
+                    f"[x] Failed updating nsfw memes : {type(e).__name__}: {str(e)}")
 
         start_time = time.time()
-        try:
-            tasks = [update_memes(), update_nsfw_memes()]
-            await asyncio.gather(*tasks)
-            print(
-                f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
-        except:
-            print("[x] Failed updating memes.")
+        tasks = [update_memes(), update_nsfw_memes()]
+        await asyncio.gather(*tasks)
+        print(
+            f"[+] Memes updated (took {(time.time() - start_time):.2f} sec for {len(memes_subs+nsfw_memes_subs)} subreddits). Submissions : {len(self.memes+self.nsfw_memes)}")
         gc.collect()
 
     @commands.command()
@@ -151,7 +155,7 @@ class Fun(commands.Cog):
                 )
             )
 
-    @commands.command(name="twitter", aliases=["tw"])
+    @commands.command(name="twitter", aliases=["tw", "ratio"])
     @plugin_is_enabled()
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def ratio_twitter(self, ctx: commands.Context):

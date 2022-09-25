@@ -18,19 +18,19 @@ class Help(commands.Cog):
         self.client: Shibbot = client
 
         self.location = "Unknown"
-        self.client.loop(self.get_location())
+        self.client.loop.create_task(self.get_location())
 
     async def get_location(self):
-        session = aiohttp.ClientSession()
-        while True:
-            try:
-                result = await session.get(
-                    "http://ip-api.com/json/?fields=country,city")
-                json_result = result.json()
-                self.location = f"{json_result['city']}, {json_result['country']}"
-                break
-            except:
-                await asyncio.sleep(40)
+        async with aiohttp.ClientSession() as session:
+            while True:
+                try:
+                    result = await session.get(
+                        "http://ip-api.com/json/?fields=country,city")
+                    json_result = await result.json()
+                    self.location = f"{json_result['city']}, {json_result['country']}"
+                    break
+                except:
+                    await asyncio.sleep(40)
 
     @commands.command(name="invite", aliases=["support", "botinvite"])
     @commands.cooldown(1, 7, commands.BucketType.member)
@@ -41,30 +41,24 @@ class Help(commands.Cog):
         embed = discord.Embed(
             title=embed_text["title"],
             description=embed_text["description"],
-            color=discord.Color.dark_gold()
-        )
+            color=discord.Color.dark_gold())
         embed.set_image(
             url="https://cdn.discordapp.com/attachments/955511076261347369/963461186756694096/happy_doggo.jpg")
         embed.set_footer(
             text=embed_text["footer"].format(
-                version=self.client.version
-            )
-        )
+                version=self.client.version))
 
         buttons_text = text["buttons"]
         invite_button = discord.ui.Button(
             label=buttons_text["bot_invite"],
-            url=self.client.invite_bot_url
-        )
+            url=self.client.invite_bot_url)
         support_button = discord.ui.Button(
             label=buttons_text["support"],
-            url=self.client.support_link
-        )
+            url=self.client.support_link)
 
         await ctx.reply(
             embed=embed,
-            view=discord.ui.View(invite_button, support_button)
-        )
+            view=discord.ui.View(invite_button, support_button))
 
     @commands.command(name="botinfo", aliases=["about"])
     @commands.cooldown(1, 7, commands.BucketType.member)
@@ -76,15 +70,12 @@ class Help(commands.Cog):
         embed = discord.Embed(color=discord.Color.dark_gold())
         embed.set_author(
             name=embed_text["title"],
-            icon_url=self.client.user.avatar
-        )
+            icon_url=self.client.user.avatar)
         fields_text = embed_text["fields"]
         embed.add_field(
             name=fields_text[0]["name"],
             value=fields_text[0]["value"].format(
-                n_servers=len(self.client.guilds)
-            )
-        )
+                n_servers=len(self.client.guilds)))
         embed.add_field(
             name=fields_text[1]["name"],
             value=fields_text[1]["value"].format(
@@ -93,16 +84,12 @@ class Help(commands.Cog):
                 n_threads=psutil.cpu_count(logical=True),
                 ram_usage=round(psutil.virtual_memory().used/1000000, 2),
                 n_ram=round(psutil.virtual_memory().total/1000000, 2),
-                place=self.location
-            )
-        )
+                place=self.location))
         embed.add_field(
             name=fields_text[2]["name"],
             value=fields_text[2]["value"].format(
-                donation_link="https://www.paypal.com/donate/?hosted_button_id=7WHDTVQR765B6"
-            ),
-            inline=False
-        )
+                donation_link="https://www.paypal.com/donate/?hosted_button_id=7WHDTVQR765B6"),
+            inline=False)
         await ctx.reply(embed=embed)
 
     @bridge.bridge_command(name="help", description="Stuck with the bot ? Use this command !")
@@ -114,8 +101,7 @@ class Help(commands.Cog):
         embed = discord.Embed(
             title=embed_text["title"],
             description=embed_text["description"],
-            color=discord.Color.dark_gold()
-        )
+            color=discord.Color.dark_gold())
         fields_text = embed_text["fields"]
         embed.add_field(
             name=fields_text[1]["name"],
@@ -126,8 +112,7 @@ class Help(commands.Cog):
         embed.add_field(
             name=fields_text[2]["name"],
             value=fields_text[2]["value"].format(prefix=await self.client._get_prefix(ctx)),
-            inline=False
-        )
+            inline=False)
         embed.set_thumbnail(url=self.client.user.avatar)
         embed.set_footer(text=embed_text["footer"].format(
             version=self.client.version))
@@ -140,26 +125,22 @@ class Help(commands.Cog):
                     label=select_text["info"]["label"],
                     description=select_text["info"]["description"],
                     emoji="ℹ",
-                    value="info"
-                ),
+                    value="info"),
                 discord.SelectOption(
                     label=select_text["mod"]["label"],
                     description=select_text["mod"]["description"],
                     emoji="🔨",
-                    value="mod"
-                ),
+                    value="mod"),
                 discord.SelectOption(
                     label=select_text["fun"]["label"],
                     description=select_text["fun"]["description"],
                     emoji="🎊",
-                    value="fun"
-                ),
+                    value="fun"),
                 discord.SelectOption(
                     label=select_text["tools"]["label"],
                     description=select_text["tools"]["description"],
                     emoji="🔍",
-                    value="tools"
-                ),
+                    value="tools"),
             ])
 
         async def callback(interaction: discord.Interaction):
@@ -174,8 +155,7 @@ class Help(commands.Cog):
                 embed.add_field(
                     name=field["name"],
                     value=field["value"],
-                    inline=False
-                )
+                    inline=False)
 
             await interaction.response.edit_message(embed=embed)
 

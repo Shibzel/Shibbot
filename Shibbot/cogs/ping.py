@@ -24,16 +24,11 @@ class Ping(commands.Cog):
             description=embed_text["description"].format(
                 ping=round(self.client.latency*1000, 2),
                 cpu=psutil.cpu_percent(),
-                ram=psutil.virtual_memory()[2]
-            ),
-            color=discord.Color.dark_gold()
-        )
+                ram=psutil.virtual_memory()[2]),
+            color=discord.Color.dark_gold())
         await ctx.reply(
             embed=embed,
             view=discord.ui.View(
                 discord.ui.Button(
                     label=text["buttons"]["status"],
-                    url="https://stats.uptimerobot.com/lmJ8oH1MgK"
-                )
-            )
-        )
+                    url="https://stats.uptimerobot.com/3pkYncX6Qk")))

@@ -6,17 +6,16 @@ import asyncpraw
 class Reddit:
     """Simplified wrapper for Reddit based on asyncpraw."""
 
-    def __init__(
-        self,
-        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
-        a2f: bool = False,
-        *args, **kwargs
-    ):
+    def __init__(self,
+                 loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
+                 a2f: bool = False,
+                 *args, **kwargs):
         self.loop = loop
         self.n_of_requests = 0  # current number of requests.
         self.max_requests = 60 if a2f else 30  # per min
 
         self.reddit = asyncpraw.Reddit(*args, **kwargs)
+        # Subclass the class Reddit will cause problems
 
         self.running = True
         self.loop.create_task(self.requests_clear_loop())

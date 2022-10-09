@@ -154,12 +154,13 @@ class Config(commands.Cog):
 
         await self.client.fetch_guild(ctx.guild)
         async with self.client.aiodb() as db:
-            async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (prefix, ctx.guild.id,)):
+            query_friendly_prefix = prefix.replace("\"", r"\"")
+            async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (query_friendly_prefix, ctx.guild.id,)):
                 await db.commit()
         embed_text = text["embed"]
         await ctx.reply(
             embed=discord.Embed(
                 title=embed_text["title"],
-                description="<a:verified:836312937332867072> " +
+                description="✔ " +
                 embed_text["description"].format(prefix=prefix),
                 color=discord.Color.green()))

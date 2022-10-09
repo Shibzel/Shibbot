@@ -8,13 +8,14 @@ License: MIT, see LICENSE for more details.
 
 __title__ = "Shibbot"
 __author__ = "JeanTheShiba"
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __license__ = "MIT"
 __copyright__ = "Copyright (c) 2022 JeanTheShiba"
 
 import datetime
 import sqlite3
 import os as sus  # When the import is sus ඞ
+import time
 
 import aiosqlite
 # The Pycord module, an (maintained) API wrapper that we will use for this bot.
@@ -98,6 +99,8 @@ class Shibbot(commands.Bot):
         print(f"   ----------------------------\n[+] Loading cogs...")
         for filename in sus.listdir("./cogs"):
             if filename.endswith(".py"):
+                if filename.startswith("~") and not self.test_mode:
+                    continue
                 cogname = filename[:-3]
                 try:
                     # if cogname in ["admin",]:
@@ -112,9 +115,9 @@ class Shibbot(commands.Bot):
             async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                 data = await cursor.fetchone()
             if not data:
-                # lang = guild.language if guild.language in AVAILABLE_LANGUAGES.keys(
-                # ) else self.default_language
-                async with db.execute("INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)", (guild.id, self.default_prefix, self.default_language)):
+                lang = guild.preferred_locale if guild.preferred_locale in AVAILABLE_LANGUAGES.keys(
+                ) else self.default_language
+                async with db.execute("INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)", (guild.id, self.default_prefix, lang)):
                     await db.commit()
         return data
 
@@ -151,13 +154,15 @@ class Shibbot(commands.Bot):
         self.bot_is_alive = True
 
     async def on_resumed(self):
-        print("[+] Bot reconnected.")
+        print(
+            f"[+] Bot reconnected (disconnected for {time.time()-self.time_disconnected:.2f} sec).")
         self.bot_is_alive = True
 
     async def on_disconnect(self):
         if self.bot_is_alive != False:
-            print("[x] Bot disconnected.")
+            self.time_disconnected = time.time()
             self.bot_is_alive = False
+            print("[x] Bot disconnected.")
 
     def run(self):
         try:

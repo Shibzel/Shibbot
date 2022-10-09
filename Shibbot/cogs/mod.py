@@ -33,6 +33,12 @@ def plugin_is_enabled():
     return commands.check(predicate)
 
 
+def is_kickable(victim: discord.Member):
+    if victim.guild_permissions.administrator():
+        return True
+    raise commands.BotMissingPermissions
+
+
 class Mod(commands.Cog):
     def __init__(self, client):
         self.client: Shibbot = client
@@ -261,7 +267,7 @@ class Mod(commands.Cog):
                 deleted_messages = await ctx.channel.delete_messages(messages)
                 embed_text = text["member_clear"]
                 embed = discord.Embed(
-                    description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
+                    description=f"🧹 "+embed_text["description"].format(
                         n_messages=len(messages),
                         member=member.mention),
                     color=discord.Color.green())
@@ -277,7 +283,7 @@ class Mod(commands.Cog):
                 embed_text = text["channel_clear"]
                 embed = discord.Embed(
                     title=embed_text["title"],
-                    description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
+                    description=f"🧹 "+embed_text["description"].format(
                         n_messages=len(deleted_messages)),
                     color=discord.Color.green())
         await ctx.send(
@@ -342,11 +348,11 @@ class Mod(commands.Cog):
                 await asyncio.sleep(2.0)
                 await interaction.channel.send(content="1 ! <:POG:815700150164652092>")
                 await asyncio.sleep(1.0)
-                deleted_messages = await interaction.channel.purge(limit=1000)
+                deleted_messages = await interaction.channel.purge(limit=1200)
             embed_text = text["done"]
             embed = discord.Embed(
                 title=embed_text["title"],
-                description=f"<a:verified:836312937332867072> "+embed_text["description"].format(
+                description=f"☢ "+embed_text["description"].format(
                     n_messages=len(deleted_messages)),
                 color=discord.Color.red())
             await interaction.channel.send(
@@ -398,7 +404,7 @@ class Mod(commands.Cog):
 
         embed_text = text["embed"]
         embed = discord.Embed(
-            description=embed_text["description"].format(
+            description="❗ "+embed_text["description"].format(
                 member=member.mention,
                 n_warns=nb_warns,
                 reason=reason),
@@ -450,7 +456,7 @@ class Mod(commands.Cog):
         self.client.db.commit()
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="✔ "+embed_text["description"].format(
                 member=member.mention),
             color=discord.Color.green())
         embed.set_author(
@@ -620,7 +626,7 @@ class Mod(commands.Cog):
         self.client.loop.create_task(self.set_mute_role(ctx, mute_role))
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="🔇 "+embed_text["description"].format(
                 member=member.mention,
                 reason=reason),
             color=discord.Color.green())
@@ -684,7 +690,7 @@ class Mod(commands.Cog):
         self.client.loop.create_task(self.add_temp_sanction(*data))
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="🔇⏲ "+embed_text["description"].format(
                 member=member.mention,
                 duration=duration,
                 reason=reason),
@@ -796,7 +802,7 @@ class Mod(commands.Cog):
         await member.kick(reason=reason)
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="🚮 "+embed_text["description"].format(
                 member=member.mention,
                 reason=reason),
             color=discord.Color.green())
@@ -873,19 +879,11 @@ class Mod(commands.Cog):
         if kicked_members != []:
             embed.add_field(
                 name=fields_text[0]["name"],
-                value=", ".join(
-                    [
-                        member.mention
-                        for member in kicked_members
-                    ]))
+                value=", ".join([member.mention for member in kicked_members]))
         if failed_kicks != []:
             embed.add_field(
                 name=fields_text[1]["name"],
-                value=", ".join(
-                    [
-                        member
-                        for member in failed_kicks
-                    ]))
+                value=", ".join([member for member in failed_kicks]))
         await ctx.send(embed=embed)
 
         async def notify_member(member):
@@ -922,7 +920,7 @@ class Mod(commands.Cog):
         await ctx.guild.ban(member, reason=reason)
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="😐👉🚪 "+embed_text["description"].format(
                 member=member.mention,
                 reason=reason),
             color=discord.Color.green())
@@ -979,7 +977,7 @@ class Mod(commands.Cog):
         self.client.loop.create_task(self.add_temp_sanction(*data))
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="😐👉🚪⏲ "+embed_text["description"].format(
                 member=member.mention,
                 duration=duration,
                 reason=reason),
@@ -1045,7 +1043,7 @@ class Mod(commands.Cog):
         await ctx.guild.unban(member)
         embed_text = text["embed"]
         embed = discord.Embed(
-            description="<a:verified:836312937332867072> "+embed_text["description"].format(
+            description="🗿 "+embed_text["description"].format(
                 member=member.mention,
                 reason=reason),
             color=discord.Color.green())
@@ -1110,19 +1108,11 @@ class Mod(commands.Cog):
         if banned_members != []:
             embed.add_field(
                 name=fields_text[0]["name"],
-                value=", ".join(
-                    [
-                        member.mention
-                        for member in banned_members
-                    ]))
+                value=", ".join([member.mention for member in banned_members]))
         if failed_bans != []:
             embed.add_field(
                 name=fields_text[1]["name"],
-                value=", ".join(
-                    [
-                        member
-                        for member in failed_bans
-                    ]))
+                value=", ".join([member for member in failed_bans]))
         await ctx.send(embed=embed)
 
         async def notify_member(member):
@@ -1221,7 +1211,7 @@ class Mod(commands.Cog):
         await member.edit(nick=nickname or "Bad Username")
         embed_text = text["embed"]
         embed = discord.Embed(
-            description=embed_text["description"].format(
+            description="🔣 "+embed_text["description"].format(
                 member=member.mention),
             color=discord.Color.green())
         embed.set_author(

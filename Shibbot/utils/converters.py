@@ -16,9 +16,7 @@ class _Duration:
 
 class ArgToDuration(commands.Converter):
     """Converter that returns a `_Duration` object."""
-
     async def convert(self, ctx: commands.Context, argument: str = None):
-
         if not argument:
             return None  # Not sure that if I remove this condition the converter would return None
         try:
@@ -53,10 +51,6 @@ class ArgToDuration(commands.Converter):
                     remove_chars(argument, "years ", "")), "year(s)"
                 _datetime = datetime.datetime.utcnow() + datetime.timedelta(seconds=raw_time*31557600)
             # This was tricky, I'm sure there's a better way to do this. If it's the case don't hesitate to tell me 😏
-            return _Duration(
-                _datetime,
-                raw_time,
-                duration_type
-            )
+            return _Duration(_datetime, raw_time, duration_type)
         except (ValueError, NameError):
             raise commands.BadArgument

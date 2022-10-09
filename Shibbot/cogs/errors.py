@@ -98,10 +98,7 @@ class Error(commands.Cog):
             temp_embed = discord.Embed(
                 description="⏳",
                 color=discord.Color.red())
-            try:
-                message = await ctx.reply(embed=temp_embed)
-            except:
-                message = await ctx.send(embed=temp_embed)
+            message = await ctx.send(embed=temp_embed)
 
             async def delete_message(interaction: discord.Interaction):
                 await message.delete()
@@ -113,10 +110,7 @@ class Error(commands.Cog):
                     pass
             dismiss_button.callback = delete_message
             view = discord.ui.View(dismiss_button)
-            await message.edit(
-                embed=embed,
-                view=view,
-                delete_after=time)
+            await message.edit(embed=embed, view=view, delete_after=time)
         except:
             print(f"[x] Unexpected error : {type(error).__name__}: {error}")
 

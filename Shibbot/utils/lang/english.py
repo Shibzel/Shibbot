@@ -220,7 +220,7 @@ class English:
             "CommandError": {
                 "description": "Something went wrong, I couldn't do that.",
                 "footer": "If the problem persists, contact the owner of the bot : {owner}.",
-                "dissmiss": "dissmiss"
+                "dissmiss": "Dissmiss"
             }
         }
 

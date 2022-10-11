@@ -105,7 +105,7 @@ class English:
 - `prefix [prefix]` : For a custom prefix on this server
 - `avatar <user>` : Shows the avatar of an user
 - `uinfo [user]` : Shows some infos about the specified user
-- `serverinfo` : Shows some info about the server you are currently in
+- `sinfo` : Shows some info about the server you are currently in
 """
                     }
                 ]
@@ -212,7 +212,7 @@ class English:
                 "and": "and"
             },
             "BotMissingPermissions": {
-                "description": "It seems that the bot is missing permissions, if you can manage roles putting Shibbot's role higher may be a solution or you're asking to do something impossible."
+                "description": "It seems that i'm missing permissions, if you can manage roles putting Shibbot's role higher may be a solution or you're asking to do something impossible."
             },
             "BadArgument": {
                 "description": "Sorry, bad argument(s). Use the `help` command to get the list of commands."
@@ -526,7 +526,7 @@ class English:
             },
             "embed": {
                 "title": "Warned !",
-                "description": "<a:verified:836312937332867072> You've warned {member}. They now have `{n_warns}` warn(s) !\nReason : {reason}"
+                "description": "You've warned {member}. They now have `{n_warns}` warn(s) !\nReason : {reason}"
             },
             "log": {
                 "action": "Warn n°{n_warns}",
@@ -632,7 +632,7 @@ class English:
                 }
             },
             "embed": {
-                "title": "Muted !",
+                "title": "Unmuted !",
                 "description": "{member} is now unmuted."
             },
             "pm": {

@@ -20,7 +20,7 @@ class French(English):
             "embed": {
                 "title": "Invitation",
                 "description": "Utilisez les boutons ci-dessous pour vous y rendre. Merci si vous invitez Shibbot !",
-                "footer": "Image de Shiba appréciant les fonctionnalités de Shibbot. | Shibbot • v{version}",
+                "footer": "Image d'un shiba appréciant les fonctionnalités de Shibbot. | Shibbot • v{version}",
             },
             "buttons": {
                 "bot_invite": "Invite mwa !",
@@ -33,7 +33,7 @@ class French(English):
                 "fields": [
                     {
                         "name": "Description",
-                        "value": "Shibbot est un bot multifonction présent sur `{n_servers}` serveurs et écrit en Python par JeanLeShiba ([dsc.bio](https://dsc.bio/jls), [github](https://github.com/JeanLeShiba)). Le but est de proposer un bot cool et fun avec de nombreuses fonctionnalités pour les personnes qui gèrent un serveur et les membres eux-mêmes avec des plugins de modération, des utilitaires, du divertissement... Le projet est toujours en bêta donc si vous rencontrez des problèmes contactez le propriétaire en mp ou via le serveur de support."
+                        "value": "Shibbot est un bot multifonction présent sur `{n_servers}` serveurs et écrit en Python par JeanLeShiba ([dsc.bio](https://dsc.bio/jls), [github](https://github.com/JeanLeShiba)). Le but est de proposer un bot sympa et fun avec de nombreuses fonctionnalités pour les personnes qui gèrent un serveur et les membres eux-mêmes avec des plugins de modération, des utilitaires, du divertissement... Le projet est toujours en bêta donc si vous rencontrez des problèmes contactez le propriétaire en mp ou via le serveur de support."
                     },
                     {
                         "name": "Specs",
@@ -57,7 +57,7 @@ class French(English):
                     },
                     {
                         "name": "Quoi de neuf ?",
-                        "value": "🇫🇷 Support en Français\nPossibilité de kick/ban en une commande\nNormaliser le pseudo d'un membre avec `username`\nChats et Oiseaux ajoutés, Les Capybaras seront peut être ajoutés par la suite."
+                        "value": "🇫🇷 Support en Français\nPossibilité de kick/ban plusieurs personnes en une commande\nNormaliser le pseudo d'un membre avec `username`\nAjout de chats et d'oiseaux."
                     },
                     {
                         "name": "Obtenir de l'aide :",
@@ -78,7 +78,7 @@ class French(English):
                 },
                 "fun": {
                     "label": "Amusements",
-                    "description": "Commandes amusantes. Yay :D"
+                    "description": "Commandes fun. Yay :D"
                 },
                 "tools": {
                     "label": "Outils",
@@ -100,59 +100,59 @@ class French(English):
 - `invite`: Envoie un lien d'invitation du bot pour l'inviter sur votre serveur ou accéder au serveur de support
 - `ping`: Montre le ping de Shibbot
 - `plugins` : Pour activer ou désactiver les plugins du bot sur ce serveur (à utiliser si le bot vient de rejoindre pour la première fois)
-- `lang` : Change la langue du bot
-- `prefix [prefix]` : Pour définir un préfixe personnalisé sur ce serveur
-- `avatar <user>` : Montre l'avatar d'un utilisateur
-- `uinfo [user]` : Montre des informations sur l'utilisateur spécifié
-- `serverinfo` : Montre des informations sur ce serveur
+- `lang` : Change le langage du bot
+- `prefix [préfixe]` : Pour définir un préfixe personnalisé sur ce serveur
+- `avatar <utilisateur>` : Montre l'avatar d'un utilisateur
+- `uinfo [utilisateur]` : Montre des informations sur l'utilisateur spécifié
+- `sinfo` : Montre des informations sur ce serveur
 """
                     }
                 ]
             },
             "mod": {
-                "description": "**Modération :** Vous permet de gérer les membres et le serveur avec des commandes simples et des commandes complexes.",
+                "description": "**Modération :** Aides pour modérer votre serveur.",
                 "fields": [
                     {
                         "name": "Commandes classiques",
                         "value": """
-- `logs [channel]` : Définit ou change le salon de journalisation de ce serveur
-- `clear [amount] <user>` : Supprime jusqu'à 100 messages à la fois dans le salon
-- `warn [member] <reason>` : Avertit un membre
-- `clearwarns [user]` : Supprime les avertissements d'un membre
-- `mute [member] <reason>` : Rend un memebre muet
-- `unmute [member] <reason>` : Rend la parole à un membre
-- `kick [member] <reason>` : Expulse un membre
-- `ban [user] <reason>` : Bannit un membre
-- `unban [user] <reason>` : Retire un utilisateur de la liste des bannis"""
+- `logs [salon]` : Définit ou change le salon de log de ce serveur
+- `clear [quantité] <utilisateur>` : Supprime jusqu'à 100 messages à la fois dans le salon
+- `warn [membre] <raison>` : warnst un membre
+- `clearwarns [utilisateur]` : Supprime les warns d'un membre
+- `mute [membre] <raison>` : Rend un memebre muet
+- `unmute [membre] <raison>` : Rend la parole à un membre
+- `kick [membre] <raison>` : Expulse un membre
+- `ban [utilisateur] <raison>` : Bannit un membre
+- `unban [utilisateur] <raison>` : Retire un utilisateur de la liste des bannis"""
                     },
                     {
                         "name": "Commandes à durée limitée",
                         "value": """
-- `tempmute [member] [duration] <reason>` : Rend un membre muet pour la durée spécifiée
-- `tempban [member] [duration] <reason>` : Bannit un membre pour la durée spécifiée
+- `tempmute [membre] [durée] <raison>` : Rend un membre muet pour la durée spécifiée
+- `tempban [membre] [durée] <raison>` : Bannit un membre pour la durée spécifiée
 """
                     },
                     {
                         "name": "Commandes spécifiques / Plus complexes",
                         "value": """
-- `normalize [member]` : Rétablit le nom par défaut d'un membre
-- `nuke` : KADABOOM de jusqu'à 1000 messages dans le salon (dangereux)
-- `softban [member] <reason>` : Kick un membre du serveur, supprime tous ses messages des dernières 24h et le réinvite. Utile pour un utilisateur qui s'est fait hacker par exemple
-- `multikick [members separated by a space]` : Expulse plusieurs membres en une seule commande
-- `multiban [members separated by a space]` : Bannit plusieurs membres en une commande. Équivalent plus violent de multikick"""
+- `normalize [membre]` : Rend "normal" le pseudo d'un membre
+- `nuke` : KADABOOM jusqu'à 1000 messages dans le salon (dangereux)
+- `softban [membre] <raison>` : Kick un membre du serveur, supprime tous ses messages des dernières 24h et le réinvite. Utile pour un utilisateur qui s'est fait hacker par exemple
+- `multikick [membres séparés par un espace]` : Expulse plusieurs membres en une seule commande
+- `multiban [membres séparés par un espace]` : Bannit plusieurs membres en une commande. Équivalent plus violent de multikick"""
                     },
                     {
                         "name": "Commandes d'informations",
                         "value": """
-- `warnings [user]` : Liste les avertissements d'un membre
-⚠ - `perms [member]` : Liste les permissions d'un membre
-⚠ - `roles [member]` : Liste les rôles d'un membre
+- `warnings [utilisateur]` : Liste les warns d'un membre
+⚠ - `perms [membre]` : Liste les permissions d'un membre
+⚠ - `roles [membre]` : Liste les rôles d'un membre
 """
                     }
                 ]
             },
             "fun": {
-                "description": "**Amusement :** Commandes amusantes. Yay :D",
+                "description": "**Amusement :** Commandes fun. Yay :D",
                 "fields": [
                     {
                         "name": "Commandes",
@@ -162,8 +162,8 @@ class French(English):
 - `shiba` : Montre un Shibadorable
 - `bird` : Montre un Woiseau
 - `cat` : Montre un Chawwww
-- `piss` : *piss*
-- `twitter` : ratio + L + fatherless + maidenless
+- `piss` : *pisse*
+- `ratio` : ratio + L + fatherless + maidenless
 - `randnum [a] <b>` : Donne un nombre entre `a` et `b` ou `0` et `a` si `b` n'est pas précisé"""
                     }
                 ]
@@ -176,7 +176,7 @@ class French(English):
                         "value": """
 - `wikipedia [search]` : Recherche un article sur Wikipédia
 - `translate [language] [sentence]` : Traduit une phrase dans le langage spécifié
-- `covid [country]` : Cherche les cas de covid dans un pays spécifié
+- `covid [pays (en anglais)]` : Cherche les cas de covid dans un pays spécifié
 - `urbandict [word]` : Donne la définition d'un mot dans l'Urban Dictionnary"""
                     }
                 ]
@@ -186,7 +186,7 @@ class French(English):
         # events.py cog
         self.on_command_error = {
             "CommandOnCooldown": {
-                "description": "Hé, attends ! Cette commande est en refroidissement, Il faut attendre que ce message disparaisse pour utiliser à nouveau la commande (`{secs} second(s)`)."
+                "description": "Hé, attends ! Cette commande est en cooldown, Il faut attendre que ce message disparaisse pour utiliser à nouveau la commande (`{secs} second(s)`)."
             },
             "PrivateMessageOnly": {
                 "description": "Cette commande est réservée aux messages privés."
@@ -211,7 +211,7 @@ class French(English):
                 "and": "et"
             },
             "BotMissingPermissions": {
-                "description": "On dirait qu'il me manque les permissions nécessaires à la réalisation de cette commande. Il faudrait déplacer mon rôle plus haut dans la liste de rôles, ou la commande n'est pas réalisable"
+                "description": "On dirait qu'il me manque les permissions nécessaires à la réalisation de cette commande. Il faudrait déplacer mon rôle plus haut dans la liste de rôles ou que je ne peux pas faire ça."
             },
             "BadArgument": {
                 "description": "Désolé, mauvais argument, la commande `help` pourrait vous aider."
@@ -227,7 +227,7 @@ class French(English):
         self.urbain_dictionary = {
             "checks": {
                 "missing_args": {
-                    "description": "Me donner un mot à chercher sur l'Urban Dictionnary !\nUsage : `udict [mot]`"
+                    "description": "Donnez moi un mot à chercher sur l'Urban Dictionnary !\nUtilisation : `udict [mot]`"
                 }
             },
             "embed": {
@@ -248,7 +248,7 @@ class French(English):
         self.get_covid_stats = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un pays ou utilisez `world` pour obtenir les données mondiales !\nUsage : `covid [pays]`"
+                    "description": "Donnez moi un pays ou utilisez `world` pour obtenir les données mondiales !\nUtilisation : `covid [pays]`"
                 }
             },
             "loading_embed": {
@@ -257,7 +257,7 @@ class French(English):
             },
             "embed": {
                 "title": "Statut COVID-19 pour le pays {country}",
-                "description": "Voilà les Statistiques :",
+                "description": "Voilà les statistiques :",
                 "fields": [
                     {
                         "name": "Cas"
@@ -302,14 +302,14 @@ class French(English):
         self.translate_text = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un langage et du texte à traduire !\nUsage : `trans [language] [sentence]`"
+                    "description": "Donnez moi un langage et du texte à traduire !\nUtilisation : `trans [language] [sentence]`"
                 },
                 "bad_args": {
                     "title": "Essayez encore !",
                     "description": "Pas de support pour le langage spécifié."
                 },
                 "unavalaible": {
-                    "title": "Indisponibloe...",
+                    "title": "Indisponible...",
                     "description": "Service indisponible, réessayez plus tard."
                 }
             },
@@ -328,14 +328,14 @@ class French(English):
         self.search_on_wikipedia = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi quelque chose à chercher !\nUsage : `wiki [article]`"
+                    "description": "Donnez moi quelque chose à chercher !\nUtilisation : `wiki [article]`"
                 },
                 "not_found": {
                     "description": "Je n'ai rien put trouver pour '{article}', Réessayez."
                 }
             },
             "selection_embed": {
-                "description": "Utilisez la barre ci dessous pour obtenir l'objet de votre choix ! (Il ne mordra pas)"
+                "description": "Utilisez la barre ci dessous pour obtenir l'objet de votre choix ! (Elle ne mordra pas)"
             },
             "select": {
                 "placeholder": "Sélectionnez un article ici :"
@@ -350,7 +350,7 @@ class French(English):
         self.get_random_number = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un nombre ou deux !\nUsage : `randint [x] <y>`"
+                    "description": "Donnez moi un nombre ou deux !\nUtilisation : `randint [x] <y>`"
 
                 }
             }
@@ -399,49 +399,49 @@ class French(English):
                 },
                 "fun": {
                     "label": "Amusement",
-                    "description": "Commandes amusantes. Yay :D"
+                    "description": "Commandes fun. Yay :D"
                 },
                 "tools": {
                     "label": "Outils",
                     "description": "Outils utiles à utiliser directement dans un salon."
                 },
-                "placeholder": "Select plugins here :"
+                "placeholder": "Sélectionnez un plugin ici :"
             },
-            "content": "Done !"
+            "content": "Fait !"
         }
         self.change_prefix = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a prefix to change (must be lower than 8 caracters) !\nUsage : `prefix [prefix]`"
+                    "description": "Donnez moi un préfixe (doit être inférieur à 8 caractères) !\nUtilisation : `prefix [préfixe]`"
 
                 },
                 "length_exceeded": {
                     "title": "Oops...",
-                    "description": "The prefix must have less than 8 characters !"
+                    "description": "Le préfixe ne doit pas dépasser 8 caractères !"
 
                 }
             },
             "embed": {
-                "title": "Done !",
-                "description": "The prefix has successfully been updated to `{prefix}`."
+                "title": "Fait !",
+                "description": "Le préfixe a bien été changé pour `{prefix}`."
             }
         }
         self.change_logs_channel = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a logs channel to define ! Usage : `logs [channel]`"
+                    "description": "Donnez moi un salon pour le logging ! Utilisation : `logs [salon]`"
 
                 }
             },
             "embed": {
-                "title": "Done !",
-                "description": "The logs channel has successfully been updated to {channel}."
+                "title": "Fait !",
+                "description": "Le salon des logs a bien été changé pour {channel}."
             }
         }
         self.change_language = {
             "embed": {
                 "title": "Language",
-                "description": "Use the bar bellow to select a language to set."
+                "description": "Utilisez la barre ci-dessous pour changer de langage."
             },
             "options": {
                 "en": {
@@ -452,133 +452,133 @@ class French(English):
                 },
                 "placeholder": "Select a language here :"
             },
-            "content": "Done !"
+            "content": "Fait !"
         }
 
         # mod.py cog
         self.log_on_member_remove = {
             "embed": {
                 "action": "Kick",
-                "description": "{member} (id : `{member_id}`) has been kicked by {mod}\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) a été kick par {mod}\nRaison : {reason}."
             }
         }
         self.log_on_member_ban = {
             "embed": {
                 "action": "Kick",
-                "description": "{member} (id : `{member_id}`) has been banned by {mod}\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) a été bannit par {mod}\nRaison : {reason}."
             }
         }
         self.log_on_member_unban = {
             "embed": {
                 "action": "Kick",
-                "description": "{member} (id : `{member_id}`) is now unbanned."
+                "description": "{member} (id : `{member_id}`) n'est plus ban."
             }
         }
         self.log_unmute = {
             "embed": {
                 "action": "Unmute",
-                "description": "{member} (id : `{member_id}`) has been unmuted."
+                "description": "{member} (id : `{member_id}`) n'est plus mute."
             }
         }
         self.log_purge = {
             "embed": {
                 "action": "Purge",
-                "description": "{mod} purged {n_message} messages in {channel}."
+                "description": "{mod} a supprimé {n_message} messages dans {channel}."
             },
         }
         self.clear_messages = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a number of messages to clear and optionally an user !\nUsage : `clear [amount] <user>`"
+                    "description": "Donnez moi un nombre de messages à supprimer et au préalable un utilisateur !\nUtilisation : `clear [quantité] <utilisateur>`"
                 }
             },
             "member_clear": {
-                "title": "Done !",
-                "description": "Deleted `{n_messages}` messages of {member}.",
-                "footer": "The messages older than 2 weeks cannot be deleted by the bot (Discord restrictions)."
+                "title": "Fait !",
+                "description": "`{n_messages}` messages de {member} ont été supprimés.",
+                "footer": "Les messages plus vieux que 2 semaines ne peuvent être supprimés (restriction Discord)."
 
             },
             "channel_clear": {
-                "title": "Done !",
-                "description": "Removed `{n_messages}` messages in this channel."
+                "title": "Fait !",
+                "description": "`{n_messages}` messages ont été supprimés dans ce salon."
             }
         }
         self.nuke_channel = {
             "embed": {
-                "title": "Ok, wait a second !",
-                "description": "You're about to nuke this channel and **up to 1000 messages will be deleted**. Are you sure you wanna do this ?"
+                "title": "Ok, ok, attendez une seconde !",
+                "description": "Vous êtes sur le point de nuke ce salon et **plus de 1000 messages peuvent-être supprimés**. Vous êtes vraiment sûr de vouloir faire ça ?"
             },
             "buttons": {
-                "no": "nah i'm good",
+                "no": "nah c'est bon",
                 "yes": "KADABOOOM"
             },
             "done": {
-                "title": "Done !",
-                "description": "Kadaboomed `{n_messages}` messages in this channel, that was very effective !"
+                "title": "Fait !",
+                "description": "`{n_messages}` messages ont cessé d'exister, ça été vraiment efficace !"
             }
         }
         self.warn_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to warn !\nUsage : `warn [member] <reason>`"
+                    "description": "Donnez moi un membre à warnsr !\nUtilisation : `warn [membre] <raison>`"
                 }
             },
             "embed": {
                 "title": "Warned !",
-                "description": "<a:verified:836312937332867072> You've warned {member}. They now have `{n_warns}` warn(s) !\nReason : {reason}"
+                "description": "Vous avez warn {member}. Il a désormais `{n_warns}` warn(s) !\nRaison : {reason}"
             },
             "log": {
                 "action": "Warn n°{n_warns}",
-                "description": "{member} (id : `{member_id}`) has been warned by {mod}.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) a été warn par {mod}.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been warned on **{guild}**.\nReason : {reason}."
+                "description": "Vous avez été warn sur **{guild}**.\nRaison : {reason}."
             }
         }
         self.clear_user_warns = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user with warns to clean !\nUsage : `clearwarns [member] <reason>`"
+                    "description": "Donnez moi un utilisateur avec des warns !\nUtilisation : `clearwarns [membre] <raison>`"
                 }
             },
             "embed": {
-                "title": "Infractions cleared !",
-                "description": "All the infractions of {member} has been removed."
+                "title": "Infractions effacées !",
+                "description": "Toutes les infractions de {member} ont été supprimés."
             },
             "log": {
-                "action": "Warns clear",
-                "description": "{mod} cleared all the warns of {member}.\nReason : {reason}."
+                "action": "Effacement d'infractions",
+                "description": "{mod} a supprimé tous les warns de {member}.\nRaison : {reason}."
             }
         }
         self.show_warnings = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to search !\nUsage : `warnings [member] <reason>`"
+                    "description": "Donnez moi un utilisateur !\nUtilisation : `warnings [membre] <raison>`"
                 }
             },
             "embed": {
                 "title": "Infractions",
-                "description": "Here's all the infractions of {member} (id : `{member_id}`) :",
+                "description": "Voici toutes les infractions de {member} (id : `{member_id}`) :",
                 "fields": {
                     "no_infra": {
-                        "name": "No infraction",
-                        "value": "This user has not yet been warned (must be an angel... or the mods aren't doing their work, idk.)"
+                        "name": "Aucune infraction",
+                        "value": "Cet utilisateur n'a pas encore été warn (il doit être un ange... ou les modos font pas leur boulot, jsp)."
                     },
                     "warn": {
                         "name": "Warn n°{n_warn}",
-                        "value": "Reason : {reason}\nBy {mod} on `{date}`"
+                        "value": "Raison : {reason}\Par {mod} le `{date}`"
                     }
                 },
                 "buttons": {
-                    "previous": "Previous",
-                    "next": "Next"
+                    "previous": "Précédent",
+                    "next": "Suivant"
                 }
             }
         }
         self.mute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to mute !\nUsage: `mute[member] <reason>`"
+                    "description": "Gimme a member to mute !\nUsage: `mute[membre] <raison>`"
 
                 },
                 "already_muted": {
@@ -588,20 +588,20 @@ class French(English):
             },
             "embed": {
                 "title": "Muted !",
-                "description": "Just muted {member}.\nReason : {reason}"
+                "description": "Just muted {member}.\nRaison : {reason}"
             },
             "log": {
                 "action": "Mute",
-                "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been muted on **{guild}**.\nReason : {reason}."
+                "description": "You've been muted on **{guild}**.\nRaison : {reason}."
             }
         }
         self.tempmute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to tempmute !\nUsage: `tmute [member] [duration] <reason>`"
+                    "description": "Gimme a member to tempmute !\nUsage: `tmute [membre] [durée] <raison>`"
                 },
                 "already_muted": {
                     "title": "Oops...",
@@ -610,20 +610,20 @@ class French(English):
             },
             "embed": {
                 "title": "Muted !",
-                "description": "{member} is now tempmuted for `{duration}`.\nReason : {reason}"
+                "description": "{member} is now tempmuted for `{duration}`.\nRaison : {reason}"
             },
             "log": {
                 "action": "Tempmute",
-                "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been tempmuted on **{guild}** for `{duration}`.\nReason : {reason}."
+                "description": "You've been tempmuted on **{guild}** for `{duration}`.\nRaison : {reason}."
             }
         }
         self.unmute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to unmute !\nUsage: `tmute [member]`"
+                    "description": "Gimme a member to unmute !\nUsage: `tmute [membre]`"
                 },
                 "not_muted": {
                     "title": "Oops...",
@@ -641,21 +641,21 @@ class French(English):
         self.yeet_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to kick !\nUsage : `kick [member] <reason>`"
+                    "description": "Gimme a member to kick !\nUtilisation : `kick [membre] <raison>`"
                 }
             },
             "embed": {
                 "title": "Kicked !",
-                "description": "{member} has been yeeted out from the server.\nReason : {reason}"
+                "description": "{member} has been yeeted out from the server.\nRaison : {reason}"
             },
             "pm": {
-                "description": "You've been kicked from **{guild}**.\nReason : {reason}"
+                "description": "You've been kicked from **{guild}**.\nRaison : {reason}"
             }
         }
         self.yeet_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to kick !\nUsage : `kick [members] <reason>`"
+                    "description": "Gimme members to kick !\nUtilisation : `kick [members] <raison>`"
                 }
             },
             "embed": {
@@ -676,57 +676,57 @@ class French(English):
         self.ban_user = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to ban !\nUsage : `ban [user] <reason>`"
+                    "description": "Gimme a user to ban !\nUtilisation : `ban [utilisateur] <raison>`"
                 }
             },
             "embed": {
                 "title": "Banned !",
-                "description": "Banishing hammer sagged on {member}.\nReason : {reason}"
+                "description": "Banishing hammer sagged on {member}.\nRaison : {reason}"
             },
             "pm": {
-                "description": "You've been banned from **{guild}**.\nReason : {reason}"
+                "description": "You've been banned from **{guild}**.\nRaison : {reason}"
             }
         }
         self.tempban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to tempban !\nUsage: `tban [user] [duration] <reason>`"
+                    "description": "Gimme a user to tempban !\nUsage: `tban [utilisateur] [durée] <raison>`"
                 }
             },
             "embed": {
                 "title": "Banned !",
-                "description": "{member} is now tempbanned for `{duration}`.\nReason : {reason}"
+                "description": "{member} is now tempbanned for `{duration}`.\nRaison : {reason}"
             },
             "log": {
                 "action": "Tempban",
-                "description": "{member} (id : `{member_id}`) has been tempbanned by {mod} for `{duration}`.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) has been tempbanned by {mod} for `{duration}`.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been tempbanned on **{guild}** for `{duration}`.\nReason : {reason}."
+                "description": "You've been tempbanned on **{guild}** for `{duration}`.\nRaison : {reason}."
             }
         }
         self.softban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "( ﾉ ﾟｰﾟ)ﾉ Gimme a member to soft-ban !\nUsage : `softban [member] <reason>`"
+                    "description": "( ﾉ ﾟｰﾟ)ﾉ Gimme a member to soft-ban !\nUtilisation : `softban [membre] <raison>`"
                 }
             },
             "pm": {
-                "description": "You've been soft-banned from **{guild}** for the following reason : '{reason}'.\nUse this link to come back : {invite}"
+                "description": "You've been soft-banned from **{guild}** for the following raison : '{reason}'.\nUse this link to come back : {invite}"
             },
             "embed": {
                 "title": "Tempbanned !",
-                "description": "{member} has been softbanned.\nReason : {reason}"
+                "description": "{member} has been softbanned.\nRaison : {reason}"
             },
             "log": {
                 "action": "Softban",
-                "description": "{member} (id : `{member_id}`) has been softbanned by {mod}.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) has been softbanned by {mod}.\nRaison : {reason}."
             }
         }
         self.ban_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to ban !\nUsage : `mban [members] <reason>`"
+                    "description": "Gimme members to ban !\nUtilisation : `mban [members] <raison>`"
                 }
             },
             "embed": {
@@ -747,7 +747,7 @@ class French(English):
         self.unban_user = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to unban !\nUsage: `unban [user]`"
+                    "description": "Gimme a user to unban !\nUsage: `unban [utilisateur]`"
                 }
             },
             "embed": {
@@ -761,7 +761,7 @@ class French(English):
         self.normalize_nickname = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member with a nickname to normalize.\nUsage : `normalize [member]`."
+                    "description": "Gimme a member with a nickname to normalize.\nUtilisation : `normalize [membre]`."
                 },
                 "already_normal": {
                     "title": "Hm.",

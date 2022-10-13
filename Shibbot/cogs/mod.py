@@ -674,13 +674,18 @@ class Mod(commands.Cog):
             raise commands.BotMissingPermissions
         await ctx.message.delete()
         mute_role = await self.get_mute_role(ctx.guild)
+
         if mute_role in member.roles:
-            embed_text = text["checks"]["already_muted"]
-            return await ctx.send(
-                embed=discord.Embed(
-                    title=embed_text["title"],
-                    description="ಠ_ಠ "+embed_text["description"],
-                    color=discord.Color.red()))
+            async with self.client.aiodb() as db:
+                async with db.execute("SELECT * FROM sanctions WHERE guild_id=? AND user_id=? AND type=?", (ctx.guild.id, member.id, "tempmute")) as cursor:
+                    tempmute_sanctions = await cursor.fetchone()
+            if tempmute_sanctions:
+                embed_text = text["checks"]["already_muted"]
+                return await ctx.send(
+                    embed=discord.Embed(
+                        title=embed_text["title"],
+                        description="ಠ_ಠ "+embed_text["description"],
+                        color=discord.Color.red()))
 
         await member.add_roles(mute_role, reason=reason)
         self.client.loop.create_task(self.set_mute_role(ctx, mute_role))

@@ -227,7 +227,7 @@ class French(English):
         self.urbain_dictionary = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un mot à chercher sur l'Urban Dictionnary !\nUtilisation : `udict [mot]`"
+                    "description": "Donnez-moi un mot à chercher sur l'Urban Dictionnary !\nUsage : `udict [mot]`"
                 }
             },
             "embed": {
@@ -248,7 +248,7 @@ class French(English):
         self.get_covid_stats = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un pays ou utilisez `world` pour obtenir les données mondiales !\nUtilisation : `covid [pays]`"
+                    "description": "Donnez-moi un pays ou utilisez `world` pour obtenir les données mondiales !\nUsage : `covid [pays]`"
                 }
             },
             "loading_embed": {
@@ -302,7 +302,7 @@ class French(English):
         self.translate_text = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un langage et du texte à traduire !\nUtilisation : `trans [language] [sentence]`"
+                    "description": "Donnez-moi un langage et du texte à traduire !\nUsage : `trans [language] [sentence]`"
                 },
                 "bad_args": {
                     "title": "Essayez encore !",
@@ -328,7 +328,7 @@ class French(English):
         self.search_on_wikipedia = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi quelque chose à chercher !\nUtilisation : `wiki [article]`"
+                    "description": "Donnez-moi quelque chose à chercher !\nUsage : `wiki [article]`"
                 },
                 "not_found": {
                     "description": "Je n'ai rien put trouver pour '{article}', Réessayez."
@@ -350,7 +350,7 @@ class French(English):
         self.get_random_number = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un nombre ou deux !\nUtilisation : `randint [x] <y>`"
+                    "description": "Donnez-moi un nombre ou deux !\nUsage : `randint [x] <y>`"
 
                 }
             }
@@ -412,7 +412,7 @@ class French(English):
         self.change_prefix = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un préfixe (doit être inférieur à 8 caractères) !\nUtilisation : `prefix [préfixe]`"
+                    "description": "Donnez-moi un préfixe (doit être inférieur à 8 caractères) !\nUsage : `prefix [préfixe]`"
 
                 },
                 "length_exceeded": {
@@ -429,7 +429,7 @@ class French(English):
         self.change_logs_channel = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un salon pour le logging ! Utilisation : `logs [salon]`"
+                    "description": "Donnez-moi un salon pour le logging ! Utilisation : `logs [salon]`"
 
                 }
             },
@@ -465,7 +465,7 @@ class French(English):
         self.log_on_member_ban = {
             "embed": {
                 "action": "Kick",
-                "description": "{member} (id : `{member_id}`) a été bannit par {mod}\nRaison : {reason}."
+                "description": "{member} (id : `{member_id}`) a été banni par {mod}\nRaison : {reason}."
             }
         }
         self.log_on_member_unban = {
@@ -489,7 +489,7 @@ class French(English):
         self.clear_messages = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un nombre de messages à supprimer et au préalable un utilisateur !\nUtilisation : `clear [quantité] <utilisateur>`"
+                    "description": "Donnez-moi un nombre de messages à supprimer et au préalable un utilisateur !\nUsage : `clear [quantité] <utilisateur>`"
                 }
             },
             "member_clear": {
@@ -506,7 +506,7 @@ class French(English):
         self.nuke_channel = {
             "embed": {
                 "title": "Ok, ok, attendez une seconde !",
-                "description": "Vous êtes sur le point de nuke ce salon et **plus de 1000 messages peuvent-être supprimés**. Vous êtes vraiment sûr de vouloir faire ça ?"
+                "description": "Vous êtes sur le point de nuke ce salon et **plus de 1000 messages peuvent-être supprimés**. Etes vous vraiment sûr de vouloir faire ça ?"
             },
             "buttons": {
                 "no": "nah c'est bon",
@@ -514,13 +514,13 @@ class French(English):
             },
             "done": {
                 "title": "Fait !",
-                "description": "`{n_messages}` messages ont cessé d'exister, ça été vraiment efficace !"
+                "description": "`{n_messages}` messages ont cessé d'exister, ça a été vraiment efficace !"
             }
         }
         self.warn_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un membre à warnsr !\nUtilisation : `warn [membre] <raison>`"
+                    "description": "Donnez-moi un membre à warnsr !\nUsage : `warn [membre] <raison>`"
                 }
             },
             "embed": {
@@ -538,7 +538,7 @@ class French(English):
         self.clear_user_warns = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un utilisateur avec des warns !\nUtilisation : `clearwarns [membre] <raison>`"
+                    "description": "Donnez-moi un utilisateur avec des warns !\nUsage : `clearwarns [membre] <raison>`"
                 }
             },
             "embed": {
@@ -553,7 +553,7 @@ class French(English):
         self.show_warnings = {
             "checks": {
                 "missing_args": {
-                    "description": "Donnez moi un utilisateur !\nUtilisation : `warnings [membre] <raison>`"
+                    "description": "Donnez-moi un utilisateur !\nUsage : `warnings [membre] <raison>`"
                 }
             },
             "embed": {
@@ -578,248 +578,248 @@ class French(English):
         self.mute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to mute !\nUsage: `mute[membre] <raison>`"
+                    "description": "Donnez-moi un membre à mute !\nUsage: `mute[membre] <raison>`"
 
                 },
                 "already_muted": {
                     "title": "Oops...",
-                    "description": "This member is already muted !"
+                    "description": "Ce membre est déjà mute !"
                 }
             },
             "embed": {
-                "title": "Muted !",
-                "description": "Just muted {member}.\nRaison : {reason}"
+                "title": "Mute !",
+                "description": "J'ai mute {member}.\nRaison : {reason}"
             },
             "log": {
                 "action": "Mute",
-                "description": "{member} (id : `{member_id}`) has been muted by {mod}.\nRaison : {reason}."
+                "description": "{member} (id : `{member_id}`) a été mute par {mod}.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been muted on **{guild}**.\nRaison : {reason}."
+                "description": "Vous avez été mute sur **{guild}**.\nRaison : {reason}."
             }
         }
         self.tempmute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to tempmute !\nUsage: `tmute [membre] [durée] <raison>`"
+                    "description": "Donnez-moi un membre à tempmute !\nUsage: `tmute [membre] [durée] <raison>`"
                 },
                 "already_muted": {
                     "title": "Oops...",
-                    "description": "This member is already muted !"
+                    "description": "Ce membre est déjà tempmute !"
                 }
             },
             "embed": {
                 "title": "Muted !",
-                "description": "{member} is now tempmuted for `{duration}`.\nRaison : {reason}"
+                "description": "{member} est désormais tempmute pour `{duration}`.\nRaison : {reason}"
             },
             "log": {
                 "action": "Tempmute",
-                "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nRaison : {reason}."
+                "description": "{member} (id : `{member_id}`) a été tempmute par {mod} pour `{duration}`.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been tempmuted on **{guild}** for `{duration}`.\nRaison : {reason}."
+                "description": "Vous avez été tempmute sur **{guild}** pour `{duration}`.\nRaison : {reason}."
             }
         }
         self.unmute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to unmute !\nUsage: `tmute [membre]`"
+                    "description": "Donnez-moi un membre à unmute !\nUsage: `tmute [membre]`"
                 },
                 "not_muted": {
                     "title": "Oops...",
-                    "description": "This member is not muted !"
+                    "description": "Ce membre n'est pas mute !"
                 }
             },
             "embed": {
-                "title": "Muted !",
-                "description": "{member} is now unmuted."
+                "title": "Unmute !",
+                "description": "{member} n'est désormais plus mute."
             },
             "pm": {
-                "description": "You've been unmuted from **{guild}**."
+                "description": "Vous avez été unmute sur **{guild}**."
             }
         }
         self.yeet_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to kick !\nUtilisation : `kick [membre] <raison>`"
+                    "description": "Donnez-moi un membre à expulser !\nUsage : `kick [membre] <raison>`"
                 }
             },
             "embed": {
-                "title": "Kicked !",
-                "description": "{member} has been yeeted out from the server.\nRaison : {reason}"
+                "title": "Expulsé !",
+                "description": "{member} s'est prit un coup de pied au c*l s'est fait dégagé de votre serveur.\nRaison : {reason}"
             },
             "pm": {
-                "description": "You've been kicked from **{guild}**.\nRaison : {reason}"
+                "description": "Vous avez été expulsé de **{guild}**.\nRaison : {reason}"
             }
         }
         self.yeet_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to kick !\nUtilisation : `kick [members] <raison>`"
+                    "description": "Donnez-moi des membres à expulser !\nUsage : `mkick [memberes séparés par un espace]`"
                 }
             },
             "embed": {
-                "title": "Multikcick command",
+                "title": "Commande d'expulsion de groupe",
                 "fields": [
                     {
-                        "name": "Sucessful kick(s)"
+                        "name": "Expulsion(s) réussie(s)"
                     },
                     {
-                        "name": "Failed kick(s)"
+                        "name": "Expulion(s) raté(s)"
                     }
                 ]
             },
             "pm": {
-                "description": "You've been kicked from **{guild}**."
+                "description": "Vous avez été expulsé de **{guild}**."
             }
         }
         self.ban_user = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to ban !\nUtilisation : `ban [utilisateur] <raison>`"
+                    "description": "Donnez-moi un utilisateur à bannir !\nUsage : `ban [utilisateur] <raison>`"
                 }
             },
             "embed": {
-                "title": "Banned !",
-                "description": "Banishing hammer sagged on {member}.\nRaison : {reason}"
+                "title": "Banni !",
+                "description": "Le marteau du ban s'est abbatu sur {member}.\nRaison : {reason}"
             },
             "pm": {
-                "description": "You've been banned from **{guild}**.\nRaison : {reason}"
+                "description": "Vous avez été banni de **{guild}**.\nRaison : {reason}"
             }
         }
         self.tempban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to tempban !\nUsage: `tban [utilisateur] [durée] <raison>`"
+                    "description": "Donnez-moi un utilisateur à tempban !\nUsage: `tban [utilisateur] [durée] <raison>`"
                 }
             },
             "embed": {
-                "title": "Banned !",
-                "description": "{member} is now tempbanned for `{duration}`.\nRaison : {reason}"
+                "title": "Banni !",
+                "description": "{member} a été banni pour `{duration}`.\nRaison : {reason}"
             },
             "log": {
                 "action": "Tempban",
-                "description": "{member} (id : `{member_id}`) has been tempbanned by {mod} for `{duration}`.\nRaison : {reason}."
+                "description": "{member} (id : `{member_id}`) a été banni par {mod} pour `{duration}`.\nRaison : {reason}."
             },
             "pm": {
-                "description": "You've been tempbanned on **{guild}** for `{duration}`.\nRaison : {reason}."
+                "description": "Vous avez été banni sur **{guild}** pour `{duration}`.\nRaison : {reason}."
             }
         }
         self.softban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "( ﾉ ﾟｰﾟ)ﾉ Gimme a member to soft-ban !\nUtilisation : `softban [membre] <raison>`"
+                    "description": "Donnez-moi un membre à soft-ban !\nUsage : `softban [membre] <raison>`"
                 }
             },
             "pm": {
-                "description": "You've been soft-banned from **{guild}** for the following raison : '{reason}'.\nUse this link to come back : {invite}"
+                "description": "Vous avez été soft-ban de **{guild}** pour la raison suivante : '{reason}'.\nUtilisez ce lien pour revenir : {invite}"
             },
             "embed": {
-                "title": "Tempbanned !",
-                "description": "{member} has been softbanned.\nRaison : {reason}"
+                "title": "Soft-banni !",
+                "description": "{member} a été soft-ban.\nRaison : {reason}"
             },
             "log": {
-                "action": "Softban",
-                "description": "{member} (id : `{member_id}`) has been softbanned by {mod}.\nRaison : {reason}."
+                "action": "Soft-ban",
+                "description": "{member} (id : `{member_id}`) a été softban par {mod}.\nRaison : {reason}."
             }
         }
         self.ban_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to ban !\nUtilisation : `mban [members] <raison>`"
+                    "description": "Donnez-moi des membres à bannir !\nUsage : `mban [memberes] <raison>`"
                 }
             },
             "embed": {
-                "title": "Multiban command",
+                "title": "Commande de ban de groupe",
                 "fields": [
                     {
-                        "name": "Sucessful ban(s)"
+                        "name": "Ban(s) réussi(s)"
                     },
                     {
-                        "name": "Failed ban(s)"
+                        "name": "Ban(s) raté(s)"
                     }
                 ]
             },
             "pm": {
-                "description": "You've been banned from **{guild}**."
+                "description": "Vous avez été banni de **{guild}**."
             }
         }
         self.unban_user = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to unban !\nUsage: `unban [utilisateur]`"
+                    "description": "Donnez-moi un membre à débannir !\nUsage: `unban [utilisateur]`"
                 }
             },
             "embed": {
-                "title": "Muted !",
-                "description": "{member} is now unbanned."
+                "title": "Débanni !",
+                "description": "{member} n'est désormais plus ban."
             },
             "pm": {
-                "description": "You've been unbanned from **{guild}**."
+                "description": "Vous avez été débanni de **{guild}**."
             }
         }
         self.normalize_nickname = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member with a nickname to normalize.\nUtilisation : `normalize [membre]`."
+                    "description": "Donnez moi un membre dont je dois normaliser le pseudo !\nUsage : `normalize [membre]`."
                 },
                 "already_normal": {
                     "title": "Hm.",
-                    "description": "`{nickname}` seems normal for me, nothing changed."
+                    "description": "`{nickname}` me semble plutôt normal, rien n'a changé."
                 }
             },
             "embed": {
-                "title": "Normalized !",
-                "description": "I cleaned {member} nickname."
+                "title": "Aux standarts !",
+                "description": "J'ai nettoyé le pseudo de {member}, c'est plus lisible d'un coup."
             }
         }
 
         # misc.py cog
         self.show_avatar = {
             "embed": {
-                "description": "{member}'s avatar :"
+                "description": "L'avatar de {member} :"
             }
         }
         self.get_guild_info = {
             "loading_embed": {
-                "description": "Fetching..."
+                "description": "Recherche..."
             },
             "embed": {
-                "title": "Server Info",
-                "description": "Some information about **{guild}** :",
+                "title": "Infos du serveur",
+                "description": "Quelques informations sur **{guild}** :",
                 "fields": [
                     {
-                        "name": "__Main information__",
-                        "value": "**🔍 Name :** `{guild_name}`\n**🆔 ID :** `{guild_id}`\n**⏲ Created on :** {date_creation_date} ({relative_creation_date})\n**💥 Owner :** {owner} (id : `{owner_id}`)\n**💎 Boost tier :** `{premium_tier}` (with `{premium_sub_tier} boosts`)\n**🔐 Verification level :** `{verification_level}`"
+                        "name": "__Informations principales__",
+                        "value": "**🔍 Nom :** `{guild_name}`\n**🆔 ID :** `{guild_id}`\n**⏲ Créé le :** {date_creation_date} ({relative_creation_date})\n**💥 propriétaire :** {owner} (id : `{owner_id}`)\n**💎 Palier de boost :** `{premium_tier}` (avec `{premium_sub_tier} boosts`)\n**🔐 Niveau de vérification :** `{verification_level}`"
                     },
                     {
-                        "name": "__Statistics__",
-                        "value": "**:busts_in_silhouette: Member count :** `{member_count} members`\n**- 🧔 Hoomans :** `{humain_count} ({humain_count_percent}%)`\n**- 🤖 Bots :** `{bot_count} ({bot_count_percent}%)`\n**📚 Total channels :** `{channel_count}`\n**- 🗃 Categories :** `{category_count}`\n**- 💬 Text :** `{text_count} ({text_count_percent}%)`\n**- 🔊 Voice :** `{voice_count} ({voice_count_percent}%)`"
+                        "name": "__Statistiques__",
+                        "value": "**:busts_in_silhouette: Total de membres :** `{member_count} membres`\n**- 🧔 Humains :** `{humain_count} ({humain_count_percent}%)`\n**- 🤖 Bots :** `{bot_count} ({bot_count_percent}%)`\n**📚 Total de salons :** `{channel_count}`\n**- 🗃 Catégories :** `{category_count}`\n**- 💬 Texte :** `{text_count} ({text_count_percent}%)`\n**- 🔊 Voix :** `{voice_count} ({voice_count_percent}%)`"
                     },
                     {
                         "name": "__Roles__"
                     },
                     {
                         "name": "__Emojis__",
-                        "value": "(。_。) No emoji found."
+                        "value": "(。_。) Aucun émoji trouvé."
                     }
                 ]
             }
         }
         self.get_user_info = {
             "loading_embed": {
-                "description": "Searching..."
+                "description": "Recherche..."
             },
             "embed": {
-                "title": "User info",
+                "title": "Infos de l'utilisateur",
                 "fields": [
                     {
-                        "name": "__Main information__",
-                        "value": "**#️⃣ Username and tag :** `{user}`\n**🆔 ID :** `{user_id}`\n**⏲ Account created on :** {date_creation_date} ({relative_creation_date})\n**🤖 Is a bot :** `{is_bot}`\n**:busts_in_silhouette: Servers in common :** `{common_serv}`"
+                        "name": "__Informations principales__",
+                        "value": "**#️⃣ Nom & tag :** `{user}`\n**🆔 ID :** `{user_id}`\n**⏲ Compte créé le :** {date_creation_date} ({relative_creation_date})\n**🤖 Est un bot :** `{is_bot}`\n**:busts_in_silhouette: Serveurs en commun :** `{common_serv}`"
                     },
                     {
-                        "name": "__Member related info__",
-                        "value": "**🎭 Nickname :** `{nickname}`\n**🚪Joined the server on :** {joined_at} ({relative_joined_at})\n**🎨 Activity :** `{activity}`\n**Status :** `{status}`\n**Top role :** {top_role}"
+                        "name": "__Infos liés au membre__",
+                        "value": "**🎭 Pseudo :** `{nickname}`\n**🚪A rejoint le serveur le :** {joined_at} ({relative_joined_at})\n**🎨 Activité :** `{activity}`\n**Statut :** `{status}`\n**Rôle le plus haut :** {top_role}"
                     }
                 ]
             }

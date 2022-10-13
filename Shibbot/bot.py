@@ -107,7 +107,7 @@ class Shibbot(commands.Bot):
                     self.load_extension(f"cogs.{cogname}")
                 except Exception as e:
                     print(
-                        f"[x] Could not load '{cogname}' : ({type(e).__name__}: {e})")
+                        f"[x] Could not load '{cogname}' : {type(e).__name__}: {e}")
 
     async def fetch_guild(self, guild: discord.Guild):
         """Used to fetch a guild's data or insert a guild into the guild's table."""

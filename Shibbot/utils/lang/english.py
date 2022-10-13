@@ -602,23 +602,23 @@ class English:
         self.tempmute_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a member to tempmute !\nUsage: `tmute [member] [duration] <reason>`"
+                    "description": "Gimme a member to temp-mute !\nUsage: `tmute [member] [duration] <reason>`"
                 },
                 "already_muted": {
                     "title": "Oops...",
-                    "description": "This member is already muted !"
+                    "description": "This member is already temp-muted !"
                 }
             },
             "embed": {
                 "title": "Muted !",
-                "description": "{member} is now tempmuted for `{duration}`.\nReason : {reason}"
+                "description": "{member} is now temp-muted for `{duration}`.\nReason : {reason}"
             },
             "log": {
-                "action": "Tempmute",
-                "description": "{member} (id : `{member_id}`) has been tempmuted by {mod} for `{duration}`.\nReason : {reason}."
+                "action": "Temp-mute",
+                "description": "{member} (id : `{member_id}`) has been temp-muted by {mod} for `{duration}`.\nReason : {reason}."
             },
             "pm": {
-                "description": "You've been tempmuted on **{guild}** for `{duration}`.\nReason : {reason}."
+                "description": "You've been temp-muted on **{guild}** for `{duration}`.\nReason : {reason}."
             }
         }
         self.unmute_member = {
@@ -656,7 +656,7 @@ class English:
         self.yeet_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to kick !\nUsage : `kick [members] <reason>`"
+                    "description": "Gimme members to kick !\nUsage : `mkick [members separated by a space]`"
                 }
             },
             "embed": {
@@ -691,43 +691,43 @@ class English:
         self.tempban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme a user to tempban !\nUsage: `tban [user] [duration] <reason>`"
+                    "description": "Gimme a user to temp-ban !\nUsage: `tban [user] [duration] <reason>`"
                 }
             },
             "embed": {
                 "title": "Banned !",
-                "description": "{member} is now tempbanned for `{duration}`.\nReason : {reason}"
+                "description": "{member} is now temp-banned for `{duration}`.\nReason : {reason}"
             },
             "log": {
-                "action": "Tempban",
-                "description": "{member} (id : `{member_id}`) has been tempbanned by {mod} for `{duration}`.\nReason : {reason}."
+                "action": "Temp-ban",
+                "description": "{member} (id : `{member_id}`) has been temp-banned by {mod} for `{duration}`.\nReason : {reason}."
             },
             "pm": {
-                "description": "You've been tempbanned on **{guild}** for `{duration}`.\nReason : {reason}."
+                "description": "You've been temp-banned on **{guild}** for `{duration}`.\nReason : {reason}."
             }
         }
         self.softban_member = {
             "checks": {
                 "missing_args": {
-                    "description": "( ﾉ ﾟｰﾟ)ﾉ Gimme a member to soft-ban !\nUsage : `softban [member] <reason>`"
+                    "description": "Gimme a member to soft-ban !\nUsage : `softban [member] <reason>`"
                 }
             },
             "pm": {
                 "description": "You've been soft-banned from **{guild}** for the following reason : '{reason}'.\nUse this link to come back : {invite}"
             },
             "embed": {
-                "title": "Tempbanned !",
-                "description": "{member} has been softbanned.\nReason : {reason}"
+                "title": "Soft-banned !",
+                "description": "{member} has been soft-banned.\nReason : {reason}"
             },
             "log": {
                 "action": "Softban",
-                "description": "{member} (id : `{member_id}`) has been softbanned by {mod}.\nReason : {reason}."
+                "description": "{member} (id : `{member_id}`) has been soft-banned by {mod}.\nReason : {reason}."
             }
         }
         self.ban_members = {
             "checks": {
                 "missing_args": {
-                    "description": "Gimme members to ban !\nUsage : `mban [members] <reason>`"
+                    "description": "Gimme members to ban !\nUsage : `mban [members separated by a space]`"
                 }
             },
             "embed": {
@@ -752,7 +752,7 @@ class English:
                 }
             },
             "embed": {
-                "title": "Muted !",
+                "title": "Unbanned !",
                 "description": "{member} is now unbanned."
             },
             "pm": {

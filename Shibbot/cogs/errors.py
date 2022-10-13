@@ -82,11 +82,11 @@ class Error(commands.Cog):
                     description=f"Something went wrong :\n```{type(error).__name__}: {error}```",
                     color=discord.Color.red())
             else:
-                text = text["CommandError"]
+                text_ = text["CommandError"]
                 embed = ErrorEmbed(
-                    description=text["description"])
+                    description=text_["description"])
                 embed.set_footer(
-                    text=text["footer"].format(
+                    text=text_["footer"].format(
                         owner=self.client.get_user(self.client.owner_id)))
 
         try:
@@ -111,7 +111,7 @@ class Error(commands.Cog):
             dismiss_button.callback = delete_message
             view = discord.ui.View(dismiss_button)
             await message.edit(embed=embed, view=view, delete_after=time)
-        except:
+        except Exception as e:
             print(f"[x] Unexpected error : {type(error).__name__}: {error}")
 
 

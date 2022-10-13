@@ -16,7 +16,7 @@ class Config(commands.Cog):
     @commands.command(name="enable", aliases=["disable", "plugin", "plugins"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(1, 180, commands.BucketType.member)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def enable_disable_plugin(self, ctx: commands.Context):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).enable_disable_plugins
 
@@ -84,7 +84,7 @@ class Config(commands.Cog):
     @commands.command(name="lang", aliases=["setlang"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(1, 180, commands.BucketType.member)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def change_language(self, ctx: commands.Context):
         current_lang = await self.client.get_lang(ctx.guild)
         text = self.client.fl(current_lang).change_language
@@ -135,7 +135,7 @@ class Config(commands.Cog):
     @commands.command(name="prefix", aliases=["setprefix"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    @commands.cooldown(2, 60, commands.BucketType.member)
+    @commands.cooldown(2, 10, commands.BucketType.member)
     async def change_prefix(self, ctx: commands.Context, prefix: str = None):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).change_prefix
         if not prefix:
@@ -154,8 +154,7 @@ class Config(commands.Cog):
 
         await self.client.fetch_guild(ctx.guild)
         async with self.client.aiodb() as db:
-            query_friendly_prefix = prefix.replace("\"", r"\"")
-            async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (query_friendly_prefix, ctx.guild.id,)):
+            async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (prefix, ctx.guild.id,)):
                 await db.commit()
         embed_text = text["embed"]
         await ctx.reply(

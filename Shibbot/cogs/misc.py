@@ -33,7 +33,7 @@ class Misc(commands.Cog):
 
     @commands.command(name="serverinfo", aliases=["guildinfo", "sinfo", "ginfo"])
     @commands.guild_only()
-    @commands.cooldown(1, 20, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.user)
     async def get_guild_info(self, ctx: commands.Context):
         """Gives information about the guild."""
         lang = self.client.fl(await self.client.get_lang(ctx.guild))

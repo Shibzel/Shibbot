@@ -125,11 +125,11 @@ class Mod(commands.Cog):
                 f"[+] Resuming tempmute and tempban sanctions ({len(tasks)} ones).")
             await asyncio.gather(*tasks)
 
-    @ commands.command(name="logs", aliases=["setlogs"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_channels=True)
-    @ commands.cooldown(2, 60, commands.BucketType.member)
+    @commands.command(name="logs", aliases=["setlogs"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_channels=True)
+    @commands.cooldown(2, 60, commands.BucketType.member)
     async def change_logs_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).change_logs_channel
         if not channel:
@@ -146,12 +146,12 @@ class Mod(commands.Cog):
         await ctx.reply(
             embed=discord.Embed(
                 title=embed_text["title"],
-                description=f"<a:verified:836312937332867072> " +
+                description=f"✔️ " +
                 embed_text["description"].format(channel=channel.mention),
                 color=discord.Color.green()))
 
-    @ commands.Cog.listener()
-    @ plugin_is_enabled()
+    @commands.Cog.listener()
+    @plugin_is_enabled()
     async def on_member_remove(self, member: discord.Member):
         await asyncio.sleep(0.5)
         found_entry = None
@@ -177,8 +177,8 @@ class Mod(commands.Cog):
                         reason=found_entry.reason),
                     found_entry.created_at))
 
-    @ commands.Cog.listener()
-    @ plugin_is_enabled()
+    @commands.Cog.listener()
+    @plugin_is_enabled()
     async def on_member_ban(self, guild: discord.Guild, user: discord.User):
         await asyncio.sleep(0.5)
         found_entry = None
@@ -204,8 +204,8 @@ class Mod(commands.Cog):
                         reason=found_entry.reason),
                     found_entry.created_at))
 
-    @ commands.Cog.listener()
-    @ plugin_is_enabled()
+    @commands.Cog.listener()
+    @plugin_is_enabled()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
         await asyncio.sleep(0.5)
         found_entry = None
@@ -227,18 +227,18 @@ class Mod(commands.Cog):
                         member_id=user.id),
                     found_entry.created_at))
 
-    @ commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
         self.client.cursor.execute(
             f"DELETE FROM sanctions WHERE guild_id=?",
             (guild.id,))
         self.client.db.commit()
 
-    @ commands.command(name="clear", aliases=["purge"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_messages=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="clear", aliases=["purge"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_messages(self, ctx: commands.Context, limit: int = None, member: discord.User = None):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.clear_messages
@@ -301,11 +301,11 @@ class Mod(commands.Cog):
                     n_message=len(deleted_messages),
                     channel=ctx.channel.mention)))
 
-    @ commands.command(name="nuke")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_channels=True)
-    @ commands.cooldown(1, 10, commands.BucketType.member)
+    @commands.command(name="nuke")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_channels=True)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def nuke_channel(self, ctx: commands.Context):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.nuke_channel
@@ -377,11 +377,11 @@ class Mod(commands.Cog):
                 no_button,
                 kadaboom_button))
 
-    @ commands.command(name="warn")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_messages=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="warn")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def warn_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).warn_member
         if not member:
@@ -437,11 +437,11 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @ commands.command(name="clearwarns", aliases=["cwarns"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_messages=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="clearwarns", aliases=["cwarns"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def clear_user_warns(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).clear_user_warns
         if not member:
@@ -475,11 +475,11 @@ class Mod(commands.Cog):
                     member=member.mention,
                     reason=reason)))
 
-    @ commands.command(name="warnings", aliases=["infractions", "swarn"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_messages=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="warnings", aliases=["infractions", "swarn"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def show_warnings(self, ctx: commands.Context, member: discord.User = None):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).show_warnings
         if not member:
@@ -598,11 +598,11 @@ class Mod(commands.Cog):
         ]
         await asyncio.gather(*tasks)
 
-    @ commands.command(name="mute", aliases=["tg", "shut"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_roles=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="mute", aliases=["tg", "shut"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def mute_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).mute_member
         if not member:
@@ -657,11 +657,11 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @ commands.command(name="tempmute", aliases=["tmute"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_roles=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="tempmute", aliases=["tmute"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempmute_member(self, ctx: commands.Context, member: discord.Member = None, duration: ArgToDuration = None, *, reason="Unspecified"):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).tempmute_member
         if not member or not duration:
@@ -729,11 +729,11 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @ commands.command(name="unmute")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_roles=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="unmute")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def unmute_member(self, ctx: commands.Context, member: discord.Member = None):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.unmute_member
@@ -787,11 +787,11 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @ commands.command(name="kick", aliases=["yeet", "eject"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(kick_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="kick", aliases=["yeet", "eject"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def yeet_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         if is_kickable(member):
             lang = self.client.fl(await self.client.get_lang(ctx.guild))
@@ -841,11 +841,11 @@ class Mod(commands.Cog):
             except:
                 pass
 
-    @ commands.command(name="multikick", aliases=["multiyeet", "mkick"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(kick_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="multikick", aliases=["multiyeet", "mkick"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def yeet_members(self, ctx: commands.Context, *members):
         kicked_members, failed_kicks = [], []
 
@@ -907,11 +907,11 @@ class Mod(commands.Cog):
         for member in kicked_members:
             self.client.loop.create_task(notify_member(member))
 
-    @ commands.command(name="ban")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(ban_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="ban")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def ban_user(self, ctx: commands.Context, member: discord.User = None, *, reason="Unspecified"):
         if is_kickable(member):
             lang = self.client.fl(await self.client.get_lang(ctx.guild))
@@ -961,11 +961,11 @@ class Mod(commands.Cog):
             except:
                 pass
 
-    @ commands.command(name="tempban", aliases=["tban"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(ban_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="tempban", aliases=["tban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def tempban_member(self, ctx: commands.Context, member: discord.User = None, duration: ArgToDuration = None, *, reason="Unspecified"):
         if is_kickable(member):
             text = self.client.fl(await self.client.get_lang(ctx.guild)).tempban_member
@@ -1020,11 +1020,11 @@ class Mod(commands.Cog):
             except:
                 pass
 
-    @ commands.command(name="softban", aliases=["sban"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(kick_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="softban", aliases=["sban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(kick_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def softban_member(self, ctx: commands.Context, member: discord.Member = None, *, reason="Unspecified"):
         if is_kickable(member):
             lang = self.client.fl(await self.client.get_lang(ctx.guild))
@@ -1074,11 +1074,11 @@ class Mod(commands.Cog):
                         mod=ctx.author.mention,
                         reason=reason)))
 
-    @ commands.command(name="multiban", aliases=["mban"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(ban_members=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="multiban", aliases=["mban"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(ban_members=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def ban_members(self, ctx: commands.Context, *members):
         banned_members, failed_bans = [], []
 
@@ -1140,11 +1140,11 @@ class Mod(commands.Cog):
         for member in banned_members:
             self.client.loop.create_task(notify_member(member))
 
-    @ commands.command(name="unban")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_roles=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="unban")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def unban_user(self, ctx: commands.Context, member: discord.User = None):
         lang = self.client.fl(await self.client.get_lang(ctx.guild))
         text = lang.unban_user
@@ -1181,25 +1181,25 @@ class Mod(commands.Cog):
         except:
             pass
 
-    @ commands.command(name="roles")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_roles=True)
+    @commands.command(name="roles")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_roles=True)
     async def show_roles(self, ctx: commands.Context, member: discord.Member = None):
         await ctx.send("Command not available yet !")
 
-    @ commands.command(name="permissions", aliases=["perms"])
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_messages=True)
+    @commands.command(name="permissions", aliases=["perms"])
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_messages=True)
     async def show_permissions(self, ctx: commands.Context, member: discord.Member = None):
         await ctx.send("Command not available yet !")
 
-    @ commands.command(name="normalize")
-    @ commands.guild_only()
-    @ plugin_is_enabled()
-    @ commands.has_permissions(manage_nicknames=True)
-    @ commands.cooldown(1, 3, commands.BucketType.member)
+    @commands.command(name="normalize")
+    @commands.guild_only()
+    @plugin_is_enabled()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.cooldown(1, 3, commands.BucketType.member)
     async def normalize_nickname(self, ctx: commands.Context, member: discord.Member = None):
         text = self.client.fl(await self.client.get_lang(ctx.guild)).normalize_nickname
         if not member:

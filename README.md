@@ -1,1 +1,1 @@
-> **⚠️ This project has been moved here : <https://github.com/shibzel/shibbot>**
+> **⚠️ This project is being rewrited, don't use it.**

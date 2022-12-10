@@ -58,10 +58,10 @@ class ErrorHandler(BaseCog):
         elif isinstance(error, NotInteractionOwner):
             content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
             return ctx.respond(content=content, ephemeral=True)
-        elif isinstance(error, MissingArgumentsError):
-            description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
         elif isinstance(error, PluginDisabledError):
             return ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name))
+        elif isinstance(error, MissingArgumentsError):
+            description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
         elif isinstance(error, commands.NSFWChannelRequired):
             description = error_dict["NSFWChannelRequired"].format(channel=error.channel.mention)
         elif isinstance(error, commands.MissingPermissions):

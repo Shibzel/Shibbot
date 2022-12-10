@@ -1,11 +1,9 @@
+# For this project
 .idea
 .vscode
 .replit
-**.sqlite
 **.json
-
-cogs/test.py
-cogs/nsfw.py
+**.sqlite3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

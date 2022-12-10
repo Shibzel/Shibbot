@@ -1,75 +1,77 @@
-# ****Shibbot****
+![Banner](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
 
-Shibbot is a multipurpose Discord bot in developpement using Pycord as API wrapper and SQLite as database.
+# Shibbot
 
-**Note :** Since I commit only to save my work and not to fix bugs and add features, this program might not fully work.
+> **⚠️ This project is being rewrited, don't use it.**
 
-![Profile](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
+## 🔮 Description & Motivation
 
-# Features
+Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Python (which was a bad idea... don't start with that) then gradually evolved with my skills to what it is today : **a feature rich, open source Discord bot designed to be modular and accessible**.
 
-### Moderation
+**Its specificity** is to include several languages and plugins (which can be disabled with a command) without it being hard coded into the bot so that it can include external cogs and, use a file based database : SQLite 3 to not depend on external ressources that are not usually free. It can also use custom prefixed and `/slash` commands.
 
-Shibbot will help you moderate your server(s) efficiently : it has all the classics moderation commands (there is a lot of them, really), such as `kick`, `tempmute`, `ban`, you know, the basic ones.
-But it also has less popular ones : `nuke` (kadaboom haha), `multikick`, `softban` to more flexibility while you sanction a member (abusively or not haha, we don't care).
+#### Right now it can :
 
-![Mod](https://media.discordapp.net/attachments/955511076261347369/981661183750852658/mod.png)
+- [ ] Help you with the moderation of your server (classic commands like tempban, normalize usernames, detect profanity...)
+- [ ] Show you beautiful photos of shibas, cats and birds
+- [ ] Get you the latest memes it scrobes on Reddit daily
+- [ ] Offer you translation tools, articles on wikipedia and other utilities
+- [ ] Play music in the voice channel you're in (classic)
+- [ ] Minecraft utilities (show the number of players into a server as a voice channel's name, ...)
+- [x] Become sentient and threaten humanity
 
-That's a good feature isn't it ? Nah ?
-Then let's hop to the next one :
+If you want to try it yourself on your server you can invite it by adding it on your own server by [clicking here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands) or join its server [here](https://discord.gg/TZNWfJmPwj).
 
-### Fun and entertainement
+## 🚀 Self-Hosting
 
-![Fun](https://media.discordapp.net/attachments/955511076261347369/981661184249978880/images.png)
+Of course, a new instance of the bot can be hosted on your machine with your own modifications or "vanilla" but you must consider some things :
+- Shibbot is not designed to be lightweight, you must provide him at least **N/A MiB of RAM** otherwise it will not work or not proprely.
+- Since it uses a file based portable database, **"hosts" like Heroku will simply not fit** because they wipe all the bot's files every 24 hours or less.
+- It won't work out of the box, **don't forget to create a copy of `.env.exemple` named `.env` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use Pterodactyl you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware but it's only optional.
 
-**Memes :**
+Nevertheless, using our own hosted instance of the bot is also a higly recommended option if you just don't want to undergo all the issues that it is to host a Discord bot.
 
-Get the hotest memes from Reddit everyday with the `meme` (or `nmeme` for nsfw content) command, the bot scraps memes everyday to Reddit.
+## 🤝 Contributing & Issues
 
-**Images :**
+**All feedbacks, bugs reports, forks and suggestions are welcome !** Do not hesistate to check out our [issues page](https://github.com/Shibzel/Shibbot/issues) or join our [Discord server](https://discord.gg/TZNWfJmPwj) for that.
 
-Want to "awwww" in front of cute animals pictues with your friends (if you have some) ? Then the bot has shibes, cats, birds just for your needs !
+It is maybe an useless reminder but a basic understanding of Python and the structure of the program is needed to pull commits into this repo. For that, we're working on a wiki that will arrive soon !
 
-**What's that ?**
+## 💼 Main contributors
 
-There is some wierd commands, like `piss` or `twitter`, we have absolutely no ideas why they exists neither what they do. Maybe you should try them out or not...
+- [Shibzel](https://github.com/Shibzel) : The owner and the one who worked the most on it (yet).
+- [Cloudy_Paul](https://github.com/Cloudy-Paul) : For his incredible translation job.
 
-### Tools
+Big thanks to all those listed [here](https://github.com/Shibzel/Shibbot/graphs/contributors) too !
 
-< Text here >
+## 📜 Requirements
 
-## So what are you waiting for ?
+- [Python 3.8+ (idealy 3.9 or 3.10)](https://www.python.org/downloads).
+- Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
+- A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [or someone else's](https://www.google.com/search?q=free+lavalink+host).
+- For the librairies see [`requirements.txt`](https://github.com/Shibzel/Shibbot/blob/main/requirements.txt).
 
-![Invite](https://media.discordapp.net/attachments/955511076261347369/981661184002494464/you_shloud.jpg)
+Remember to fulfill the dependencies by running `python -m pip install -r requirements.txt` into your console before starting the bot.
 
-Invite the bot by clicking right [here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands).
+## 💗 Credits
 
-# About this repository
+A big muah 😘 to everyone without whom this project would not be as great as it is !
+- The community working on [Pycord](https://github.com/Pycord-Development/pycord/graphs/contributors), the Discord API wrapper used in Shibbot.
+- The contributors of  [Lavalink](https://github.com/freyacodes/lavalink/graphs/contributors) (you know, the music server)
+- [Covoxkid](https://twitter.com/covoxkid) for [Shibe.online](https://shibe.online) for the shibes, cats and birds images
+- [Javier Aviles](https://github.com/javieraviles) for [Coronavirus-19-api](https://github.com/javieraviles/covidAPI) that fetches coronavirus stats
+- The community of [RapidAPI](rapidapi.com) for the unofficial [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary)
 
-## Motivation
+---
 
-Idk I just wanted to make a Discord bot for myself and the others
+## ❓ (Goofy aah) F.A.Q
 
-## Host and code
+**1. Why this name, Shibbot ?** Because the bot owner like shibas.
 
-Please don't host yourself the bot, a lot of features will soon depend on the database, it is preferable to invite it by using the link right above.
+**2. Amongus ?** Sus.
 
-Of, course you can inspire your code on mine, I didn't said that this is the best idea but I think that my code isn't bad at all (I hope so).
+**3. Why adding moderation tools if other bots have them too ?** Stfu
 
-## Prerequisites
-
-- [Python 3.8+ (idealy 3.10+)](https://python.org)
-  For the libs go check `requirements.txt` or [the dependency graph](https://github.com/JeanLeShiba/Shibbot/network/dependencies).
-
-## Contributors
-
-- [JeanLeShiba](https://github.com/JeanLeShiba) - Owner and main developper of Shibbot
-- [Cloudy_Paul](https://github.com/Cloudy-Paul) - Tester, translater and text quality reviewer
-
-## Aknowlegement
-
-- [shibe.online](https://shibe.online) by [covoxkid](https://twitter.com/covoxkid) for the shibes, cats and birds
-- [coronavirus-19-api.herokuapp.com](https://coronavirus-19-api.herokuapp.com) by [Javier Aviles](https://github.com/javieraviles) for the informations about covid cases
-- [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary) by the community of [RapidAPI](rapidapi.com)
+**4. Can you add a plugin that bans everyone who playing League of Legends on a server ?** We're thinking about adding this in the future.
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

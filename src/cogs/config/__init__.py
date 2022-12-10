@@ -167,7 +167,7 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed)
 
 
-    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localization={"fr": "Change le préfixe."},
+    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."},
                            options=[discord.Option(name="prefix", description="The prefix you want to set.",
                                                                   description_localizations={"fr": "Le préfixe que vous voulez définir."})])
     @bridge.has_permissions(administrator=True)
@@ -184,7 +184,7 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed)
 
 
-    @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localization={"fr": "Change le langage du bot."})
+    @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(1, 5, commands.BucketType.member)
     @bridge.guild_only()
@@ -211,7 +211,7 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed, view=view)
 
 
-    @bridge.bridge_command(name="plugins", aliases=["plugin"], description="Enables or disables plugins.", description_localization={"fr": "Active ou désactive des plugins."})
+    @bridge.bridge_command(name="plugins", aliases=["plugin"], description="Enables or disables plugins.", description_localizations={"fr": "Active ou désactive des plugins."})
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(1, 7, commands.BucketType.member)
     @bridge.guild_only()
@@ -237,7 +237,7 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed, view=view)
 
 
-    @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localization={"fr": "Faites un don au crétaeur du bot."})
+    @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au crétaeur du bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
         return

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import bridge, commands
 from platform import python_version
+import asyncio
 
 from src import (
     Shibbot, BaseCog, database,
@@ -33,7 +34,7 @@ class ConfigCog(BaseCog):
 
 
     @bridge.bridge_command(name="ping", description="Gets the bot's ping.", description_localizations={"fr": "Obtient le ping du bot."})
-    @commands.cooldown(1, 5, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.member)
     async def ping(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
         embed = discord.Embed(
@@ -47,7 +48,7 @@ class ConfigCog(BaseCog):
 
 
     @bridge.bridge_command(name="help", description="Shows help.", description_localizations={"fr": "Affiche de l'aide."})
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 10, commands.BucketType.member)
     async def show_help(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
@@ -123,7 +124,7 @@ class ConfigCog(BaseCog):
 
     @bridge.bridge_command(name="invite", aliases=["botinvite", "support"], description="Gets you the bot's invitation links.", 
                                                                             description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
-    @commands.cooldown(1, 5, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
 
@@ -141,7 +142,7 @@ class ConfigCog(BaseCog):
 
     @bridge.bridge_command(name="botinfo", aliases=["about", "specs", "botspecs"], description="Gets informations about the bot.",
                                                                                    description_localizations={"fr" : "Obtiens des informartions sur le bot."})
-    @commands.cooldown(1, 5, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_infos(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
 
@@ -185,7 +186,7 @@ class ConfigCog(BaseCog):
 
     @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localization={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
-    @commands.cooldown(2, 10, commands.BucketType.member)
+    @commands.cooldown(1, 5, commands.BucketType.member)
     @bridge.guild_only()
     async def change_lang(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)
@@ -202,16 +203,42 @@ class ConfigCog(BaseCog):
             embed = discord.Embed(title=lang.CHANGE_LANG_DONE_TITLE,
                                   description=lang.CHANGE_LANG_DONE_DESCRIPTION.format(language_flag=LANGUAGES_FLAGS[set_language] if LANGUAGES_FLAGS.get(set_language) else "🏴",
                                                                                        language=LANGUAGES[set_language].title()), color=discord.Color.dark_gold())
-            await interaction.response.edit_message(embed=embed, view=None)
+            view.disable_all_items()
+            await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
         view = discord.ui.View(select, disable_on_timeout=True)
         embed = discord.Embed(title=lang.CHANGE_LANG_MENU_TITLE, description=lang.CHANGE_LANG_MENU_DESCRIPTION, color=discord.Color.dark_gold())
-        await ctx.reply(embed=embed, view=view)
+        await ctx.respond(embed=embed, view=view)
+
+
+    @bridge.bridge_command(name="plugins", aliases=["plugin"], description="Enables or disables plugins.", description_localization={"fr": "Active ou désactive des plugins."})
+    @bridge.has_permissions(administrator=True)
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    @bridge.guild_only()
+    async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
+        lang_code = await database.get_language(ctx)
+        lang = get_language(self.languages, lang_code)
+
+        select = discord.ui.Select(placeholder=lang.ENABLE_PLUGINS_PLACEHOLDER, min_values=0, max_values=None,
+                                   options=[discord.SelectOption(label=plugin.get_name(lang_code), description=plugin.get_description(lang_code) if plugin.description else "...",
+                                                                emoji=plugin.emoji, default=await database.plugin_is_enabled(ctx, plugin.plugin_name), value=plugin.plugin_name) 
+                                                                for plugin in self.bot.plugins.values()])
+        async def callback(interaction: discord.Interaction):
+            if interaction.user != ctx.author:
+                raise NotInteractionOwner(ctx.author, interaction.user)
+            
+            await asyncio.gather(*[database.enable_plugin(ctx.guild, plugin.plugin_name, 1 if plugin.plugin_name in select.values else 0) for plugin in self.bot.plugins.values()])
+            embed = discord.Embed(title=lang.ENABLE_PLUGIN_DONE_TITLE, description=lang.ENABLE_PLUGIN_DONE_DESCRIPTION, color=discord.Color.dark_gold())
+            view.disable_all_items()
+            await interaction.response.edit_message(embed=embed, view=view)
+        select.callback = callback
+        view = discord.ui.View(select, disable_on_timeout=True)
+        embed = discord.Embed(title=lang.ENABLE_PLUGIN_MENU_TITLE, description=lang.ENABLE_PLUGIN_MENU_DESCRIPTION, color=discord.Color.dark_gold())
+        await ctx.respond(embed=embed, view=view)
 
 
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localization={"fr": "Faites un don au crétaeur du bot."})
-    @commands.cooldown(1, 5, commands.BucketType.member)
-    @bridge.guild_only()
+    @commands.cooldown(1, 7, commands.BucketType.member)
     async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
         return
 

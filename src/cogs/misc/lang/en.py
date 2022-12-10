@@ -1,2 +1,2 @@
 class English:
-    pass
+    DEFAULT_FOOTER = "Requested by {author}."

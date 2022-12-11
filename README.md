@@ -1,6 +1,6 @@
-![Banner](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
+![Banner](https://cdn.discordapp.com/attachments/797425043033686036/1051558257853988894/image.png)
 
-<div align="right">
+<div align="center">
 	<h1><b>Shibbot</b></h1>
     <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Discord&logo=Discord&logoColor=white&style=for-the-badge">
 	<img alt="Lines of code" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">

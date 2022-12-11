@@ -1,6 +1,13 @@
 ![Banner](https://camo.githubusercontent.com/52bc9a001b2806c730ed2bcf1de48619379dea46a6417e75136da4d11dd5a8b2/68747470733a2f2f6d656469612e646973636f72646170702e6e65742f6174746163686d656e74732f3836303935383733333534363638343432392f3937303033353736383830343338303730332f756e6b6e6f776e2e706e67)
 
-# Shibbot
+<div align="right">
+	<h1><b>Shibbot</b></h1>
+    <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Discord&logo=Discord&logoColor=white&style=for-the-badge">
+	<img alt="Lines of code" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">
+    <img alt="Python version" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
+    <img alt="Uptime" src="https://img.shields.io/uptimerobot/ratio/m792743228-711706b27e948a5682109c4e?style=for-the-badge">
+	<h3>A feature-rich and modular Discord bot written in Python.</h3>
+</div>
 
 > **⚠️ This project is being rewrited, don't use it.**
 
@@ -25,9 +32,9 @@ If you want to try it yourself on your server you can invite it by adding it on 
 ## 🚀 Self-Hosting
 
 Of course, a new instance of the bot can be hosted on your machine with your own modifications or "vanilla" but you must consider some things :
-- Shibbot is not designed to be lightweight, you must provide him at least **N/A MiB of RAM** otherwise it will not work or not proprely.
-- Since it uses a file based portable database, **"hosts" like Heroku will simply not fit** because they wipe all the bot's files every 24 hours or less.
-- It won't work out of the box, **don't forget to create a copy of `.env.exemple` named `.env` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use Pterodactyl you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware but it's only optional.
+- Shibbot is not designed to be lightweight, you must provide him at least more than **64 MiB of RAM** otherwise it will not work or not proprely.
+- Since it uses a file based portable database, **"hosts" like Heroku won't fit** because they wipe all the bot's files every 24 hours or less.
+- It won't work out of the box, **don't forget to create a copy of `.env.exemple` named `.env` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use Pterodactyl you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware (optional).
 
 Nevertheless, using our own hosted instance of the bot is also a higly recommended option if you just don't want to undergo all the issues that it is to host a Discord bot.
 
@@ -62,16 +69,6 @@ A big muah 😘 to everyone without whom this project would not be as great as i
 - [Javier Aviles](https://github.com/javieraviles) for [Coronavirus-19-api](https://github.com/javieraviles/covidAPI) that fetches coronavirus stats
 - The community of [RapidAPI](rapidapi.com) for the unofficial [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary)
 
----
 
-## ❓ (Goofy aah) F.A.Q
-
-**1. Why this name, Shibbot ?** Because the bot owner like shibas.
-
-**2. Amongus ?** Sus.
-
-**3. Why adding moderation tools if other bots have them too ?** Stfu
-
-**4. Can you add a plugin that bans everyone who playing League of Legends on a server ?** We're thinking about adding this in the future.
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

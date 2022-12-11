@@ -135,8 +135,7 @@ class Shibbot(bridge.Bot):
     async def on_resumed(self):
         self.is_alive = True
         time_took = time.time() - self.time_disconnected
-        if time_took > 0.50:
-            Logger.log(f"Resumed (disconnected for {time_took:.2f} sec).")
+        Logger.log(f"Resumed (disconnected for {time_took:.2f} sec).")
 
 
     async def on_disconnect(self):

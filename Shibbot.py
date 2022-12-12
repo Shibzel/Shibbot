@@ -37,6 +37,10 @@ load_dotenv()
 if not os.path.exists(DATABASE_PATH):
     open(DATABASE_PATH, "x")
     Logger.warn(f"Missing {DATABASE_PATH} file, creating one.")
+folders_to_create = ("./logs", "./cache")
+for dir in folders_to_create:
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
 # Token
 token = os.getenv("BOT_TOKEN") if not TEST_MODE else os.getenv("TEST_BOT_TOKEN")

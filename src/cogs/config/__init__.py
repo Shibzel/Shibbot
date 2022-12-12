@@ -167,9 +167,8 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed)
 
 
-    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."},
-                           options=[discord.Option(name="prefix", description="The prefix you want to set.",
-                                                                  description_localizations={"fr": "Le préfixe que vous voulez définir."})])
+    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."})
+    @discord.option(name="prefix", description="The prefix you want to set.", description_localizations={"fr": "Le préfixe que vous voulez définir."})
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.member)
     @bridge.guild_only()

@@ -22,9 +22,9 @@ class MiscCog(BaseCog):
         )
 
     
-    @bridge.bridge_command(name="avatar", aliases=["av"], description="Gives the profile picture.", description_localization={"fr": "Donne l'image de profil."},
-                           options=[discord.Option(discord.User, name="user", name_localizations={"fr": "utilisateur"},
-                                                   description="The user whose profile picture you want.", description_localizations={"fr": "L'utilisateur dont vous souhaitez l'image de profil."}, required=False)])
+    @bridge.bridge_command(name="avatar", aliases=["av"], description="Gives the profile picture.", description_localizations={"fr": "Donne l'image de profil."})
+    @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
+                    description="The user whose profile picture you want.", description_localizations={"fr": "L'utilisateur dont vous souhaitez l'image de profil."})
     @commands.cooldown(3, 10, commands.BucketType.user)
     async def get_avatar(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
         user = user if user else ctx.author
@@ -38,9 +38,9 @@ class MiscCog(BaseCog):
 
 
     @bridge.bridge_command(name="user-info", aliases=["uinfo", "userinfo"], description="Gives info about an account.",
-                           description_localizations={"fr": "Donne des infos sur un compte."}, options=[discord.Option(discord.User, name="user",
-                           name_localizations={"fr": "utilisateur"}, description="The user you want more info about.",
-                           description_localizations={"fr": "L'utilisateur sur lequel voulez plus d'infos."}, required=False)])
+                                                                            description_localizations={"fr": "Donne des infos sur un compte."})
+    @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
+                    description="The user you want more info about.", description_localizations={"fr": "L'utilisateur sur lequel voulez plus d'infos."})
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def get_user_info(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
         user = user if user else ctx.author

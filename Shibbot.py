@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import requests
 import orjson
-import random
 
 from src import Shibbot, __version__ as version
 from src.utils import Logger
@@ -106,7 +105,11 @@ if OPTIONAL_CHECKS:
 
 # Starting the bot
 try:
-    shibbot = Shibbot(test_mode=TEST_MODE, instance_owners=orjson.loads(os.getenv("BOT_OWNERS_IDS")), gc_clear=True)
+    shibbot = Shibbot(
+        test_mode=TEST_MODE,
+        instance_owners=orjson.loads(os.getenv("BOT_OWNERS_IDS")),
+        gc_clear=True
+    )
     shibbot.run(token)
 except Exception as e:
     Logger.error("Oops... Shibbot stopped ?", e)

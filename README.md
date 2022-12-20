@@ -3,8 +3,8 @@
 <div align="center">
 	<h1><b>Shibbot</b></h1>
     <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Discord&logo=Discord&logoColor=white&style=for-the-badge">
-	<img alt="Lines of code" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">
-    <img alt="Python version" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
+	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">
+    <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
     <img alt="Uptime" src="https://img.shields.io/uptimerobot/ratio/m792743228-711706b27e948a5682109c4e?style=for-the-badge">
 	<h3>A feature-rich and modular Discord bot written in Python.</h3>
 </div>

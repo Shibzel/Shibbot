@@ -119,9 +119,9 @@ class ServerSpecifications:
                     await asyncio.sleep(40)
 
             
-def auto_gc_clear(specs: ServerSpecifications, sleep: int = 60, max_percentage: float = 90.0):
+async def auto_gc(specs: ServerSpecifications, sleep: int = 60, max_percentage: float = 90.0):
     while True:
+        await asyncio.sleep(sleep)
         percentage = specs.memory_usage/specs.max_memory*100
         if percentage > max_percentage:
-            time.sleep(sleep)
             gc.collect()

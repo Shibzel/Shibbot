@@ -9,7 +9,7 @@ import traceback
 import threading
 
 from . import database
-from .utils import Logger, ServerSpecifications, auto_gc_clear
+from .utils import Logger, ServerSpecifications, auto_gc
 from .constants import COGS_PATH, SHIBZEL_ID
 from .models import PluginCog, CustomView
 
@@ -59,13 +59,11 @@ class Shibbot(bridge.Bot):
         # Client that gets the specifications of the bot
         self.specs = ServerSpecifications(self, self.loop, secs_looping=5)
 
-        # Runs automaticly if the program is going to ran out of memory
+        # Runs gc if the program is going to run out of memory
         sleep = 60
-        self.gc_thread = threading.Thread(target=auto_gc_clear, args=(self.specs, sleep,), name="GC Collector Thread")
         if gc_clear:
-            Logger.warn(f"Using automatic garbage collector every {sleep} sec.")
-            # Can be slow for Windows operating systems (~3sec)
-            self.gc_thread.start()
+            Logger.warn(f"Automatic garbage collector enabled. Running GC every {sleep} sec.")
+            self.loop.create_task(auto_gc(self.specs, sleep,))
 
         # Synchronous clients for Sqlite3
         self.db = database.db()

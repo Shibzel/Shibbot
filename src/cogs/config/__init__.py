@@ -167,8 +167,9 @@ class ConfigCog(BaseCog):
         await ctx.respond(embed=embed)
 
 
-    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."})
-    @discord.option(name="prefix", description="The prefix you want to set.", description_localizations={"fr": "Le préfixe que vous voulez définir."})
+    @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."},
+                           options=[discord.Option(required=True, name="prefix", description="The prefix you want to set.",
+                                                                                 description_localizations={"fr": "Le préfixe que vous voulez définir."})])
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.member)
     @bridge.guild_only()
@@ -179,7 +180,7 @@ class ConfigCog(BaseCog):
         lang = await self.get_lang(ctx)
         prefix = prefix.lower().split(" ")[0]
         await database.change_prefix(self.bot, ctx.guild, prefix)
-        embed = discord.Embed(title=lang.CHANGE_PREFIX_TITLE, description="✅ " + lang.CHANGE_PREFIX_DESCRIPTION.format(prefix=prefix), color=discord.Color.green())
+        embed = discord.Embed(title=lang.CHANGE_PREFIX_TITLE, description="✅ "+lang.CHANGE_PREFIX_DESCRIPTION.format(prefix=prefix), color=discord.Color.green())
         await ctx.respond(embed=embed)
 
 

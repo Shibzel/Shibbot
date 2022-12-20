@@ -20,7 +20,10 @@ def bot_get_prefix(bot, ctx):
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
-    def __init__(self, test_mode = False, instance_owners: list[int] = [SHIBZEL_ID], gc_clear: bool = True, *args, **kwargs):
+    def __init__(self, test_mode = False, instance_owners: list[int] = [SHIBZEL_ID],
+                 pterodactyl_refresh: float = 5,
+                 gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 90.0,
+                 *args, **kwargs):
         Logger.log("Initializing Shibbot...")
         start_time = time.time()
         self.test_mode = test_mode
@@ -55,13 +58,12 @@ class Shibbot(bridge.Bot):
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
-        self.specs = ServerSpecifications(self, self.loop, secs_looping=5)
+        self.specs = ServerSpecifications(self, self.loop, secs_looping=pterodactyl_refresh)
 
         # Runs gc if the program is going to run out of memory
-        sleep = 60
         if gc_clear:
-            Logger.warn(f"Automatic garbage collector enabled. Running GC every {sleep} sec.")
-            self.loop.create_task(auto_gc(self.specs, sleep,))
+            Logger.warn(f"Automatic garbage collector enabled. Running GC every {gc_sleep} sec.")
+            self.loop.create_task(auto_gc(self.specs, gc_sleep, gc_max_ram))
 
         # Synchronous clients for Sqlite3
         self.db = database.db()

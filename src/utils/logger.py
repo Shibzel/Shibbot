@@ -12,6 +12,7 @@ def _write(string):
 class Logger:
     """This dumbass dev forgot to add a documentation."""
 
+
     @staticmethod
     def formated_time(): return datetime.datetime.now().strftime("%H:%M:%S.%f")[:12]
 

@@ -165,7 +165,7 @@ class Shibbot(bridge.Bot):
         try:
             super().run(*args, **kwargs)
         except Exception as e:
-            Logger.error("Uh oh, that's lame :/ Shibbot crashed.", e)
+            # Closing everything and reraising error
             self.db.close()
-            Logger.end()
+            raise e
         

@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import requests
 import orjson
+import random
 
 from src import Shibbot, __version__ as version
 from src.utils import Logger
@@ -104,5 +105,9 @@ if OPTIONAL_CHECKS:
             Logger.error("Missing pterodactyl server ID."+("" if not url else f"  -> The ID is at the end of the server's link in the panel : {url}server/\033[93m8f61b2fb\033[00m"))
 
 # Starting the bot
-shibbot = Shibbot(test_mode=TEST_MODE, instance_owners=orjson.loads(os.getenv("BOT_OWNERS_IDS")), gc_clear=True)
-shibbot.run(token)
+try:
+    shibbot = Shibbot(test_mode=TEST_MODE, instance_owners=orjson.loads(os.getenv("BOT_OWNERS_IDS")), gc_clear=True)
+    shibbot.run(token)
+except Exception as e:
+    Logger.error("Oops... Shibbot stopped ?", e)
+    Logger.end()

@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, bridge
 import asyncio
 
-from src import Shibbot, Logger, BaseCog, stringify_command_usage, database, get_language
+from src import Shibbot, Logger, BaseCog, stringify_command_usage, database, get_language, CustomView
 from src.errors import *
 from .lang.en import English
 from .lang.fr import French
@@ -42,6 +42,7 @@ class ErrorHandler(BaseCog):
 
 
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
+        Logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
         if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
                 return
 
@@ -57,7 +58,7 @@ class ErrorHandler(BaseCog):
             description = error_dict["CommandOnCooldown"].format(n_secs=round(cooldown, 2))
         elif isinstance(error, NotInteractionOwner):
             content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
-            return ctx.respond(content=content, ephemeral=True)
+            return ctx.reply(content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
             return ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name))
         elif isinstance(error, MissingArgumentsError):
@@ -84,7 +85,7 @@ class ErrorHandler(BaseCog):
             except (discord.Forbidden, discord.NotFound, AttributeError):
                 pass
         dismiss_button.callback = delete_message
-        view = discord.ui.View(dismiss_button, disable_on_timeout=True)
+        view = self.bot.add_bot(CustomView(dismiss_button, disable_on_timeout=True))
 
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
         await ctx.respond(embed=embed, view=view, delete_after=time)

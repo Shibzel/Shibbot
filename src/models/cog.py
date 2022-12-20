@@ -1,9 +1,9 @@
 import discord
 from discord.ext.bridge import BridgeApplicationContext
 
-from .utils import fl, get_language, Logger
-from . import database
-from .errors import PluginDisabledError
+from ..utils import fl, get_language, Logger
+from .. import database
+from ..errors import PluginDisabledError
 
 
 class BaseCog(discord.Cog):

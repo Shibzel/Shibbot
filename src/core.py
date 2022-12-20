@@ -11,7 +11,7 @@ import threading
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc_clear
 from .constants import COGS_PATH, SHIBZEL_ID
-from .models import PluginCog
+from .models import PluginCog, CustomView
 
 
 def bot_get_prefix(bot, ctx):
@@ -103,12 +103,17 @@ class Shibbot(bridge.Bot):
 
     @property
     def plugins(self) -> dict[str, PluginCog]:
-        """A mapping of plugin name to PluginCog"""
+        """A mapping of plugin name to PluginCog."""
         plugins = {}
         for cog in self.cogs.values():
             if isinstance(cog, PluginCog):
                 plugins[cog.plugin_name] = cog
         return plugins
+
+
+    def add_bot(self, view):
+        view.bot = self
+        return view
 
 
     def add_language(self, language: str) -> None:

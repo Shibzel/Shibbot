@@ -4,7 +4,7 @@ from platform import python_version
 import asyncio
 
 from src import (
-    Shibbot, BaseCog, database,
+    Shibbot, BaseCog, CustomView, database,
     LANGUAGES, LANGUAGES_FLAGS,
     __version__ as version, __github__ as github_link,
     get_description_localization, stringify_command_usage, get_language,
@@ -80,7 +80,7 @@ class ConfigCog(BaseCog):
             embed.set_thumbnail(url=self.bot.user.avatar)
             embed.set_footer(text=FOOTER)
 
-            view = discord.ui.View(select, bot_button, server_button, github_button, disable_on_timeout=True)
+            view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, disable_on_timeout=True))
             return embed
 
         async def callback(interaction: discord.Interaction):
@@ -97,9 +97,9 @@ class ConfigCog(BaseCog):
             else:
                 for option in options:
                     option.default = select_value == option.value
-                for cog in cogs:
-                    if select_value == str(id(cog)):
-                        cog = cog
+                for _cog in cogs:
+                    if select_value == str(id(_cog)):
+                        cog = _cog
                         break
                 embed = discord.Embed(
                     title=TITLE,
@@ -113,7 +113,7 @@ class ConfigCog(BaseCog):
                     # Stringifying the command's options
                     value += f"• `{stringify_command_usage(command, lang_code)}` : {command_description if command_description else '...'}\n"
                 embed.add_field(name=lang.SHOW_HELP_COMMANDS_FIELD_NAME, value=value)
-                view = discord.ui.View(select, disable_on_timeout=True)
+                view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
 
@@ -137,7 +137,7 @@ class ConfigCog(BaseCog):
         
         bot_button = discord.ui.Button(label=lang.GET_INVITATIONS_INVITE_BOT_BUTTON, url=self.bot.invite_bot_url)
         server_button = discord.ui.Button(label=lang.GET_INVITATIONS_INVITE_SERVER_BUTTON, url=SERVER_INVITATION_LINK)
-        await ctx.respond(embed=embed, view=discord.ui.View(bot_button, server_button))
+        await ctx.respond(embed=embed, view=self.bot.add_bot(CustomView(bot_button, server_button)))
 
 
     @bridge.bridge_command(name="botinfo", aliases=["about", "specs", "botspecs"], description="Gets informations about the bot.",
@@ -205,7 +205,7 @@ class ConfigCog(BaseCog):
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
-        view = discord.ui.View(select, disable_on_timeout=True)
+        view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
         embed = discord.Embed(title=lang.CHANGE_LANG_MENU_TITLE, description=lang.CHANGE_LANG_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)
 
@@ -231,7 +231,7 @@ class ConfigCog(BaseCog):
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
-        view = discord.ui.View(select, disable_on_timeout=True)
+        view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
         embed = discord.Embed(title=lang.ENABLE_PLUGIN_MENU_TITLE, description=lang.ENABLE_PLUGIN_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)
 

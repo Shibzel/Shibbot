@@ -6,12 +6,11 @@ from discord.ext import bridge
 import os
 import time
 import traceback
-import threading
 
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc
 from .constants import COGS_PATH, SHIBZEL_ID
-from .models import PluginCog, CustomView
+from .models import PluginCog
 
 
 def bot_get_prefix(bot, ctx):
@@ -21,7 +20,7 @@ def bot_get_prefix(bot, ctx):
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
-    def __init__(self, test_mode = False, instance_owners: list[int] = [], gc_clear: bool = True, *args, **kwargs):
+    def __init__(self, test_mode = False, instance_owners: list[int] = [SHIBZEL_ID], gc_clear: bool = True, *args, **kwargs):
         Logger.log("Initializing Shibbot...")
         start_time = time.time()
         self.test_mode = test_mode
@@ -29,11 +28,10 @@ class Shibbot(bridge.Bot):
             Logger.warn("Test/beta mode is enabled.")
         self.is_alive = None
         self.languages = []
-        
-        owners = [SHIBZEL_ID] if instance_owners == [] else instance_owners
+
         super().__init__(
             command_prefix=bot_get_prefix,
-            owner_ids=owners,
+            owner_ids=instance_owners,
             # Being mentionned by a bot is very annoying, that's why it's all set to False.
             allowed_mentions=discord.AllowedMentions.none(),
             intents=discord.Intents(

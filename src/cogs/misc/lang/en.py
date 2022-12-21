@@ -15,7 +15,7 @@ class English:
 **⏲ Created on :** {date_creation_date} ({relative_creation_date})
 **💥 Owner :** {owner} (ID : `{owner_id}`)
 **💎 Boost tier :** `{premium_tier}` (with `{premium_sub_tier} boosts`)
-**➿ Maximum bitrate :** `{bitrate} kbps`"""
+**➿ Maximum bitrate :** `{bitrate}kbps`"""
     GET_SERVER_INFO_FIELD2_NAME = "__Statistics__"
     GET_SERVER_INFO_FIELD2_VALUE = """**:busts_in_silhouette: Member count :** `{member_count} members`
 **- 🧔 Hoomans :** `{humain_count} ({humain_count_percent}%)`

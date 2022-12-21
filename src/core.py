@@ -6,6 +6,7 @@ from discord.ext import bridge
 import os
 import time
 import traceback
+import asyncio
 
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc
@@ -125,8 +126,8 @@ class Shibbot(bridge.Bot):
     async def on_ready(self):
         """Runs when the bot has successfully connected to Discord API."""
         if self.is_alive is None:
-            self.project_owner = self.get_user(SHIBZEL_ID)
-            self.instance_owners = [self.get_user(_id) for _id in self.owner_ids]
+            self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
+            self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             owners = ", ".join([f"'{user}'" for user in self.instance_owners])
             Logger.log(f"The following users are the owners of this instance : {owners}.")
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={super().user.id}&permissions=8&scope=bot%20applications.commands"

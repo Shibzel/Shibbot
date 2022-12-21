@@ -1,6 +1,6 @@
 DEFAULT_PREFIX = "$"
 DEFAULT_LANGUAGE = "en"
-DATABASE_PATH = "./database.sqlite3"
+DATABASE_FILE_PATH = "./database.sqlite3"
 COGS_PATH = "./src/cogs"
 LOGS_PATH = "./logs"
 CACHE_PATH = "./cache"
@@ -10,3 +10,4 @@ LANGUAGES = {'af': 'afrikaans', 'sq': 'albanian', 'am': 'amharic', 'ar': 'arabic
 LANGUAGES_FLAGS = {"en": "🇬🇧", "fr": "🇫🇷",}
 
 SHIBZEL_ID = 380044496370532353
+SERVER_INVITATION_LINK = "https://discord.gg/TZNWfJmPwj"

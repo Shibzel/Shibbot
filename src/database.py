@@ -3,16 +3,16 @@ import aiosqlite
 import discord
 import sqlite3
 
-from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_PATH
+from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
 from src.utils import Logger
 
 
 def db():
-    return sqlite3.connect(DATABASE_PATH) 
+    return sqlite3.connect(DATABASE_FILE_PATH) 
 
 
 def async_db():
-    return aiosqlite.connect(DATABASE_PATH)
+    return aiosqlite.connect(DATABASE_FILE_PATH)
 
 
 async def create_or_fetch_guild(bot, guild: discord.Guild):

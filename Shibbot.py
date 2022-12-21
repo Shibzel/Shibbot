@@ -6,7 +6,7 @@ import orjson
 
 from src import Shibbot, __version__ as version
 from src.utils import Logger
-from src.constants import DATABASE_PATH, LOGS_PATH, CACHE_PATH
+from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH
 
 
 OPTIONAL_CHECKS = True
@@ -40,9 +40,9 @@ if not os.path.exists("./.env"):
 # Loading .env
 load_dotenv()
 
-if not os.path.exists(DATABASE_PATH):
-    open(DATABASE_PATH, "x")
-    Logger.warn(f"Missing {DATABASE_PATH} file, creating one.")
+if not os.path.exists(DATABASE_FILE_PATH):
+    open(DATABASE_FILE_PATH, "x")
+    Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
 folders_to_create = (LOGS_PATH, CACHE_PATH)
 for dir in folders_to_create:
     if not os.path.exists(dir):

@@ -26,3 +26,9 @@ class NotInteractionOwner(commands.UserInputError):
         self.interaction_owner = interaction_owner
         self.user_interacting = user_interacting
         super().__init__(message or f"'{user_interacting}' doesn't have access to this interaction, it belongs to '{interaction_owner}'.")
+
+
+class CogDependanceMissing(Exception):
+
+    def __init__(self, message: str | None = None, cog_name: str | None = None):
+        super().__init__(message or "This cog depends on another."+("" if not cog_name else f" Missing Cog: {cog_name}."))

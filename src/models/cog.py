@@ -11,7 +11,7 @@ class BaseCog(discord.Cog):
 
     def __init__(self, bot, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None, hidden: bool = False):
         super().__init__()
-        self.bot = bot
+        self.bot = bot or getattr(self, "bot", None)
         if not isinstance(name, dict) and name is not None:
             raise TypeError("'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
         self.name = name

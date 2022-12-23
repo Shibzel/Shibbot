@@ -22,8 +22,8 @@ class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
     def __init__(self, test_mode = False, instance_owners: list[int] = [SHIBZEL_ID],
-                 pterodactyl_refresh: float = 5,
-                 gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 90.0,
+                 pterodactyl_refresh: float = 5.0,
+                 gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         Logger.log("Initializing Shibbot...")
         start_time = time.time()

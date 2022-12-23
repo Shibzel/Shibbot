@@ -1,11 +1,9 @@
-from dotenv import load_dotenv
+import gc
+import math
+import psutil
+import orjson
 import aiohttp
 import asyncio
-import orjson
-import psutil
-import math
-import os
-import gc
 
 from .logger import Logger
 
@@ -13,34 +11,24 @@ from .logger import Logger
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, bot, loop: asyncio.AbstractEventLoop=asyncio.get_event_loop(), using_pterodactyl: bool=None, secs_looping=10.0):
+    def __init__(self, bot, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 5.0,):
         self.bot = bot
-        self._loop = loop
-        self.looping = True
+        self._loop: asyncio.AbstractEventLoop = bot.loop
+        self.using_pterodactyl = using_ptero
+        self._panel_url = ptero_url
+        self._token = ptero_token
+        self._server_id = ptero_server_id
         self.secs_looping = secs_looping
-
+        self._headers = {"Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {self._token}"}
         self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
+        self.looping = True
         self.location: str | None = "None"
-
-        load_dotenv()
-        self.using_pterodactyl = using_pterodactyl
-        if self.using_pterodactyl is None:
-            self.using_pterodactyl = os.getenv("USE_PTERO_API") in ('True', '1')
-        if self.using_pterodactyl:
-            self._panel_url = os.getenv("PTERO_PANEL_URL")
-            self._token = os.getenv("PTERO_PANEL_TOKEN")
-            self._server_id = os.getenv("PTERO_PANEL_SERVER_ID")
-            self.headers = {"Accept": "application/json",
-                            "Content-Type": "application/json",
-                            "Authorization": f"Bearer {self._token}"}
-            for i in (self._panel_url, self._token, self._server_id):
-                if i == "":
-                    self.using_pterodactyl = False
-                    Logger.warn("Missing parameters to fetch the Pterodactyl container's usage, using Psutil instead.")
 
         if self.using_pterodactyl:
             self._loop.create_task(self._get_specs_loop())
-            self._loop.create_task(self._get_location())
+        self._loop.create_task(self._get_location())
 
 
     @property
@@ -68,11 +56,11 @@ class ServerSpecifications:
 
 
     async def _request(self, url):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
+        async with aiohttp.ClientSession(headers=self._headers) as session:
             response = await session.get(url)
             result = (await response.json(loads=orjson.loads))
             if response.status != 200:
-                raise Exception(result["warn"])
+                raise Exception(result)
             return result
 
 
@@ -85,24 +73,30 @@ class ServerSpecifications:
 
 
     async def _get_specs_loop(self):
+        show_error = True
         while self.looping:
             try:
                 limits = await self._get_limits()
                 self._max_memory = limits["memory"]  # In MB.
                 self._max_cpu_percent = limits["cpu"]
                 self._threads = limits["threads"] if limits["threads"] else math.ceil(self._max_cpu_percent/100)
-            except:
-                Logger.warn("Failed to obtain the bot's hardware limits on Pterodactyl.")
-                
+                show_error = True
+            except Exception as e:
+                if show_error:
+                    Logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
+                    show_error = False
             for _ in range(int(300/self.secs_looping)):
+                sleep = self.secs_looping
                 try:
                     current = await self._get_current()
                     self._memory_usage = current["memory_bytes"]/1_000_000 # Bytes -> MB
                     self._cpu_usage_percent = current["cpu_absolute"]
-                except:
-                    if self.bot.is_alive:
-                        Logger.warn("Failed to obtain the bot's hardware usage on Pterodactyl.")
-                await asyncio.sleep(self.secs_looping)
+                    show_error = True
+                except Exception as e:
+                    if show_error:
+                        Logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
+                        show_error = False
+                await asyncio.sleep(sleep)
 
 
     async def _get_location(self):

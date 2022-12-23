@@ -49,7 +49,7 @@ for dir in folders_to_create:
         os.makedirs(dir)
 
 # Token
-token = os.getenv("BOT_TOKEN") if not TEST_MODE else os.getenv("TEST_BOT_TOKEN")
+token = os.getenv("BOT_TOKEN")
 if token == "":
     Logger.error("You forgot to set a token >:c\n  -> Go to your .env file to set one. You can get yours here : https://discord.com/developers/applications/")
     exit()
@@ -112,9 +112,12 @@ if OPTIONAL_CHECKS:
 # Starting the bot
 try:
     shibbot = Shibbot(
-        test_mode=TEST_MODE,
-        instance_owners=orjson.loads(os.getenv("BOT_OWNERS_IDS")),
-        gc_clear=True
+        test_mode=TEST_MODE, instance_owners=os.getenv("BOT_OWNERS_IDS").split(" "),
+        gc_clear=True,
+        using_ptero=os.getenv("USE_PTERO_API") in ("1", "True"),
+            ptero_url=os.getenv("PTERO_PANEL_URL"),
+            ptero_token=os.getenv("PTERO_PANEL_TOKEN"),
+            ptero_server_id=os.getenv("PTERO_PANEL_SERVER_ID")
     )
     shibbot.run(token)
 except Exception as e:

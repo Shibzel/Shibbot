@@ -21,9 +21,9 @@ def bot_get_prefix(bot, ctx):
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
-    def __init__(self, test_mode = False, instance_owners: list[int] = [SHIBZEL_ID],
-                 pterodactyl_refresh: float = 5.0,
+    def __init__(self, test_mode = False, instance_owners: list[int] = [],
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
+                 using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, ptero_refresh: float = 5.0,
                  *args, **kwargs):
         Logger.log("Initializing Shibbot...")
         start_time = time.time()
@@ -35,7 +35,7 @@ class Shibbot(bridge.Bot):
 
         super().__init__(
             command_prefix=bot_get_prefix,
-            owner_ids=instance_owners,
+            owner_ids=[SHIBZEL_ID] if instance_owners == [""] else [int(i) for i in instance_owners],
             # Being mentionned by a bot is very annoying, that's why it's all set to False.
             allowed_mentions=discord.AllowedMentions.none(),
             intents=discord.Intents(
@@ -59,7 +59,7 @@ class Shibbot(bridge.Bot):
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
-        self.specs = ServerSpecifications(self, self.loop, secs_looping=pterodactyl_refresh)
+        self.specs = ServerSpecifications(bot=self, using_ptero=using_ptero, ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id)
 
         # Runs gc if the program is going to run out of memory
         if gc_clear:

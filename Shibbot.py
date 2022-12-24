@@ -129,9 +129,9 @@ try:
     shibbot = cls(
         test_mode=True, instance_owners=instance_owners,
         gc_clear=True,
-        ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id
+        ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id,
     )
-    shibbot.run(token)
+    shibbot.run(token=token, command_input=True)
 except Exception as e:
     Logger.error("Oops... Shibbot stopped ?", e)
     Logger.end()

@@ -6,10 +6,12 @@ import time
 import traceback
 import asyncio
 
+
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc
 from .constants import COGS_PATH, SHIBZEL_ID
 from .models import PluginCog
+from .terminal import ConsoleThread
 
 
 def bot_get_prefix(bot, ctx):
@@ -95,7 +97,7 @@ class Shibbot(bridge.Bot):
             # Really ?! Why ???
         Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
                    f" Took {time.time()-start_time:.2f} sec.")
-
+      
 
     @property
     def plugins(self) -> dict[str, PluginCog]:
@@ -155,15 +157,11 @@ class Shibbot(bridge.Bot):
 
     async def on_resumed(self) -> None:
         self.is_alive = True
-        time_took = time.time() - self.time_disconnected
-        Logger.log(f"Resumed (disconnected for {time_took:.2f} sec).")
 
 
     async def on_disconnect(self) -> None:
         if self.is_alive != False:
-            self.time_disconnected = time.time()
             self.is_alive = False
-            Logger.warn("Disconnected.")
 
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
@@ -178,18 +176,30 @@ class Shibbot(bridge.Bot):
         Logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
 
 
-    def run(self, *args, **kwargs) -> None:
+    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Runs the bot.
+
+        Args:
+            command_input (bool, optional): Accept command input from the user. Defaults to False.
 
         Raises:
             e: The critical error that caused the bot to crash.
         """
         try:
-            super().run(*args, **kwargs)
+            if command_input:
+                ConsoleThread(self).start()
+            super().run(token, *args, **kwargs)
         except Exception as e:
             # Closing everything and reraising error
-            self.db.close()
-            raise e
+            self.loop.create_task(self.close(e))
+
+    async def close(self, error: Exception = None) -> None:
+        Logger.error("Shibbot is being stopped, goodbye !", error)
+        self.db.close()
+        await self.specs.close()
+        await super().close()
+        self.loop.close()
+        if error: raise error
         
 
 class PterodactylShibbot(Shibbot):

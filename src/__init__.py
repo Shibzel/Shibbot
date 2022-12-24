@@ -1,4 +1,4 @@
-from .core import Shibbot
+from .core import Shibbot, PterodactylShibbot
 from .utils import *
 from . import database
 from .constants import *

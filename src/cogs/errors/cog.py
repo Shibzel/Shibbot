@@ -40,7 +40,7 @@ class ErrorHandler(BaseCog):
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
         Logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
         if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
-                return
+            return
 
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)

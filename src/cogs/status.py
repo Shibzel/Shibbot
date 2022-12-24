@@ -21,7 +21,7 @@ class ChangeActivity(commands.Cog):
 
         self.watching_statutes = ["after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama", "inside your soul",
                                   "it's Morbin time", "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo", "JESSE, WE NEED TO COOK JESSE",
-                                  "doesn't dwayne johnson kinda looks like the rock ???", "Mandela Catalogue", "Sr Pelo", "having an existential crisis",]
+                                  "doesn't dwayne johnson kinda look like the rock ???", "Mandela Catalogue", "Sr Pelo", "having an existential crisis",]
         self.listening_statutes = ["Jetpack Joyride Main Theme", "Kahoot Lobby Music", "Never Gonna Give You Up", "wenomechainsama", "Bad Computer",
                                    "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple", "skrr shtibi shtipi dob dop yes yes jes shtip",]
         self.game_statutes = ["Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ", "ROBLOSS",

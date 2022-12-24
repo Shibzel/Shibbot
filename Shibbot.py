@@ -1,19 +1,12 @@
-"""Launcher file :O"""
 import os
 from dotenv import load_dotenv
 import requests
 import orjson
 
-from src import Shibbot, __version__ as version
+from src import Shibbot, PterodactylShibbot, __version__ as version
 from src.utils import Logger
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH
 
-
-OPTIONAL_CHECKS = True
-TEST_MODE = True
-
-
-repo_name = "Shibzel/Shibbot"
 
 print(f"""
           ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
@@ -31,43 +24,54 @@ print(f"""
 ⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈         Version : v{version}
 """)
 
+cls = Shibbot
+class Missing(Exception): pass
+class Syntax(Exception): pass
+
 Logger.start()
-
 ### Doing some checks
-if not os.path.exists("./.env"):
-    Logger.error("Missing .env file.\n  -> Create a new one, copy the contents of .env.example and complete it.")
-    exit()
-# Loading .env
-load_dotenv()
+try:
+    if not os.path.exists("./.env"):
+        raise Missing("Missing .env file. Create a new one, copy the contents of .env.example and complete it.")
+    # Loading .env
+    load_dotenv()
 
-if not os.path.exists(DATABASE_FILE_PATH):
-    open(DATABASE_FILE_PATH, "x")
-    Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
-folders_to_create = (LOGS_PATH, CACHE_PATH)
-for dir in folders_to_create:
-    if not os.path.exists(dir):
-        os.makedirs(dir)
+    if not os.path.exists(DATABASE_FILE_PATH):
+        open(DATABASE_FILE_PATH, "x")
+        Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
+    folders_to_create = (LOGS_PATH, CACHE_PATH)
+    for dir in folders_to_create:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-# Token
-token = os.getenv("BOT_TOKEN")
-if token == "":
-    Logger.error("You forgot to set a token >:c\n  -> Go to your .env file to set one. You can get yours here : https://discord.com/developers/applications/")
-    exit()
+    # Discord
+    token = os.getenv("BOT_TOKEN")
+    if token == "":
+        raise Missing("You forgot to set a token >:c Go to your .env file to set one. You can get yours here : https://discord.com/developers/applications/")
+    instance_owners = []
+    raw_ids = os.getenv("BOT_OWNERS_ID")
+    if raw_ids != "":
+        try:
+            for _id in raw_ids.split(" "):
+                assert len(_id) == 18
+                instance_owners.append(int(_id))
+        except (ValueError, AssertionError):
+            raise Syntax("Invalid Discord ids. Be sure that the ids are separated with spaces and intergers.")
 
-if OPTIONAL_CHECKS:
+    repo_name = "Shibzel/Shibbot"
     # Version
     request = requests.get(f"https://api.github.com/repos/{repo_name}/tags")
     response = orjson.loads(request.text)
     if request.status_code == 200:
         last_version = response[0]["name"]
         if last_version == version:
-            Logger.log("You're currently using the lastest version :O")
+            Logger.log("You're currently using the lastest version, thank you !")
         else:
             version_listed = False
             for i in response:
                 if i["name"] == version:
                     version_listed = True
-                    Logger.warn(f"You're not using the latest version '{version}' < '{last_version}'.\n  -> Download the latest one here : https://github.com/{repo_name}/releases/")
+                    Logger.warn(f"You're not using the latest version '{version}' < '{last_version}'. Download the latest one here : https://github.com/{repo_name}/releases/")
                     break
             if not version_listed:
                 Logger.warn("You're currently using a wip/unlisted version.")
@@ -76,48 +80,56 @@ if OPTIONAL_CHECKS:
 
     # Reddit
     if os.getenv("REDDIT_CLIENT_ID") in ("", None):
-        Logger.error("Missing Reddit application client ID.\n  -> You can get your application's ID and secret here : https://www.reddit.com/prefs/apps/")
+        raise Missing("Missing Reddit application client ID. You can get your application's ID and secret here : https://www.reddit.com/prefs/apps/")
     if os.getenv("REDDIT_CLIENT_SECRET") in ("", None):
-        Logger.error("Missing Reddit application client secret.")
+        raise Missing("Missing Reddit application client secret.")
     if os.getenv("REDDIT_USERNAME") in ("", None):
-        Logger.error("Missing username of your Reddit account.")
+        raise Missing("Missing username of your Reddit account.")
     if os.getenv("REDDIT_PASSWORD") in ("", None):
-        Logger.error("Missing password of your Reddit account.")
+        raise Missing("Missing password of your Reddit account.")
 
     # Lavalink
     if os.getenv("LAVALINK_HOST") in ("", None):
-        Logger.error("Missing Lavalink server url/IP.\n  -> Self host your own Lavalink server or get a free one on the internet.")
-    if os.getenv("LAVALINK_PORT") in ("", None):
-        Logger.error("Missing Lavalink port.")
+        raise Missing("Missing Lavalink server ptero_url/IP. Self host your own Lavalink server or get a free one on the internet.")
+    ll_port = os.getenv("LAVALINK_PORT")
+    if ll_port in ("", None):
+        raise Missing("Missing Lavalink port.")
+    else:
+        try:
+            int(ll_port)
+        except ValueError:
+            raise Syntax("The Lavalink port isn't valid.")
     if os.getenv("LAVALINK_PASSWORD") in ("", None):
-        Logger.error("Missing Lavalink password.")
+        raise Missing("Missing Lavalink password.")
 
     # RapidAPI
     if os.getenv("RAPID_API_TOKEN") in ("", None):
-        Logger.error("Missing RapidAPI token.\n  -> Get yours here : https://rapidapi.com/developer/new/")
+        raise Missing("Missing RapidAPI token. Get yours here : https://rapidapi.com/developer/new/")
 
     # Pterodactyl (for the hardware stats, optional)
     if os.getenv("USE_PTERO_API") in ('True', '1'):
-        url = os.getenv("PTERO_PANEL_URL")
-        if url == "":
-            url = None
-            Logger.error("Missing pterodactyl url.")
-        elif str(url).endswith("/"):
-            Logger.error("Your pterodactyl url mustn't end with '/'.")
-        if os.getenv("PTERO_PANEL_TOKEN") in ("", None):
-            Logger.error("Missing pterodactyl token."+("" if not url else f"  -> You can it here : {url}account/api/"))
-        if os.getenv("PTERO_PANEL_SERVER_ID") in ("", None):
-            Logger.error("Missing pterodactyl server ID."+("" if not url else f"  -> The ID is at the end of the server's link in the panel : {url}server/\033[93m8f61b2fb\033[00m"))
+        ptero_url = os.getenv("PTERO_PANEL_URL")
+        if ptero_url == "":
+            raise Missing("Missing pterodactyl ptero_url.")
+        elif ptero_url.endswith("/"):
+            raise Syntax("Your pterodactyl ptero_url mustn't end with '/'.")
+        ptero_token=os.getenv("PTERO_PANEL_TOKEN")
+        if ptero_token in ("", None):
+            raise Missing("Missing pterodactyl token."+("" if not ptero_url else f" You can it here : {ptero_url}account/api/"))
+        ptero_server_id = os.getenv("PTERO_PANEL_SERVER_ID")
+        if ptero_server_id in ("", None):
+            raise Missing("Missing pterodactyl server ID."+("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/\033[93m8f61b2fb\033[00m"))
+        cls = PterodactylShibbot
+except (Missing, Syntax) as e:
+    Logger.error("Eh, your forgot something.", e)
+    exit()
 
 # Starting the bot
 try:
-    shibbot = Shibbot(
-        test_mode=TEST_MODE, instance_owners=os.getenv("BOT_OWNERS_IDS").split(" "),
+    shibbot = cls(
+        test_mode=True, instance_owners=instance_owners,
         gc_clear=True,
-        using_ptero=os.getenv("USE_PTERO_API") in ("1", "True"),
-            ptero_url=os.getenv("PTERO_PANEL_URL"),
-            ptero_token=os.getenv("PTERO_PANEL_TOKEN"),
-            ptero_server_id=os.getenv("PTERO_PANEL_SERVER_ID")
+        ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id
     )
     shibbot.run(token)
 except Exception as e:

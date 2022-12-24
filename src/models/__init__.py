@@ -1,2 +1,2 @@
-from .cog import *
-from .ui import *
+from .cog import BaseCog, PluginCog
+from .ui import CustomView

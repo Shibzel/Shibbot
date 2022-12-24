@@ -2,7 +2,6 @@
 .idea
 .vscode
 .replit
-**.json
 **.sqlite3
 
 # Byte-compiled / optimized / DLL files

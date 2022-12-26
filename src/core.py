@@ -197,7 +197,8 @@ class Shibbot(bridge.Bot):
         """
         try:
             if command_input:
-                ConsoleThread(self)
+                self.console_thread = ConsoleThread(self)
+                self.console_thread.start()
             super().run(token, *args, **kwargs)
         except Exception as e:
             # Closing everything and reraising error

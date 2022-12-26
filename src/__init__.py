@@ -4,7 +4,7 @@ from . import database
 from .constants import *
 from .models import *
 from .errors import *
-from .terminal import ConsoleThread
+from .console import ConsoleThread
 
 __title__ = "Shibbot"
 __author__ = "Shibzel"

@@ -11,7 +11,7 @@ from . import database
 from .utils import Logger, ServerSpecifications, auto_gc, Reddit
 from .constants import COGS_PATH, SHIBZEL_ID
 from .models import PluginCog
-from .terminal import ConsoleThread
+from .console import ConsoleThread
 
 
 def bot_get_prefix(bot, ctx):

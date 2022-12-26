@@ -107,7 +107,7 @@ try:
         raise Missing("Missing RapidAPI token. Get yours here : https://rapidapi.com/developer/new/")
 
     # Pterodactyl (for the hardware stats, optional)
-    if os.getenv("USE_PTERO_API") in ('True', '1'):
+    if os.getenv("USE_PTERO_API").lower() in ('true', '1'):
         ptero_url = os.getenv("PTERO_PANEL_URL")
         if ptero_url == "":
             raise Missing("Missing pterodactyl ptero_url.")

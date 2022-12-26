@@ -8,7 +8,7 @@ import asyncio
 
 
 from . import database
-from .utils import Logger, ServerSpecifications, auto_gc
+from .utils import Logger, ServerSpecifications, auto_gc, Reddit
 from .constants import COGS_PATH, SHIBZEL_ID
 from .models import PluginCog
 from .terminal import ConsoleThread
@@ -31,6 +31,7 @@ class Shibbot(bridge.Bot):
             Logger.warn("Test/beta mode is enabled.")
         self.is_alive = None
         self.languages = []
+        self.reddit = None
 
         super().__init__(
             command_prefix=bot_get_prefix,
@@ -137,6 +138,18 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             self.languages.append(language)
 
+    
+    def init_reddit(self, client_secret: str, password: str, user_name: str, client_id:str, *args, **kwargs):
+        """_summary_
+
+        Args:
+            client_secret (str): _description_
+            password (str): _description_
+            user_name (str): _description_
+            client_id (str): _description_
+        """
+        self.reddit = Reddit(self.loop, client_secret, password, user_name, client_id, *args, **kwargs)
+
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content:
@@ -181,24 +194,31 @@ class Shibbot(bridge.Bot):
 
         Args:
             command_input (bool, optional): Accept command input from the user. Defaults to False.
-
-        Raises:
-            e: The critical error that caused the bot to crash.
         """
         try:
             if command_input:
-                ConsoleThread(self).start()
+                ConsoleThread(self)
             super().run(token, *args, **kwargs)
         except Exception as e:
             # Closing everything and reraising error
             self.loop.create_task(self.close(e))
 
     async def close(self, error: Exception = None) -> None:
+        """Closes the bot.
+
+        Args:
+            error (Exception, optional): The error which caused the bot to stop. Defaults to None.
+
+        Raises:
+            error: Reraised error, if there is one.
+        """
         Logger.error("Shibbot is being stopped, goodbye !", error)
-        self.db.close()
-        await self.specs.close()
-        await super().close()
+        to_close = [self.specs.close(), super().close()]
+        if self.reddit:
+            to_close.append(self.reddit.close())
+        await asyncio.gather(*to_close)
         self.loop.close()
+        self.db.close()
         if error: raise error
         
 
@@ -209,4 +229,4 @@ class PterodactylShibbot(Shibbot):
         super().__init__(*args, **kwargs)
         self.specs = ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
-        Logger.warn("Using Pterodactyl API to get hardware usage.")
+        Logger.warn("Using the Pterodactyl API to get hardware usage.")

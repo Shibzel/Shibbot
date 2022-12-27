@@ -85,8 +85,8 @@ try:
     reddit_client_secret = os.getenv("REDDIT_CLIENT_SECRET")
     if reddit_client_secret in ("", None):
         raise Missing("Missing Reddit application client secret.")
-    reddit_user_name = os.getenv("REDDIT_USERNAME")
-    if reddit_user_name in ("", None):
+    reddit_username = os.getenv("REDDIT_USERNAME")
+    if reddit_username in ("", None):
         raise Missing("Missing username of your Reddit account.")
     reddit_password = os.getenv("REDDIT_PASSWORD")
     if reddit_password in ("", None):
@@ -138,7 +138,7 @@ try:
     shibbot.init_reddit(
         client_id=reddit_client_id,
         client_secret=reddit_client_secret,
-        user_name=reddit_user_name,
+        username=reddit_username,
         password=reddit_password
     )
     shibbot.run(token=token, command_input=True)

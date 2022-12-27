@@ -139,7 +139,7 @@ class Shibbot(bridge.Bot):
             self.languages.append(language)
 
     
-    def init_reddit(self, client_id:str, client_secret: str, user_name: str, password: str, *args, **kwargs):
+    def init_reddit(self, client_id:str, client_secret: str, username: str, password: str, *args, **kwargs):
         """Initializes the Reddit client.
 
         Args:
@@ -152,9 +152,8 @@ class Shibbot(bridge.Bot):
             user_name (str): The id of the account on which the application was created.
             password (str): The password of the account.
         """
-        self.reddit = Reddit(self.loop, client_secret, password, user_name, client_id, *args, **kwargs)
         Logger.log(f"Initializing Reddit client.")
-        self.reddit = Reddit(loop=self.loop, client_secret=client_secret, password=password, user_name=user_name, client_id=client_id, *args, **kwargs)
+        self.reddit = Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
 
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:

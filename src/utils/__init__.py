@@ -7,6 +7,7 @@ from .hardware import ServerSpecifications, auto_gc
 from .reddit import Reddit
 from .language import factory_language, fl, get_language
 from .commands import *
+from .re import *
 
 
 def relative_timestamp(datetime: datetime.datetime) -> str:

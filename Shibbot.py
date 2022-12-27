@@ -28,6 +28,14 @@ cls = Shibbot
 class Missing(Exception): pass
 class Syntax(Exception): pass
 
+if not os.path.exists(DATABASE_FILE_PATH):
+    open(DATABASE_FILE_PATH, "x")
+    Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
+folders_to_create = (LOGS_PATH, CACHE_PATH)
+for dir in folders_to_create:
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
 Logger.start()
 ### Doing some checks
 try:
@@ -35,14 +43,6 @@ try:
         raise Missing("Missing .env file. Create a new one, copy the contents of .env.example and complete it.")
     # Loading .env
     load_dotenv()
-
-    if not os.path.exists(DATABASE_FILE_PATH):
-        open(DATABASE_FILE_PATH, "x")
-        Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
-    folders_to_create = (LOGS_PATH, CACHE_PATH)
-    for dir in folders_to_create:
-        if not os.path.exists(dir):
-            os.makedirs(dir)
 
     # Discord
     token = os.getenv("BOT_TOKEN")
@@ -79,13 +79,17 @@ try:
         Logger.warn("Couldn't verify if the bot is up to date.")
 
     # Reddit
-    if os.getenv("REDDIT_CLIENT_ID") in ("", None):
+    reddit_client_id = os.getenv("REDDIT_CLIENT_ID")
+    if reddit_client_id in ("", None):
         raise Missing("Missing Reddit application client ID. You can get your application's ID and secret here : https://www.reddit.com/prefs/apps/")
-    if os.getenv("REDDIT_CLIENT_SECRET") in ("", None):
+    reddit_client_secret = os.getenv("REDDIT_CLIENT_SECRET")
+    if reddit_client_secret in ("", None):
         raise Missing("Missing Reddit application client secret.")
-    if os.getenv("REDDIT_USERNAME") in ("", None):
+    reddit_user_name = os.getenv("REDDIT_USERNAME")
+    if reddit_user_name in ("", None):
         raise Missing("Missing username of your Reddit account.")
-    if os.getenv("REDDIT_PASSWORD") in ("", None):
+    reddit_password = os.getenv("REDDIT_PASSWORD")
+    if reddit_password in ("", None):
         raise Missing("Missing password of your Reddit account.")
 
     # Lavalink
@@ -131,7 +135,14 @@ try:
         gc_clear=True,
         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id,
     )
+    shibbot.init_reddit(
+        client_id=reddit_client_id,
+        client_secret=reddit_client_secret,
+        user_name=reddit_user_name,
+        password=reddit_password
+    )
     shibbot.run(token=token, command_input=True)
 except Exception as e:
     Logger.error("Oops... Shibbot stopped ?", e)
     Logger.end()
+exit()

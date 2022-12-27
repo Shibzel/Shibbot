@@ -25,7 +25,7 @@ class Shibbot(bridge.Bot):
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         Logger.log("Initializing Shibbot...")
-        start_time = time.time()
+        self.init_time = time.time()
         self.test_mode = test_mode
         if self.test_mode:
             Logger.warn("Test/beta mode is enabled.")
@@ -97,7 +97,7 @@ class Shibbot(bridge.Bot):
             Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
         Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
-                   f" Took {time.time()-start_time:.2f} sec.")
+                   f" Took {time.time()-self.init_time:.2f} sec.")
       
 
     @property
@@ -139,16 +139,22 @@ class Shibbot(bridge.Bot):
             self.languages.append(language)
 
     
-    def init_reddit(self, client_secret: str, password: str, user_name: str, client_id:str, *args, **kwargs):
-        """_summary_
+    def init_reddit(self, client_id:str, client_secret: str, user_name: str, password: str, *args, **kwargs):
+        """Initializes the Reddit client.
 
         Args:
             client_secret (str): _description_
             password (str): _description_
             user_name (str): _description_
             client_id (str): _description_
+            client_id (str): The application id.
+            client_secret (str): The application secret.
+            user_name (str): The id of the account on which the application was created.
+            password (str): The password of the account.
         """
         self.reddit = Reddit(self.loop, client_secret, password, user_name, client_id, *args, **kwargs)
+        Logger.log(f"Initializing Reddit client.")
+        self.reddit = Reddit(loop=self.loop, client_secret=client_secret, password=password, user_name=user_name, client_id=client_id, *args, **kwargs)
 
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
@@ -203,6 +209,7 @@ class Shibbot(bridge.Bot):
         except Exception as e:
             # Closing everything and reraising error
             self.loop.create_task(self.close(e))
+
 
     async def close(self, error: Exception = None) -> None:
         """Closes the bot.

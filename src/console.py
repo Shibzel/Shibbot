@@ -71,7 +71,7 @@ class ConsoleThread:
     @command
     def uptime(self, *args):
         _time = datetime.datetime.utcnow() - datetime.timedelta(seconds=self.bot.init_time)
-        Logger.log(f"Up for : {(time.time()-self.bot.init_time)/86400:.0f} days, {_time.hour} hours and {_time.minute} min.")
+        Logger.log(f"Up for : {(time.time()-self.bot.init_time)/86400:.0f} days, {_time.hour} hours, {_time.minute} min and {_time.second} sec.")
 
 
     def main(self):

@@ -1,5 +1,7 @@
 import threading
 import gc
+import datetime
+import time
 
 from .utils import Logger
 from .constants import COGS_PATH
@@ -42,7 +44,7 @@ class ConsoleThread:
     def stop(self, *args):
         try: raise ConsoleInterruption
         except ConsoleInterruption as e: self.bot.loop.create_task(self.bot.close(e))
-        self.stop()
+        self.kill()
 
     
     @command
@@ -65,6 +67,12 @@ class ConsoleThread:
     def reload(self, cog, *args):
         self.apply_on_cog(self.bot.reload_extension, "reload", cog)
 
+    
+    @command
+    def uptime(self, *args):
+        _time = datetime.datetime.utcnow() - datetime.timedelta(seconds=self.bot.init_time)
+        Logger.log(f"Up for : {(time.time()-self.bot.init_time)/86400:.0f} days, {_time.hour} hours and {_time.minute} min.")
+
 
     def main(self):
         Logger.log(f"Using command inputs ({', '.join(commands.keys())}).")
@@ -85,5 +93,5 @@ class ConsoleThread:
     def start(self):
         self.thread.start()   
 
-    def stop(self):
+    def kill(self):
         self.running = False

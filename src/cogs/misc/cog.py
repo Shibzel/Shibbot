@@ -35,7 +35,7 @@ class Miscellaneous(BaseCog):
 
     @bridge.bridge_command(name="userinfo", aliases=["uinfo", "user-info"], description="Gives info about an account.",
                                                                             description_localizations={"fr": "Donne des infos sur un compte."})
-    @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
+    @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User,
                     description="The user you want more info about.", description_localizations={"fr": "L'utilisateur sur lequel voulez plus d'infos."})
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def get_user_info(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
@@ -142,3 +142,9 @@ class Miscellaneous(BaseCog):
             embed.add_field(name=lang.GET_SERVER_INFO_FIELD4_NAME, value=emojis_str if emojis_str != "" else lang.GET_SERVER_INFO_FIELD4_VALUE)
 
         await ctx.respond(embed=embed)
+
+    @bridge.bridge_command(name="id", description="Get the id of an account.", description_localizations={"fr": "Obtiens l'id d'un compte."})
+    @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User)
+    async def _get_id(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
+        user = user or ctx.author
+        await ctx.respond(content=f"{user}: `{user.id}`")

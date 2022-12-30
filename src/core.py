@@ -194,6 +194,17 @@ class Shibbot(bridge.Bot):
         Logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
 
 
+    def _on_cog(self, method, *args, **kwargs) -> None:
+        """Fixes a bug beacause using methods like loading must run twice."""
+        try:
+            method(*args, **kwargs)
+        except AttributeError:
+            method(*args, **kwargs)
+    def load_extension(self, *args, **kwargs): self._on_cog(super().load_extension, *args, **kwargs)
+    def unload_extension(self, *args, **kwargs): self._on_cog(super().unload_extension, *args, **kwargs)
+    def reload_extension(self, *args, **kwargs): self._on_cog(super().reload_extension, *args, **kwargs)
+
+
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Runs the bot.
 

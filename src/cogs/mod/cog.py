@@ -30,7 +30,7 @@ class Moderation(PluginCog):
             bot=bot,
             name={"en": "Moderation", "fr": "Modération"},
             description={"en": "Helps you moderating your server."},
-            languages={"en": English,}, emoji="✨"
+            languages={"en": English,}, emoji="👮"
         )
 
         self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS sanctions (id TEXT PRIMARY_KEY, guild_id INTEGER, user_id INTEGER, type TEXT, duration DATETIME)")

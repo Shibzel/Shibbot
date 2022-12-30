@@ -3,7 +3,7 @@ import gc
 import datetime
 import time
 
-from .utils import Logger
+from .utils import Logger, Uptime
 from .constants import COGS_PATH
 
 path = COGS_PATH
@@ -70,8 +70,8 @@ class ConsoleThread:
     
     @command
     def uptime(self, *args):
-        _time = datetime.datetime.utcnow() - datetime.timedelta(seconds=self.bot.init_time)
-        Logger.log(f"Up for : {(time.time()-self.bot.init_time)/86400:.0f} days, {_time.hour} hours, {_time.minute} min and {_time.second} sec.")
+        uptime = Uptime(self.bot.init_time)
+        Logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
 
 
     def main(self):

@@ -33,7 +33,7 @@ class Miscellaneous(BaseCog):
         await ctx.respond(embed=embed)
 
 
-    @bridge.bridge_command(name="user-info", aliases=["uinfo", "userinfo"], description="Gives info about an account.",
+    @bridge.bridge_command(name="userinfo", aliases=["uinfo", "user-info"], description="Gives info about an account.",
                                                                             description_localizations={"fr": "Donne des infos sur un compte."})
     @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
                     description="The user you want more info about.", description_localizations={"fr": "L'utilisateur sur lequel voulez plus d'infos."})
@@ -67,7 +67,7 @@ class Miscellaneous(BaseCog):
 
         await ctx.respond(embed=embed)
 
-    @bridge.bridge_command(name="server-info", aliases=["sinfo", "serverinfo"], description="Gives info about the server you're in.",
+    @bridge.bridge_command(name="serverinfo", aliases=["sinfo", "server-info"], description="Gives info about the server you're in.",
                                                                             description_localizations={"fr": "Donne des infos sur le serveur sur lequel vous êtes."})
     @bridge.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)

@@ -24,7 +24,7 @@ Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Pyth
 - [ ] Get you the latest memes it scrobes on Reddit daily
 - [ ] Offer you translation tools, articles on wikipedia and other utilities
 - [ ] Play music in the voice channel you're in (classic)
-- [ ] Minecraft utilities (show the number of players into a server as a voice channel's name, ...)
+- [ ] ~~Minecraft utilities (show the number of players into a server as a voice channel's name, ...)~~
 - [x] Become sentient and threaten humanity
 
 If you want to try it yourself on your server you can invite it by adding it on your own server by [clicking here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands) or join its server [here](https://discord.gg/TZNWfJmPwj).

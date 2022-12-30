@@ -3,7 +3,7 @@ import datetime
 
 from .json import *
 from .logger import Logger
-from .hardware import ServerSpecifications, auto_gc
+from .hardware import ServerSpecifications, auto_gc, Uptime
 from .reddit import Reddit
 from .language import factory_language, fl, get_language
 from .commands import *

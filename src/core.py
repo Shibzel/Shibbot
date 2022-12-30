@@ -2,9 +2,9 @@
 import discord
 from discord.ext import bridge
 import os
-import time
 import traceback
 import asyncio
+import datetime
 
 
 from . import database
@@ -25,7 +25,7 @@ class Shibbot(bridge.Bot):
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         Logger.log("Initializing Shibbot...")
-        self.init_time = time.time()
+        self.init_time = datetime.datetime.utcnow()
         self.test_mode = test_mode
         if self.test_mode:
             Logger.warn("Test/beta mode is enabled.")
@@ -97,7 +97,7 @@ class Shibbot(bridge.Bot):
             Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
         Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
-                   f" Took {time.time()-self.init_time:.2f} sec.")
+                   f" Took {(datetime.datetime.utcnow()-self.init_time).total_seconds():.2f} sec.")
       
 
     @property

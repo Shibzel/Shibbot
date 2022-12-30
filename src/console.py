@@ -1,7 +1,5 @@
 import threading
 import gc
-import datetime
-import time
 
 from .utils import Logger, Uptime
 from .constants import COGS_PATH

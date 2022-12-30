@@ -1,7 +1,6 @@
 import threading
+import multiprocessing
 import gc
-import datetime
-import time
 
 from .utils import Logger, Uptime
 from .constants import COGS_PATH
@@ -29,7 +28,11 @@ class ConsoleThread:
         self.bot = bot
         self.running = True
 
-        self.thread = threading.Thread(target=self.main, name="ConsoleThread")
+        kwargs = {"target": self.main, "name": "ConsoleThread"}
+        try:
+            self.thread = multiprocessing.Process(**kwargs)
+        except OSError:
+            self.thread = threading.Thread(**kwargs)
 
     
     def apply_on_cog(self, method, method_name, cog_name):
@@ -95,3 +98,5 @@ class ConsoleThread:
 
     def kill(self):
         self.running = False
+        if isinstance(self.thread, multiprocessing.Process):
+            self.thread.terminate()

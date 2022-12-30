@@ -42,7 +42,7 @@ class Configuration(BaseCog):
 
     @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
-    @commands.cooldown(1, 5, commands.BucketType.member)
+    @commands.cooldown(2, 10, commands.BucketType.member)
     @bridge.guild_only()
     async def change_lang(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)

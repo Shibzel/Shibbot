@@ -4,8 +4,7 @@ from platform import python_version
 
 from src import Shibbot, __version__ as version, __github__ as github_link, database
 from src.models import BaseCog, CustomView
-from src.utils import get_description_localization, stringify_command_usage, get_language
-from src.errors import NotInteractionOwner
+from src.utils import get_description_localization, stringify_command_usage, get_language, Uptime
 from src.constants import SERVER_INVITATION_LINK
 
 from . import English, French
@@ -56,14 +55,11 @@ class About(BaseCog):
             embed.set_thumbnail(url=self.bot.user.avatar)
             embed.set_footer(text=FOOTER)
 
-            view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, disable_on_timeout=True))
+            view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, timeout=300, disable_on_timeout=True))
             return embed
 
         async def callback(interaction: discord.Interaction):
             """The select bar's callback."""
-            if interaction.user != ctx.author:
-                raise NotInteractionOwner(ctx.author, interaction.user)
-
             nonlocal view
             select_value = select.values[0]
             if select_value == "home":
@@ -89,7 +85,7 @@ class About(BaseCog):
                     # Stringifying the command's options
                     value += f"• `{stringify_command_usage(command, lang_code)}` : {command_description if command_description else '...'}\n"
                 embed.add_field(name=lang.SHOW_HELP_COMMANDS_FIELD_NAME, value=value if value != "" else "...")
-                view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
+                view = self.bot.add_bot(CustomView(select, timeout=300, disable_on_timeout=True))
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
 
@@ -153,6 +149,28 @@ class About(BaseCog):
                                                                        n_ram=round(specs.max_memory, 2),
                                                                        place=specs.location))
         embed.add_field(name=lang.GET_INFOS_FIELD3_NAME, value=lang.GET_INFOS_FIELD3_DESCRIPTION, inline=False)
+
+        await ctx.respond(embed=embed)
+
+
+    @bridge.bridge_command(name="uptime", description="Displays since when the bot has been online.",
+                                          description_localizations={"fr" : "Affiche depuis quand le bot est en ligne."})
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    async def get_uptime(self, ctx: bridge.BridgeApplicationContext):
+        lang = await self.get_lang(ctx)
+
+        # TODO: Get the uptime of the bot
+        uptime = 0
+        if uptime > 90: emoji, color = "🟢", discord.Color.green()
+        elif 75 > uptime >= 90: emoji, color = "🟠", discord.Color.orange()
+        elif not uptime: emoji, color = "⚪", 0xffffff
+        else: emoji, color = "🔴", discord.Color.red()
+
+        ut = Uptime(self.bot.init_time)
+
+        embed = discord.Embed(color=color)
+        embed.add_field(name=lang.GET_UPTIME_FIELD2_NAME, value=lang.GET_UPTIME_FIELD2_VALUE.format(emoji=emoji, uptime=uptime))
+        embed.add_field(name=lang.GET_UPTIME_FIELD1_NAME, value=lang.GET_UPTIME_FIELD1_VALUE.format(d=ut.days, h=ut.hours, m=ut.minutes, s=ut.seconds))
 
         await ctx.respond(embed=embed)
 

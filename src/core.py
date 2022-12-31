@@ -73,8 +73,7 @@ class Shibbot(bridge.Bot):
 
         # Loading all the cogs
         Logger.log("Loading cogs...")
-        path = convert_to_import_path(COGS_PATH)
-        files = os.listdir(path) # Getting all the file names in the cog folders
+        files = os.listdir(COGS_PATH) # Getting all the file names in the cog folders
         treated_cogs = []
         for filename in files:
             if filename not in ("__pycache__",):
@@ -82,7 +81,7 @@ class Shibbot(bridge.Bot):
                 if cogname.endswith(".py"):
                     cogname = cogname[:-3]
                 try:
-                    self.load_extension(f"{path.replace('/', '.')}.{cogname}")
+                    self.load_extension(f"{convert_to_import_path(COGS_PATH)}.{cogname}")
                 except Exception as e:
                     Logger.error(f"Could not load '{cogname}' cog.", e)
                 treated_cogs.append(cogname)

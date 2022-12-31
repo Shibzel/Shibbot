@@ -171,4 +171,5 @@ class About(BaseCog):
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au crétaeur du bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
+        # TODO: Complete this command.
         await ctx.respond("Command not available yet.")

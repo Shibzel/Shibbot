@@ -15,7 +15,6 @@ def convert_to_import_path(path: str):
         path = path[2:]
     return path.replace('/', '.')
 
-
 def relative_timestamp(datetime: datetime.datetime) -> str:
     return f"<t:{int(datetime.timestamp())}:R>"
 

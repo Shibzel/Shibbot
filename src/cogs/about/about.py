@@ -11,7 +11,6 @@ from . import English, French
 
 
 class About(BaseCog):
-    
     def __init__(self, bot):
         self.bot: Shibbot = bot
         super().__init__(
@@ -21,7 +20,6 @@ class About(BaseCog):
             languages={"en": English, "fr": French}, emoji="📍"
         )
 
-    
     @bridge.bridge_command(name="help", description="Shows help.", description_localizations={"fr": "Affiche de l'aide."})
     @commands.cooldown(1, 10, commands.BucketType.member)
     async def show_help(self, ctx: bridge.BridgeApplicationContext):
@@ -93,7 +91,6 @@ class About(BaseCog):
         embed = await get_home_page()
         await ctx.respond(embed=embed, view=view)
 
-
     @bridge.bridge_command(name="ping", description="Gets the bot's ping.", description_localizations={"fr": "Obtient le ping du bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def ping(self, ctx: bridge.BridgeApplicationContext):
@@ -106,7 +103,6 @@ class About(BaseCog):
                 ram=round(self.bot.specs.memory_usage/self.bot.specs.max_memory*100, 2)),
             color=discord.Color.dark_gold())
         await ctx.respond(embed=embed)
-        
     
     @bridge.bridge_command(name="invite", aliases=["botinvite", "support"], description="Gets you the bot's invitation links.", 
                                                                             description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
@@ -124,7 +120,6 @@ class About(BaseCog):
         bot_button = discord.ui.Button(label=lang.GET_INVITATIONS_INVITE_BOT_BUTTON, url=self.bot.invite_bot_url)
         server_button = discord.ui.Button(label=lang.GET_INVITATIONS_INVITE_SERVER_BUTTON, url=SERVER_INVITATION_LINK)
         await ctx.respond(embed=embed, view=self.bot.add_bot(CustomView(bot_button, server_button)))
-
 
     @bridge.bridge_command(name="botinfo", aliases=["about", "specs", "botspecs"], description="Gets informations about the bot.",
                                                                                    description_localizations={"fr" : "Obtiens des informartions sur le bot."})
@@ -152,7 +147,6 @@ class About(BaseCog):
 
         await ctx.respond(embed=embed)
 
-
     @bridge.bridge_command(name="uptime", description="Displays since when the bot has been online.",
                                           description_localizations={"fr" : "Affiche depuis quand le bot est en ligne."})
     @commands.cooldown(1, 7, commands.BucketType.member)
@@ -173,7 +167,6 @@ class About(BaseCog):
         embed.add_field(name=lang.GET_UPTIME_FIELD1_NAME, value=lang.GET_UPTIME_FIELD1_VALUE.format(d=ut.days, h=ut.hours, m=ut.minutes, s=ut.seconds))
 
         await ctx.respond(embed=embed)
-
 
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au crétaeur du bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)

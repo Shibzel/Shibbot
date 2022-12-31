@@ -12,7 +12,6 @@ from . import English, French
 
 
 class Configuration(BaseCog):
-    
     def __init__(self, bot):
         self.bot: Shibbot = bot
         super().__init__(
@@ -21,7 +20,6 @@ class Configuration(BaseCog):
             description={"en": "Set of configuration commands.", "fr": "Commandes de configuration."},
             languages={"en": English, "fr": French}, emoji="🛠️"
         )
-
 
     @bridge.bridge_command(name="prefix", description="Changes the prefix.", description_localizations={"fr": "Change le préfixe."},
                            options=[discord.Option(required=True, name="prefix", description="The prefix you want to set.",
@@ -38,7 +36,6 @@ class Configuration(BaseCog):
         await database.change_prefix(self.bot, ctx.guild, prefix)
         embed = discord.Embed(title=lang.CHANGE_PREFIX_TITLE, description="✅ "+lang.CHANGE_PREFIX_DESCRIPTION.format(prefix=prefix), color=discord.Color.green())
         await ctx.respond(embed=embed)
-
 
     @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
@@ -67,7 +64,6 @@ class Configuration(BaseCog):
         embed = discord.Embed(title=lang.CHANGE_LANG_MENU_TITLE, description=lang.CHANGE_LANG_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)
 
-
     @bridge.bridge_command(name="plugins", aliases=["plugin"], description="Enables or disables plugins.", description_localizations={"fr": "Active ou désactive des plugins."})
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(1, 7, commands.BucketType.member)
@@ -92,6 +88,3 @@ class Configuration(BaseCog):
         view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
         embed = discord.Embed(title=lang.ENABLE_PLUGIN_MENU_TITLE, description=lang.ENABLE_PLUGIN_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)
-
-
-    

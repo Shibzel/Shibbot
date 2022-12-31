@@ -1,5 +1,5 @@
 from .lang import French, English
-from .cog import Configuration
+from .configuration import Configuration
 
 
 def setup(bot):

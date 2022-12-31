@@ -10,14 +10,12 @@ from src.utils import Logger
 def db():
     return sqlite3.connect(DATABASE_FILE_PATH) 
 
-
-def async_db():
+def aiodb():
     return aiosqlite.connect(DATABASE_FILE_PATH)
-
 
 async def create_or_fetch_guild(bot, guild: discord.Guild):
     """Fetch the infos of a guild inside the guild table or insert it."""
-    async with async_db() as db:
+    async with aiodb() as db:
             async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                 data = await cursor.fetchone()
             if not data:
@@ -28,13 +26,12 @@ async def create_or_fetch_guild(bot, guild: discord.Guild):
                     await db.commit()
             return data
 
-
 async def get_prefix(has_guild):
     """Gets the prefix."""
     try:
         guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
         if guild:
-            async with async_db() as db:
+            async with aiodb() as db:
                 async with db.execute("SELECT prefix FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
@@ -45,17 +42,16 @@ async def get_prefix(has_guild):
 
 async def change_prefix(bot, guild: discord.Guild, prefix: str):
     await create_or_fetch_guild(bot, guild)
-    async with async_db() as db:
+    async with aiodb() as db:
         async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (prefix, guild.id,)):
             await db.commit()
-
 
 async def get_language(has_guild):
     """Gets the language of a guild."""
     try:
         guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
         if guild:
-            async with async_db() as db:
+            async with aiodb() as db:
                 async with db.execute("SELECT lang FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
                     prefix = await cursor.fetchone()
             if prefix:
@@ -66,16 +62,15 @@ async def get_language(has_guild):
 
 async def change_language(bot, guild: discord.Guild, language: str):
     await create_or_fetch_guild(bot, guild)
-    async with async_db() as db:
+    async with aiodb() as db:
         async with db.execute("UPDATE guilds SET lang=? WHERE guild_id=?", (language, guild.id,)):
             await db.commit()
-
 
 async def plugin_is_enabled(has_guild, plugin: str, guild_only: bool = False):
     guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
     if not guild:
         return not guild_only
-    async with async_db() as db:
+    async with aiodb() as db:
         async with db.execute(f"SELECT enabled FROM {plugin}_plugin WHERE guild_id=?", (guild.id,)) as cursor:
             enabled = await cursor.fetchone()
             if enabled:
@@ -83,7 +78,7 @@ async def plugin_is_enabled(has_guild, plugin: str, guild_only: bool = False):
             return enabled
 
 async def enable_plugin(guild: discord.Guild, plugin: str, enable: bool = True):
-    async with async_db() as db:
+    async with aiodb() as db:
         cursor = await db.execute(f"SELECT * FROM {plugin}_plugin WHERE guild_id=?", (guild.id,))
         if not await cursor.fetchone():
             await cursor.execute(f"INSERT INTO {plugin}_plugin (guild_id, enabled) VALUES (?,?)", (guild.id, enable,))

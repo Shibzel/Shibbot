@@ -14,7 +14,6 @@ def get_description_localization(obj, lang_code: str) -> str | None:
             obj_description = get_language(obj.description_localizations, lang_code)
     return obj_description if obj_description else obj.description
 
-
 def stringify_command_usage(command: discord.SlashCommand, lang_code: str) -> str | None:
     command_options = ""
     for option in command.options:

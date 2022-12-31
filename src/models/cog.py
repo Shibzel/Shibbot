@@ -25,34 +25,28 @@ class BaseCog(discord.Cog):
         self.emoji = emoji
         self.is_hidden = hidden
 
-
     async def cog_before_invoke(self, ctx: BridgeApplicationContext):
         guild_string = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
         Logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{ctx.command}' command{guild_string}.")
         return await super().cog_before_invoke(ctx)
 
-
     def get_name(self, lang_code: str) -> str:
         return get_language(self.name, lang_code) if self.name else self.__name__
 
-
     def get_description(self, lang_code: str) -> str:
         return get_language(self.description, lang_code) if self.description else None
-
 
     def get_lang(self, ctx):
         return fl(ctx, self.languages)
 
 
 class PluginCog(BaseCog):
-
     def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):
         self.plugin_name = plugin_name
         self.guild_only = guild_only
         super().__init__(*args, **kwargs)
         self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS {plugin_name}_plugin (guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
         self.bot.db.commit()
-
 
     async def cog_before_invoke(self, ctx: BridgeApplicationContext):
         if not await database.plugin_is_enabled(ctx, self.plugin_name, self.guild_only):

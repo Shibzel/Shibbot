@@ -7,7 +7,6 @@ from . import English, French
 
 
 class Miscellaneous(BaseCog):
-    
     def __init__(self, bot):
         self.bot: Shibbot = bot
         super().__init__(
@@ -16,7 +15,6 @@ class Miscellaneous(BaseCog):
             description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variés."},
             languages={"en": English, "fr": French}, emoji="✨"
         )
-
     
     @bridge.bridge_command(name="avatar", aliases=["av"], description="Gives the profile picture.", description_localizations={"fr": "Donne l'image de profil."})
     @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
@@ -31,7 +29,6 @@ class Miscellaneous(BaseCog):
         embed.set_author(name=user)
         embed.set_image(url=user.avatar)
         await ctx.respond(embed=embed)
-
 
     @bridge.bridge_command(name="userinfo", aliases=["uinfo", "user-info"], description="Gives info about an account.",
                                                                             description_localizations={"fr": "Donne des infos sur un compte."})

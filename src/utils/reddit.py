@@ -17,12 +17,10 @@ class Reddit(asyncpraw.Reddit):
         
         self.loop.create_task(self.clear_requests_loop())
 
-
     async def clear_requests_loop(self):
         while self.running:
             await asyncio.sleep(60.0)
             self.n_requests = 0
-
 
     async def get_sub(self, subreddit: str, limit: int=500):
         """Gets the latest hot submissions from a subreddit."""
@@ -32,7 +30,6 @@ class Reddit(asyncpraw.Reddit):
         self.n_requests += 1
         subreddit = await self.subreddit(subreddit)
         return [sub async for sub in subreddit.hot(limit=limit)]
-
 
     async def get_subs(self, subreddits: list, limit_per_subred: int=500):
         """Gets hot submissions from different subreddits."""
@@ -46,7 +43,6 @@ class Reddit(asyncpraw.Reddit):
         tasks = [append_submits(subreddit) for subreddit in subreddits]
         await asyncio.gather(*tasks)
         return submissions
-
 
     @staticmethod
     def sub_to_dict(submission, **kwargs: bool):
@@ -71,7 +67,6 @@ class Reddit(asyncpraw.Reddit):
             if value:
                 _dict.update({key: getattr(submission, key, None)})
         return _dict
-
 
     async def close(self):
         self.running = False

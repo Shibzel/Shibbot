@@ -19,9 +19,7 @@ class SanctionType:
     temp_ban = "tban"
     unban = "unban"
 
-
 class Moderation(PluginCog):
-    
     def __init__(self, bot):
         self.bot: Shibbot = bot
         super().__init__(
@@ -33,10 +31,9 @@ class Moderation(PluginCog):
             languages={"en": English,}, emoji="👮"
         )
 
-        self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS sanctions (id TEXT PRIMARY_KEY, guild_id INTEGER, user_id INTEGER, type TEXT, duration DATETIME)")
+        self.bot.cursor.execute("CREATE TABLE IF NOT EXISTS sanctions (id TEXT PRIMARY_KEY, guild_id INTEGER, user_id INTEGER, type TEXT, duration DATETIME)")
         self.bot.cursor.execute("CREATE TABLE IF NOT EXISTS warns(id TEXT PRIMARY_KEY, guild_id INTEGER, user_id INTEGER, reason TEXT, date DATETIME, mod_id INTEGER)")
         self.bot.db.commit()
-
 
     async def mod_log(self, guild: discord.Guild, method_used):
         lang = await self.get_lang(guild)

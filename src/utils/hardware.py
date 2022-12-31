@@ -9,7 +9,6 @@ import datetime
 from .logger import Logger
 
 class Uptime:
-    
     def __init__(self, init_time: float):
         now = datetime.datetime.utcnow()
         delta = now - init_time
@@ -45,30 +44,24 @@ class ServerSpecifications:
             self._loop.create_task(self._get_specs_loop())
         self._loop.create_task(self._get_location())
 
-
     @property
     def max_memory(self):
         return psutil.virtual_memory().total/1_000_000 if not self.using_pterodactyl else self._max_memory
-
 
     @property
     def memory_usage(self):
         return psutil.virtual_memory().used/1_000_000 if not self.using_pterodactyl else self._memory_usage
 
-
     @property
     def cpu_percentage(self):
         return psutil.cpu_percent() if not self.using_pterodactyl else self._cpu_usage_percent/self._max_cpu_percent*100
-
 
     @property
     def threads(self):
         return psutil.cpu_count(logical=True) if not self.using_pterodactyl else self._threads
 
-
     async def close(self):
         self.looping = False
-
 
     async def _request(self, url):
         async with aiohttp.ClientSession(headers=self._headers) as session:
@@ -78,14 +71,11 @@ class ServerSpecifications:
                 raise Exception(result)
             return result
 
-
     async def _get_current(self):
         return (await self._request(f"{self._panel_url}/api/client/servers/{self._server_id}/resources"))["attributes"]["resources"]
-        
 
     async def _get_limits(self):
         return (await self._request(f"{self._panel_url}/api/client/servers/{self._server_id}"))["attributes"]["limits"]
-
 
     async def _get_specs_loop(self):
         show_error = True
@@ -113,7 +103,6 @@ class ServerSpecifications:
                         show_error = False
                 await asyncio.sleep(sleep)
 
-
     async def _get_location(self):
         async with aiohttp.ClientSession() as session:
             got_response = False
@@ -125,7 +114,6 @@ class ServerSpecifications:
                     got_response = True
                 except:
                     await asyncio.sleep(40)
-
             
 async def auto_gc(specs: ServerSpecifications, sleep: int = 60, max_percentage: float = 80.0):
     while True:

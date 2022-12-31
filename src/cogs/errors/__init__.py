@@ -1,5 +1,5 @@
 from .lang import English, French
-from .cog import ErrorHandler
+from .errorHandler import ErrorHandler
 
 
 def setup(bot):

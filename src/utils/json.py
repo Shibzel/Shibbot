@@ -13,7 +13,6 @@ async def load(fpath: str):
     with open(fpath, "rb") as json_file:
         return orjson.loads(json_file.read())
 
-
 async def json_from_urls(urls: list) -> list:
     """Asynchronous way to get the json content from an API."""
     async with aiohttp.ClientSession() as session:

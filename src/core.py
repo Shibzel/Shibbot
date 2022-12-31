@@ -17,7 +17,6 @@ from .console import ConsoleThread
 def bot_get_prefix(bot, ctx):
     return database.get_prefix(ctx)
 
-
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
@@ -33,29 +32,28 @@ class Shibbot(bridge.Bot):
         self.languages = []
         self.reddit = None
 
-        super().__init__(
-            command_prefix=bot_get_prefix,
-            owner_ids=[SHIBZEL_ID] if instance_owners == [] else instance_owners,
-            # Being mentionned by a bot is very annoying, that's why it's all set to False.
-            allowed_mentions=discord.AllowedMentions.none(),
-            intents=discord.Intents(
-                bans=True,
-                dm_messages=True, # Waterver we want the bot to respond to dms or not
-                emojis=True,          
-                guild_messages=True,
-                guild_reactions=False, # Not needed yet
-                guilds=True,
-                invites=False,
-                members=True,
-                message_content=True,
-                presences=True,
-                voice_states=False),
-            case_insensitive=True,
-            activity=discord.Streaming(
-                name="connecting...",
-                # Don't put this link on your browser or you'll regret it.
-                url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-            *args, **kwargs)
+        super().__init__(command_prefix=bot_get_prefix,
+                        owner_ids=[SHIBZEL_ID] if instance_owners == [] else instance_owners,
+                        # Being mentionned by a bot is very annoying, that's why it's all set to False.
+                        allowed_mentions=discord.AllowedMentions.none(),
+                        intents=discord.Intents(
+                            bans=True,
+                            dm_messages=True, # Waterver we want the bot to respond to dms or not
+                            emojis=True,          
+                            guild_messages=True,
+                            guild_reactions=False, # Not needed yet
+                            guilds=True,
+                            invites=False,
+                            members=True,
+                            message_content=True,
+                            presences=True,
+                            voice_states=False),
+                        case_insensitive=True,
+                        activity=discord.Streaming(
+                            name="connecting...",
+                            # Don't put this link on your browser or you'll regret it.
+                            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+                        *args, **kwargs)
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
@@ -97,7 +95,6 @@ class Shibbot(bridge.Bot):
         Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
                    f" Took {(datetime.datetime.utcnow()-self.init_time).total_seconds():.2f} sec.")
       
-
     @property
     def plugins(self) -> dict[str, PluginCog]:
         """A read-only mapping of plugin name to PluginCog.
@@ -111,7 +108,6 @@ class Shibbot(bridge.Bot):
                 plugins[cog.plugin_name] = cog
         return plugins
 
-
     def add_bot(self, cls: object) -> object:
         """Adds the bot to the class if it has the attribute `bot`. 
 
@@ -120,7 +116,6 @@ class Shibbot(bridge.Bot):
         """
         cls.bot = self
         return cls
-
 
     def add_language(self, language: str) -> None:
         """Adds a language to the bot.
@@ -135,7 +130,6 @@ class Shibbot(bridge.Bot):
             raise TypeError(f"'language' must be an 'str' object and not '{type(language).__name__}'.")
         if language not in self.languages:
             self.languages.append(language)
-
     
     def init_reddit(self, client_id:str, client_secret: str, username: str, password: str, *args, **kwargs):
         """Initializes the Reddit client.
@@ -153,11 +147,9 @@ class Shibbot(bridge.Bot):
         Logger.log(f"Initializing Reddit client.")
         self.reddit = Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
 
-
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content:
             await self.process_commands(after)
-
 
     async def on_ready(self) -> None:
         if self.is_alive is None:
@@ -170,27 +162,21 @@ class Shibbot(bridge.Bot):
         self.is_alive = True
         Logger.log(f"Ready. Connected as '{super().user}' (ID : {super().user.id}).")
 
-
     async def on_resumed(self) -> None:
         self.is_alive = True
-
 
     async def on_disconnect(self) -> None:
         if self.is_alive != False:
             self.is_alive = False
 
-
     async def on_guild_join(self, guild: discord.Guild) -> None:
         Logger.log(f"Joined guild '{guild.name}' (ID: {guild.id})")
-
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         Logger.log(f"Left guild '{guild.name}' (ID: {guild.id})")
 
-
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         Logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
-
 
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""
@@ -201,7 +187,6 @@ class Shibbot(bridge.Bot):
     def load_extension(self, *args, **kwargs): self._on_cog(super().load_extension, *args, **kwargs)
     def unload_extension(self, *args, **kwargs): self._on_cog(super().unload_extension, *args, **kwargs)
     def reload_extension(self, *args, **kwargs): self._on_cog(super().reload_extension, *args, **kwargs)
-
 
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Runs the bot.
@@ -217,7 +202,6 @@ class Shibbot(bridge.Bot):
         except Exception as e:
             # Closing everything and reraising error
             self.loop.create_task(self.close(e))
-
 
     async def close(self, error: Exception = None) -> None:
         """Closes the bot.
@@ -236,7 +220,6 @@ class Shibbot(bridge.Bot):
         self.loop.close()
         self.db.close()
         if error: raise error
-        
 
 class PterodactylShibbot(Shibbot):
     """A subclass of `Shibbot` using the Pterodactyl API for hardware usage."""

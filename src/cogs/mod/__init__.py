@@ -1,5 +1,5 @@
 from .lang import English
-from .cog import Moderation
+from .moderation import Moderation
 from .database import *
 
 def setup(bot):

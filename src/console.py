@@ -37,6 +37,18 @@ class ConsoleThread:
         except Exception as e:
             Logger.error(f"Could not {method_name} '{cog_name}' cog.", e)
 
+    @command
+    def load(self, cog, *args):
+        self.apply_on_cog(self.bot.load_extension, "load", cog)
+
+    @command
+    def unload(self, cog, *args):
+        self.apply_on_cog(self.bot.unload_extension, "unload", cog)
+
+    @command
+    def reload(self, cog, *args):
+        self.apply_on_cog(self.bot.reload_extension, "reload", cog)
+
 
     @command
     def stop(self, *args):
@@ -44,7 +56,7 @@ class ConsoleThread:
         except ConsoleInterruption as e: self.bot.loop.create_task(self.bot.close(e))
         self.kill()
 
-    
+
     @command
     def gc(self, *args):
         gc.collect()
@@ -52,24 +64,19 @@ class ConsoleThread:
 
 
     @command
-    def load(self, cog, *args):
-        self.apply_on_cog(self.bot.load_extension, "load", cog)
-
-
-    @command
-    def unload(self, cog, *args):
-        self.apply_on_cog(self.bot.unload_extension, "unload", cog)
-
-    
-    @command
-    def reload(self, cog, *args):
-        self.apply_on_cog(self.bot.reload_extension, "reload", cog)
-
-    
-    @command
     def uptime(self, *args):
         uptime = Uptime(self.bot.init_time)
         Logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
+
+
+    @command
+    def servers(self, *args):
+        Logger.log(f"This instance is currently on {len(self.bot.guilds)} servers in total.")
+
+    
+    @command
+    def users(self, *args):
+        Logger.log(f"This instance is watching over {len(self.bot.users)} users.")
 
 
     def main(self):
@@ -88,8 +95,10 @@ class ConsoleThread:
             else:
                 Logger.log(f"Unknown command '{command_name}'.")
 
+
     def start(self):
-        self.thread.start()   
+        self.thread.start()  
+
 
     def kill(self):
         self.running = False

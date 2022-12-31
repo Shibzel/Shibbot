@@ -76,7 +76,7 @@ try:
             if not version_listed:
                 Logger.warn("You're currently using a wip/unlisted version.")
     else:
-        Logger.warn("Couldn't verify if the bot is up to date.")
+        Logger.error("Couldn't verify if the bot is up to date.")
 
     # Reddit
     reddit_client_id = os.getenv("REDDIT_CLIENT_ID")

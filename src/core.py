@@ -8,7 +8,7 @@ import datetime
 
 
 from . import database
-from .utils import Logger, ServerSpecifications, auto_gc, Reddit
+from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path
 from .constants import COGS_PATH, SHIBZEL_ID
 from .models import PluginCog
 from .console import ConsoleThread
@@ -75,9 +75,7 @@ class Shibbot(bridge.Bot):
 
         # Loading all the cogs
         Logger.log("Loading cogs...")
-        path = COGS_PATH
-        if path.startswith("./"):
-            path = path[2:]
+        path = convert_to_import_path(COGS_PATH)
         files = os.listdir(path) # Getting all the file names in the cog folders
         treated_cogs = []
         for filename in files:

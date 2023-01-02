@@ -53,7 +53,7 @@ try:
     if raw_ids != "":
         try:
             for _id in raw_ids.split(" "):
-                assert len(_id) == 18
+                assert len(_id) >= 18
                 instance_owners.append(int(_id))
         except (ValueError, AssertionError):
             raise Syntax("Invalid Discord ids. Be sure that the ids are separated with spaces and intergers.")

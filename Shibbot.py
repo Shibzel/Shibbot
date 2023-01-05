@@ -26,6 +26,10 @@ print(f"""
 """)
 
 cls = Shibbot
+kwargs = {
+    "test_mode": True,
+    "gc_clear": True,
+}
 class Missing(Exception): pass
 class Syntax(Exception): pass
 
@@ -58,6 +62,7 @@ try:
                 instance_owners.append(int(_id))
         except (ValueError, AssertionError):
             raise Syntax("Invalid Discord ids. Be sure that the ids are separated with spaces and intergers.")
+    kwargs["instance_owners"] = instance_owners
 
     repo_name = "Shibzel/Shibbot"
     # Version
@@ -125,17 +130,14 @@ try:
         if ptero_server_id in ("", None):
             raise Missing("Missing pterodactyl server ID."+("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/\033[93m8f61b2fb\033[00m"))
         cls = PterodactylShibbot
+        kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
 except (Missing, Syntax) as e:
     Logger.error("Eh, your forgot something.", e)
     exit()
 
 # Starting the bot
 try:
-    shibbot = cls(
-        test_mode=True, instance_owners=instance_owners,
-        gc_clear=True,
-        ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id,
-    )
+    shibbot = cls(**kwargs)
     shibbot.init_reddit(
         client_id=reddit_client_id,
         client_secret=reddit_client_secret,

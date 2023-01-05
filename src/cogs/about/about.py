@@ -1,6 +1,7 @@
 import discord
 from discord.ext import bridge, commands
 from platform import python_version
+import random
 
 from src import Shibbot, __version__ as version, __github__ as github_link, database
 from src.models import BaseCog, CustomView
@@ -27,7 +28,7 @@ class About(BaseCog):
         lang = get_language(self.languages, lang_code)
 
         TITLE = lang.SHOW_HELP_TITLE
-        FOOTER = f"Shibbot v{version} | "+lang.SHOW_HELP_FOOTER
+        FOOTER = f"Shibbot v{version} | "
         view = None
 
         # Listing all visible cogs and creating options accordingly
@@ -51,7 +52,7 @@ class About(BaseCog):
             embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME, value=lang.SHOW_HELP_FIELD2_VALUE.format(github_link=github_link+"/realeases/latest"), inline=True)
             embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME, value=lang.SHOW_HELP_FIELD3_VALUE.format(prefix=await database.get_prefix(ctx)), inline=False)
             embed.set_thumbnail(url=self.bot.user.avatar)
-            embed.set_footer(text=FOOTER)
+            embed.set_footer(text=FOOTER+random.choice(lang.SHOW_HELP_FOOTER_HOME))
 
             view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, timeout=300, disable_on_timeout=True))
             return embed
@@ -75,7 +76,7 @@ class About(BaseCog):
                     title=TITLE,
                     description=f"**{f'{cog.emoji} ' if cog.emoji else ''}{cog.get_name(lang_code)} :** {cog.get_description(lang_code) if cog.description else '...'}",
                     color=discord.Color.dark_gold())
-                embed.set_footer(text=FOOTER)
+                embed.set_footer(text=FOOTER+lang.SHOW_HELP_FOOTER)
                 value = ""
                 for command in cog.get_commands():
                     # Getting the command's description

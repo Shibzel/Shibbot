@@ -12,6 +12,7 @@ class English:
     SHOW_HELP_FIELD3_NAME = "Get help :"
     SHOW_HELP_FIELD3_VALUE = "The current prefixes are `{prefix}` and `/`. To get the list of my commands on one of my cogs, click on the bar bellow and select one of the options to get right in ⬇."
     SHOW_HELP_FOOTER = "Legend: [] required, <> optional"
+    SHOW_HELP_FOOTER_HOME = ("Tip: If the application doesn't respond, try to summon the command again.", "Tip: Hello i'm a tip :3",)
     SHOW_HELP_COMMANDS_FIELD_NAME = "Commands :"
 
     GET_INVITATIONS_TITLE = "Invitations"

@@ -14,6 +14,7 @@ class French(English):
     SHOW_HELP_FIELD3_NAME = "Obtenir de l'aide :"
     SHOW_HELP_FIELD3_VALUE = "Les préfixes actuels sont `{prefix}` et `/`. Pour accéder à la liste de commandes appartenant à l'un de mes engrenages, cliquez sur la barre ci-dessous et choisissez l'une des options pour vous y rendre ⬇."
     SHOW_HELP_FOOTER = "Légende: [] requis, <> optionel"
+    SHOW_HELP_FOOTER_HOME = ("Conseil: Si l'application ne répond pas, réinvoquez la commande.",)
     SHOW_HELP_COMMANDS_FIELD_NAME = "Commandes :"
 
     GET_INVITATIONS_TITLE = "Invitations"

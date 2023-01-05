@@ -5,8 +5,6 @@ from .utils import Logger, Uptime, convert_to_import_path
 from .constants import COGS_PATH
 
 
-path = convert_to_import_path(COGS_PATH)
-
 class ConsoleInterruption(Exception):
     def __init__(self, message=None):
         super().__init__(message or "Shibbot was asked to stop by the console.")
@@ -46,7 +44,7 @@ class ConsoleThread:
     @staticmethod
     def apply_on_cog(method, method_name, cog_name):
         try:
-            method(f"{path}.{cog_name}")
+            method(cog_name)
             Logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
         except Exception as e:
             Logger.error(f"Could not {method_name} '{cog_name}' cog.", e)

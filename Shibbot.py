@@ -1,3 +1,4 @@
+"""Launcher optimized to run ONE instance of Shibbot."""
 import os
 from dotenv import load_dotenv
 import requests
@@ -5,7 +6,7 @@ import orjson
 
 from src import Shibbot, PterodactylShibbot, __version__ as version
 from src.utils import Logger
-from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH
+from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENTIONS_PATH
 
 
 print(f"""
@@ -31,7 +32,7 @@ class Syntax(Exception): pass
 if not os.path.exists(DATABASE_FILE_PATH):
     open(DATABASE_FILE_PATH, "x")
     Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
-folders_to_create = (LOGS_PATH, CACHE_PATH)
+folders_to_create = (LOGS_PATH, CACHE_PATH, EXTENTIONS_PATH)
 for dir in folders_to_create:
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -145,4 +146,6 @@ try:
 except Exception as e:
     Logger.error("Oops... Shibbot stopped ?", e)
     Logger.end()
+
+# Exiting Program (there can be threads running in the background, that's why this exit func is here)
 exit()

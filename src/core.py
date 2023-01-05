@@ -9,7 +9,7 @@ import datetime
 
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path
-from .constants import COGS_PATH, SHIBZEL_ID
+from .constants import COGS_PATH, SHIBZEL_ID, EXTENTIONS_PATH
 from .models import PluginCog
 from .console import ConsoleThread
 
@@ -20,7 +20,7 @@ def bot_get_prefix(bot, ctx):
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
-    def __init__(self, test_mode = False, instance_owners: list[int] = [],
+    def __init__(self, test_mode = False, instance_owners: list[int] = [], extentions_path: str | None = None,
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         Logger.log("Initializing Shibbot...")
@@ -28,6 +28,7 @@ class Shibbot(bridge.Bot):
         self.test_mode = test_mode
         if self.test_mode:
             Logger.warn("Test/beta mode is enabled.")
+        self.extentions_path = extentions_path or EXTENTIONS_PATH
         self.is_alive = None
         self.languages = []
         self.reddit = None
@@ -71,28 +72,35 @@ class Shibbot(bridge.Bot):
         self.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
         self.db.commit()
 
-        # Loading all the cogs
+        # Loading all the cogs and extentions
         Logger.log("Loading cogs...")
-        files = os.listdir(COGS_PATH) # Getting all the file names in the cog folders
-        treated_cogs = []
-        for filename in files:
-            if filename not in ("__pycache__",):
-                cogname = filename
-                if cogname.endswith(".py"):
-                    cogname = cogname[:-3]
-                try:
-                    self.load_extension(f"{convert_to_import_path(COGS_PATH)}.{cogname}")
-                except Exception as e:
-                    Logger.error(f"Could not load '{cogname}' cog.", e)
-                treated_cogs.append(cogname)
-        if treated_cogs == []:
-            Logger.warn(f"No cog was loaded, because nothing was in '{COGS_PATH}'.")
+        path = convert_to_import_path(COGS_PATH)
+        buildin_cogs = [f"{path}.{cog}" 
+                        for cog in ("about", "config", "errors", "misc", "owner", "status", "mod", "automod", "fun", "utils", "music",)]
+        path = convert_to_import_path(self.extentions_path)
+        extentions = []
+        for extention in os.listdir(self.extentions_path):
+            if extention in ("__pycache__",) or extention.endswith((".md",)): continue
+            if extention.endswith(".py"): extention = extention[:-3]
+            extentions.append(f"{path}.{extention}")
+        Logger.warn(f"No extention was loaded, because nothing was in '{self.extentions_path}' (nothing to worry about if you didn't add extentions).")
+        for cog in buildin_cogs + extentions:
+            try:
+                self.load_extension(cog)
+                continue
+            except discord.ExtensionNotFound as e:
+                if cog in buildin_cogs:
+                    Logger.error(f"Could not find cog '{cog}' wich is a buildin, the bot may not work as expected except if another custom cog replaces it.", e)
+                    continue
+            except Exception as e: pass
+            Logger.error(f"Could not load cog '{cog}'.", e)
 
         if not os.path.exists("./burgir.jpg"):
             Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
+
         Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
-                   f" Took {(datetime.datetime.utcnow()-self.init_time).total_seconds():.2f} sec.")
+                   f" Took {int((datetime.datetime.utcnow()-self.init_time).total_seconds()*1000)} ms.")
       
     @property
     def plugins(self) -> dict[str, PluginCog]:
@@ -130,14 +138,10 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             self.languages.append(language)
     
-    def init_reddit(self, client_id:str, client_secret: str, username: str, password: str, *args, **kwargs):
+    def init_reddit(self, client_id: str, client_secret: str, username: str, password: str, *args, **kwargs) -> None:
         """Initializes the Reddit client.
 
         Args:
-            client_secret (str): _description_
-            password (str): _description_
-            user_name (str): _description_
-            client_id (str): _description_
             client_id (str): The application id.
             client_secret (str): The application secret.
             user_name (str): The id of the account on which the application was created.

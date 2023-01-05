@@ -11,8 +11,8 @@ from .re import *
 
 
 def convert_to_import_path(path: str):
-    if path.startswith("./"):
-        path = path[2:]
+    if path.startswith("/"): path = path[1:]
+    elif path.startswith("./"): path = path[2:]
     return path.replace('/', '.')
 
 def relative_timestamp(datetime: datetime.datetime) -> str:

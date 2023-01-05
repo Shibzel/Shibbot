@@ -2,6 +2,7 @@ DEFAULT_PREFIX = "$"
 DEFAULT_LANGUAGE = "en"
 DATABASE_FILE_PATH = "./database.sqlite3"
 COGS_PATH = "./src/cogs"
+EXTENTIONS_PATH = "./extentions"
 LOGS_PATH = "./logs"
 CACHE_PATH = "./cache"
 

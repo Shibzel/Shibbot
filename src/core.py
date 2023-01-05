@@ -9,7 +9,7 @@ import datetime
 
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path
-from .constants import COGS_PATH, SHIBZEL_ID, EXTENTIONS_PATH
+from .constants import COGS_PATH, SHIBZEL_ID, EXTENTIONS_PATH, BUILDIN_COGS
 from .models import PluginCog
 from .console import ConsoleThread
 
@@ -62,7 +62,7 @@ class Shibbot(bridge.Bot):
 
         # Runs gc if the program is going to run out of memory
         if gc_clear:
-            Logger.warn(f"Automatic garbage collector enabled. Running GC every {gc_sleep} sec.")
+            Logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
             self.loop.create_task(auto_gc(self.specs, gc_sleep, gc_max_ram))
 
         # Synchronous clients for Sqlite3
@@ -75,25 +75,25 @@ class Shibbot(bridge.Bot):
         # Loading all the cogs and extentions
         Logger.log("Loading cogs...")
         path = convert_to_import_path(COGS_PATH)
-        buildin_cogs = [f"{path}.{cog}" 
-                        for cog in ("about", "config", "errors", "misc", "owner", "status", "mod", "automod", "fun", "utils", "music",)]
+        buildin_cogs = [f"{path}.{cog}" for cog in BUILDIN_COGS]
         path = convert_to_import_path(self.extentions_path)
         extentions = []
         for extention in os.listdir(self.extentions_path):
             if extention in ("__pycache__",) or extention.endswith((".md",)): continue
             if extention.endswith(".py"): extention = extention[:-3]
             extentions.append(f"{path}.{extention}")
-        Logger.warn(f"No extention was loaded, because nothing was in '{self.extentions_path}' (nothing to worry about if you didn't add extentions).")
+        if extentions == []:
+            Logger.warn(f"No extention will load because there is nothing in '{self.extentions_path}' (nothing to worry about if you didn't add any extention).")
         for cog in buildin_cogs + extentions:
             try:
                 self.load_extension(cog)
                 continue
             except discord.ExtensionNotFound as e:
                 if cog in buildin_cogs:
-                    Logger.error(f"Could not find cog '{cog}' wich is a buildin, the bot may not work as expected except if another custom cog replaces it.", e)
+                    Logger.error(f"Couldn't find cog '{cog}' wich is a buildin, the bot may not work as expected.", e)
                     continue
             except Exception as e: pass
-            Logger.error(f"Could not load cog '{cog}'.", e)
+            Logger.error(f"Couldn't load cog '{cog}'.", e)
 
         if not os.path.exists("./burgir.jpg"):
             Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
@@ -173,10 +173,10 @@ class Shibbot(bridge.Bot):
             self.is_alive = False
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
-        Logger.log(f"Joined guild '{guild.name}' (ID: {guild.id})")
+        Logger.log(f"Joined guild '{guild.name}' (ID: {guild.id}).")
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        Logger.log(f"Left guild '{guild.name}' (ID: {guild.id})")
+        Logger.log(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         Logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")

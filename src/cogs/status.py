@@ -27,13 +27,15 @@ class ChangeActivity(commands.Cog):
                                    "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple", "skrr shtibi shtipi dob dop yes yes jes shtip",]
         self.game_statutes = ["Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ", "ROBLOSS",
                               "Cyberpunk 2069", "HEE HEE HE HA", "Minecwaft", "Shiba Horizon 5", "Portel 2", "Underfail", "Genshit Impact", "Off",
-                              "Absolutely accurate battle simulator", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🏌️"]
+                              "Absolutely accurate battle simulator", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️"]
 
         self.bot.loop.create_task(self.start_status_loop())
         self.halloween_statutes = ["it is spooky month !!", "🎃", "OOGA BOOGA 🧟‍♀️", "Boo 👻", "oh man i'm dead 💀⚰️"]
         self.bot.loop.create_task(self.monthly_calender_event(self.halloween_statutes, month=10))
-        self.chrismas_statutes = ["chrismas status",]
+        self.chrismas_statutes = ["Merry CHRIIIIIIISMAAAAAAAAAAAAAAAAAAS", "🎅🎄",]
         self.bot.loop.create_task(self.monthly_calender_event(self.chrismas_statutes, month=12))
+        self.new_year_statutes = ["happy new year",]
+        self.bot.loop.create_task(self.monthly_calender_event(self.new_year_statutes, month=1))
 
     async def monthly_calender_event(self, statutes: list, month: int,):
         while True:
@@ -52,16 +54,13 @@ class ChangeActivity(commands.Cog):
             self.bot_statutes.extend(statutes)
             after_sleep_now = datetime.datetime.utcnow()
             year, month = now.year, now.month
-            if month == 12:
-                year, month = year+1, 1
+            if month == 12: year, month = year+1, 1
             end_date = datetime.datetime(year=year, month=month, day=1)
             await asyncio.sleep((end_date-after_sleep_now).total_seconds())
             for status in statutes:
                 self.bot_statutes.remove(status)
 
     async def start_status_loop(self):
-        while not self.bot.is_alive:
-            await asyncio.sleep(1)
         await asyncio.sleep(10)
         self.change_activity.start()
 

@@ -100,7 +100,7 @@ class Shibbot(bridge.Bot):
             logger.error(f"Couldn't load cog '{cog}'.", error)
 
         if not os.path.exists("./burgir.jpg"):
-            logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.quiet("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
@@ -176,10 +176,10 @@ class Shibbot(bridge.Bot):
             self.is_alive = False
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
-        logger.log(f"Joined guild '{guild.name}' (ID: {guild.id}).")
+        logger.quiet(f"Joined guild '{guild.name}' (ID: {guild.id}).")
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        logger.log(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
+        logger.quiet(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {traceback.format_exc()}")

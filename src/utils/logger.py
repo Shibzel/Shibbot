@@ -8,7 +8,7 @@ class PStyles:
     ENDC = "\033[00m"
     WARNING = "\033[93m"
     ERROR = "\033[1;31m"
-    QUIET = "\033[38;5;18m"
+    QUIET = "\033[38;5;12m"
     OKCYAN = "\033[96m"
     OKBLUE = "\033[94m"
     OKGREEN = "\033[92m"

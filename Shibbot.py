@@ -10,7 +10,6 @@ from src.utils import Logger, PStyles
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
 
 
-
 print(f"""
           ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣀⣤⠀⣤⡄⡤⣤⢤⣀⡀

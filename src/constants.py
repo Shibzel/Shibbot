@@ -2,8 +2,8 @@ DEFAULT_PREFIX = "$"
 DEFAULT_LANGUAGE = "en"
 DATABASE_FILE_PATH = "./database.sqlite3"
 COGS_PATH = "./src/cogs"
-BUILDIN_COGS = ("about", "config", "errors", "misc", "owner", "status", "mod", "automod", "fun", "utils", "music",)
-EXTENTIONS_PATH = "./extentions"
+BUILTIN_COGS = ("about", "config", "errors", "misc", "owner", "status", "mod", "automod", "fun", "utils", "music",)
+EXTENSIONS_PATH = "./extensions"
 LOGS_PATH = "./logs"
 CACHE_PATH = "./cache"
 

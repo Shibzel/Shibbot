@@ -9,7 +9,7 @@ import datetime
 
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path
-from .constants import COGS_PATH, SHIBZEL_ID, EXTENTIONS_PATH, BUILDIN_COGS
+from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
 from .models import PluginCog
 from .console import ConsoleThread
 
@@ -28,7 +28,7 @@ class Shibbot(bridge.Bot):
         self.test_mode = test_mode
         if self.test_mode:
             Logger.warn("Test/beta mode is enabled.")
-        self.extentions_path = extentions_path or EXTENTIONS_PATH
+        self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.is_alive = None
         self.languages = []
         self.reddit = None
@@ -75,7 +75,7 @@ class Shibbot(bridge.Bot):
         # Loading all the cogs and extentions
         Logger.log("Loading cogs...")
         path = convert_to_import_path(COGS_PATH)
-        buildin_cogs = [f"{path}.{cog}" for cog in BUILDIN_COGS]
+        buildin_cogs = [f"{path}.{cog}" for cog in BUILTIN_COGS]
         path = convert_to_import_path(self.extentions_path)
         extentions = []
         for extention in os.listdir(self.extentions_path):
@@ -231,4 +231,4 @@ class PterodactylShibbot(Shibbot):
         super().__init__(*args, **kwargs)
         self.specs = ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
-        Logger.warn("Using the Pterodactyl API to get hardware usage.")
+        Logger.quiet("Using the Pterodactyl API to get hardware usage.")

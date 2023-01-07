@@ -1,8 +1,7 @@
 import threading
 import gc
 
-from .utils import Logger, Uptime, convert_to_import_path
-from .constants import COGS_PATH
+from .utils import Logger, Uptime
 
 
 class ConsoleInterruption(Exception):

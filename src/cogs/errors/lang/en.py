@@ -14,6 +14,7 @@ class English:
         "NotInteractionOwner": "Sorry {user_interacting} but only {interaction_owner} can interact with this.",
         "NotOwner": "You're not my owner, you can't use this command.",
         "NSFWChannelRequired": "This channel {channel} isn't for NSFW content ! Kids might be shocked.",
+        "ServiceUnavailableError": "This service is unavailable right now, try again in a minute."
     }
     ON_COMMAND_ERROR_TITLE = "Oops..."
     DISSMISS_BUTTON = "Dissmiss"

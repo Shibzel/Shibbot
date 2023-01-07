@@ -16,6 +16,7 @@ class French(English):
         "NotInteractionOwner": "Désolé {user_interacting} mais seulement {interaction_owner} peut interargir avec ça.",
         "NotOwner": "Il semblerait que tu ne soit pas mon propriétaire, l'utilisation de cette commande t'es proscrite.",
         "NSFWChannelRequired": "Le salon {channel} n'autorise pas le contenu nsfw ! Les enfants pourraient être choqués.",
+        "ServiceUnavailableError": "Ce service n'est pas accessible pour le moment, réessayez dans une minute."
     }
     ON_COMMAND_ERROR_TITLE = "Oops..."
     DISSMISS_BUTTON = "Compris"

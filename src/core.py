@@ -6,7 +6,6 @@ import traceback
 import asyncio
 import datetime
 
-
 from . import database
 from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path, PStyles
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
@@ -81,18 +80,20 @@ class Shibbot(bridge.Bot):
         path = convert_to_import_path(self.extentions_path)
         extentions = []
         for extention in os.listdir(self.extentions_path):
-            if extention in ("__pycache__",) or extention.endswith((".md",)): continue
-            if extention.endswith(".py"): extention = extention[:-3]
+            if extention in ("__pycache__",) or extention.endswith((".md",)): 
+                continue
+            if extention.endswith(".py"): 
+                extention = extention[:-3]
             extentions.append(f"{path}.{extention}")
         if extentions == []:
-            logger.warn(f"No extention will load because there is nothing in '{self.extentions_path}' (nothing to worry about if you didn't add any extention).")
+            logger.warn(f"No extention will load because folder '{self.extentions_path}' is empty.")
         for cog in buildin_cogs + extentions:
             try:
                 self.load_extension(cog)
                 continue
             except discord.ExtensionNotFound as e:
                 if cog in buildin_cogs:
-                    logger.error(f"Couldn't find cog '{cog}' wich is a buildin, the bot may not work as expected.", e)
+                    logger.error(f"Couldn't find cog '{cog}' wich is a builtin, the bot may not work as expected.", e)
                     continue
                 error = e
             except Exception as e: error = e

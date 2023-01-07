@@ -10,7 +10,6 @@ from src.utils import Logger, PStyles
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
 
 
-logger = Logger(__name__)
 
 print(f"""
           ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
@@ -29,22 +28,22 @@ print(f"""
 """)
 
 cls = Shibbot
-kwargs = {
-    "test_mode": True,
-    "gc_clear": True,
-}
+kwargs = {"test_mode": True,}
 class Missing(Exception): pass
 class Syntax(Exception): pass
 
-if not os.path.exists(DATABASE_FILE_PATH):
-    open(DATABASE_FILE_PATH, "x")
-    logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
 folders_to_create = (LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH)
 for dir in folders_to_create:
     if not os.path.exists(dir):
         os.makedirs(dir)
-
+        
+logger = Logger(__name__)
 logger.start()
+
+if not os.path.exists(DATABASE_FILE_PATH):
+    open(DATABASE_FILE_PATH, "x")
+    logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
+
 ### Doing some checks
 try:
     logger.quiet(f"Running on Python {platform.python_version()}.")
@@ -132,11 +131,11 @@ try:
             raise Syntax("Your pterodactyl ptero_url mustn't end with '/'.")
         ptero_token=os.getenv("PTERO_PANEL_TOKEN")
         if ptero_token in ("", None):
-            raise Missing("Missing pterodactyl token."+("" if not ptero_url else f" You can it here : {ptero_url}account/api/"))
+            raise Missing("Missing pterodactyl token." + ("" if not ptero_url else f" You can it here : {ptero_url}account/api/"))
         ptero_server_id = os.getenv("PTERO_PANEL_SERVER_ID")
         if ptero_server_id in ("", None):
-            raise Missing("Missing pterodactyl server ID." + \
-                        ("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/" + PStyles.UNDERLINE + "8f61b2fb" + PStyles.ENDC))
+            raise Missing("Missing pterodactyl server ID." + ("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/" + \
+                          PStyles.UNDERLINE + "8f61b2fb" + PStyles.ENDC))
         cls = PterodactylShibbot
         kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
 except (Missing, Syntax) as e:

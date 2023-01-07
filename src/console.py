@@ -40,7 +40,7 @@ class ConsoleThread:
     @command
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        logger.log("Enabled cogs :\n[\n    {0}\n]".format('\n    '.join(self.bot.cogs.keys())))
+        logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs.keys())))
 
     @staticmethod
     def apply_on_cog(method, method_name, cog_name):

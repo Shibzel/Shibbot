@@ -10,6 +10,8 @@ from src.utils import Logger
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
 
 
+logger = Logger(__name__)
+
 print(f"""
           ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣀⣤⠀⣤⡄⡤⣤⢤⣀⡀
@@ -36,18 +38,18 @@ class Syntax(Exception): pass
 
 if not os.path.exists(DATABASE_FILE_PATH):
     open(DATABASE_FILE_PATH, "x")
-    Logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
+    logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
 folders_to_create = (LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH)
 for dir in folders_to_create:
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-Logger.start()
+logger.start()
 ### Doing some checks
 try:
-    Logger.quiet(f"Running on Python {platform.python_version()}.")
+    logger.quiet(f"Running on Python {platform.python_version()}.")
     if not 7 < int(platform.python_version_tuple()[1]) < 11:
-        Logger.error(f"Shibbot is not intended to run on version {platform.python_version()} of Python.")
+        logger.error(f"Shibbot is not intended to run on version {platform.python_version()} of Python.")
 
     if not os.path.exists("./.env"):
         raise Missing("Missing .env file. Create a new one, copy the contents of .env.example and complete it.")
@@ -76,18 +78,18 @@ try:
     if request.status_code == 200:
         last_version = response[0]["name"]
         if last_version == version:
-            Logger.log("You're currently using the lastest version, thank you !")
+            logger.log("You're currently using the lastest version, thank you !")
         else:
             version_listed = False
             for i in response:
                 if i["name"] == version:
                     version_listed = True
-                    Logger.warn(f"You're not using the latest version '{version}' < '{last_version}'. Download the latest one here : https://github.com/{repo_name}/releases/")
+                    logger.warn(f"You're not using the latest version '{version}' < '{last_version}'. Download the latest one here : https://github.com/{repo_name}/releases/")
                     break
             if not version_listed:
-                Logger.warn("You're currently using a wip/unlisted version.")
+                logger.warn("You're currently using a wip/unlisted version.")
     else:
-        Logger.error("Couldn't verify if the bot is up to date.")
+        logger.error("Couldn't verify if the bot is up to date.")
 
     # Reddit
     reddit_client_id = os.getenv("REDDIT_CLIENT_ID")
@@ -137,7 +139,7 @@ try:
         cls = PterodactylShibbot
         kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
 except (Missing, Syntax) as e:
-    Logger.error("Eh, your forgot something.", e)
+    logger.error("Eh, your forgot something.", e)
     exit()
 
 # Starting the bot
@@ -151,8 +153,8 @@ try:
     )
     shibbot.run(token=token, command_input=True)
 except Exception as e:
-    Logger.error("Oops... Shibbot stopped ?", e)
-    Logger.end()
+    logger.error("Oops... Shibbot stopped ?", e)
+    logger.end()
 
 # Exiting Program (there can be threads running in the background, that's why this exit func is here)
 exit()

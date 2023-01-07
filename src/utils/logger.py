@@ -10,29 +10,27 @@ def _write(string):
 
 class Logger:
     """This dumbass dev forgot to add a documentation."""
+    def __init__(self, package_name):
+        self.package_name = package_name
 
     @staticmethod
     def formated_time(): return datetime.datetime.now().strftime("%H:%M:%S.%f")[:12]
 
-    @staticmethod
-    def log(string):
-        string = f"[{Logger.formated_time()} INFO] {string}"
+    def log(self, string):
+        string = f"[{Logger.formated_time()} INFO @{self.package_name}] {string}"
         print(string)
         _write(string)
 
-    @staticmethod
-    def quiet(string):
-        _write(f"[{Logger.formated_time()} QUIET] {string}")
+    def quiet(self, string):
+        _write(f"[{Logger.formated_time()} QUIET @{self.package_name}] {string}")
 
-    @staticmethod
-    def warn(string):
-        string = f"[{Logger.formated_time()} WARN] {string}"
+    def warn(self, string):
+        string = f"[{Logger.formated_time()} WARN @{self.package_name}] {string}"
         print(f"\033[93m{string}\033[00m")
         _write(string)
 
-    @staticmethod
-    def error(string, error=None):
-        string = f"[{Logger.formated_time()} ERROR] {string}"
+    def error(self, string, error=None):
+        string = f"[{Logger.formated_time()} ERROR @{self.package_name}] {string}"
         print(f"\033[91m{string}\033[00m")
         error_string = None
         if error:

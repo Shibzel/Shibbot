@@ -3,6 +3,9 @@ import asyncpraw
 
 from src.utils import Logger
 
+
+logger = Logger(__name__)
+
 class Reddit(asyncpraw.Reddit):
     """This dumbass dev forgot to add a documentation."""
 
@@ -39,7 +42,7 @@ class Reddit(asyncpraw.Reddit):
                 for sub in await self.get_sub(subreddit, limit=limit_per_subred):
                     submissions.append(sub)
             except Exception as e:
-                Logger.error(f"Failed fetching submissions from r/'{subreddit}' on Reddit.", e)
+                logger.error(f"Failed fetching submissions from r/'{subreddit}' on Reddit.", e)
         tasks = [append_submits(subreddit) for subreddit in subreddits]
         await asyncio.gather(*tasks)
         return submissions

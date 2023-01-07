@@ -8,6 +8,8 @@ from src.errors import NotInteractionOwner, PluginDisabledError, MissingArgument
 from . import French, English
 
 
+logger = Logger(__name__)
+
 class ErrorHandler(BaseCog):
     
     def __init__(self, bot):
@@ -38,7 +40,7 @@ class ErrorHandler(BaseCog):
 
 
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
-        Logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
+        logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
         if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
             return
 
@@ -70,7 +72,7 @@ class ErrorHandler(BaseCog):
             if error_name in error_dict.keys():
                 description = error_dict[error_name]
             else:
-                Logger.error(f"Unexpected error in {type(self).__name__}.", error)
+                logger.error(f"Unexpected error in {type(self).__name__}.", error)
                 description = error_dict["CommandError"].format(owner=self.bot.get_user(self.bot.owner_id))
 
         dismiss_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")

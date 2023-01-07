@@ -6,6 +6,8 @@ from .. import database
 from ..errors import PluginDisabledError
 
 
+logger = Logger(__name__)
+
 class BaseCog(discord.Cog):
     """This dumbass dev forgot to add a documentation."""
 
@@ -27,7 +29,7 @@ class BaseCog(discord.Cog):
 
     async def cog_before_invoke(self, ctx: BridgeApplicationContext):
         guild_string = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
-        Logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{ctx.command}' command{guild_string}.")
+        logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{ctx.command}' command{guild_string}.")
         return await super().cog_before_invoke(ctx)
 
     def get_name(self, lang_code: str) -> str:
@@ -47,8 +49,11 @@ class PluginCog(BaseCog):
         super().__init__(*args, **kwargs)
         self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS {plugin_name}_plugin (guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
         self.bot.db.commit()
+        
+    async def is_enabled(self, ctx: BridgeApplicationContext):
+        return await database.plugin_is_enabled(ctx, self.plugin_name, self.guild_only)
 
     async def cog_before_invoke(self, ctx: BridgeApplicationContext):
-        if not await database.plugin_is_enabled(ctx, self.plugin_name, self.guild_only):
+        if not await self.is_enabled(ctx):
             raise PluginDisabledError(self.plugin_name)
         return await super().cog_before_invoke(ctx)

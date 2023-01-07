@@ -7,6 +7,8 @@ from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
 from src.utils import Logger
 
 
+logger = Logger(__name__)
+
 def db():
     return sqlite3.connect(DATABASE_FILE_PATH) 
 
@@ -16,15 +18,15 @@ def aiodb():
 async def create_or_fetch_guild(bot, guild: discord.Guild):
     """Fetch the infos of a guild inside the guild table or insert it."""
     async with aiodb() as db:
-            async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
-                data = await cursor.fetchone()
-            if not data:
-                # Tries to sync the bot's language with the server's one
-                language = guild.preferred_locale if guild.preferred_locale in bot.languages else DEFAULT_LANGUAGE
-                data = (guild.id, DEFAULT_PREFIX, language,)
-                async with db.execute("INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)", data):
-                    await db.commit()
-            return data
+        async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
+            data = await cursor.fetchone()
+        if not data:
+            # Tries to sync the bot's language with the server's one
+            language = guild.preferred_locale if guild.preferred_locale in bot.languages else DEFAULT_LANGUAGE
+            data = (guild.id, DEFAULT_PREFIX, language,)
+            async with db.execute("INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)", data):
+                await db.commit()
+        return data
 
 async def get_prefix(has_guild):
     """Gets the prefix."""
@@ -37,7 +39,7 @@ async def get_prefix(has_guild):
             if prefix:
                 return prefix[0]
     except Exception as e:
-        Logger.error(f"Failed getting prefix on guild '{guild or has_guild}'.", e)
+        logger.error(f"Failed getting prefix on guild '{guild or has_guild}'.", e)
     return DEFAULT_PREFIX
 
 async def change_prefix(bot, guild: discord.Guild, prefix: str):
@@ -57,7 +59,7 @@ async def get_language(has_guild):
             if prefix:
                 return prefix[0]
     except Exception as e:
-        Logger.error(f"Failed getting language on guild '{guild or has_guild}'.", e)
+        logger.error(f"Failed getting language on guild '{guild or has_guild}'.", e)
     return DEFAULT_LANGUAGE
 
 async def change_language(bot, guild: discord.Guild, language: str):

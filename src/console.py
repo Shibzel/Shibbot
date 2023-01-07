@@ -4,6 +4,8 @@ import gc
 from .utils import Logger, Uptime
 
 
+logger = Logger(__name__)
+
 class ConsoleInterruption(Exception):
     def __init__(self, message=None):
         super().__init__(message or "Shibbot was asked to stop by the console.")
@@ -29,24 +31,24 @@ class ConsoleThread:
     def help(self, command_name: str | None = None, *args):
         """Shows all console commands. Args: 'command_name' (optional)."""
         if not command_name:
-            Logger.log("Available commands :\n"+"\n".join([self.strinify_command(name) for name in commands.keys()]))
+            logger.log("Available commands :\n"+"\n".join([self.strinify_command(name) for name in commands.keys()]))
         elif commands.get(command_name):
-            Logger.log(self.strinify_command(command_name))
+            logger.log(self.strinify_command(command_name))
         else:
-            Logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
+            logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
     
     @command
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        Logger.log("Enabled cogs :\n[\n    {0}\n]".format('\n    '.join(self.bot.cogs.keys())))
+        logger.log("Enabled cogs :\n[\n    {0}\n]".format('\n    '.join(self.bot.cogs.keys())))
 
     @staticmethod
     def apply_on_cog(method, method_name, cog_name):
         try:
             method(cog_name)
-            Logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
+            logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
         except Exception as e:
-            Logger.error(f"Could not {method_name} '{cog_name}' cog.", e)
+            logger.error(f"Could not {method_name} '{cog_name}' cog.", e)
     
     @command
     def load(self, cog_name, *args):
@@ -67,47 +69,47 @@ class ConsoleThread:
     def gc(self, *args):
         """Runs the garbage collector."""
         gc.collect()
-        Logger.log("Done running GC !")
+        logger.log("Done running GC !")
 
     @command
     def uptime(self, *args):
         """Shows the uptime."""
         uptime = Uptime(self.bot.init_time)
-        Logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
+        logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
 
     @command
     def servers(self, *args):
         """Shows the numbers of guilds."""
-        Logger.log(f"This instance is currently on {len(self.bot.guilds)} servers.")
+        logger.log(f"This instance is currently on {len(self.bot.guilds)} servers.")
     
     @command
     def users(self, *args):
         """Shows the numbers of users."""
-        Logger.log(f"This instance is watching over {len(self.bot.users)} users.")
+        logger.log(f"This instance is watching over {len(self.bot.users)} users.")
 
     @command
     def stop(self, *args):
         """Stops the bot."""
-        Logger.log("Stopping Shibbot...")
+        logger.log("Stopping Shibbot...")
         try: raise ConsoleInterruption
         except ConsoleInterruption as e: self.bot.loop.create_task(self.bot.close(e))
         self.kill()
 
     def main(self):
-        Logger.log(f"Console commands available ({', '.join(commands.keys())}).")
+        logger.log(f"Console commands available ({', '.join(commands.keys())}).")
 
         while self.running:
             raw_command = input()
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
-            Logger.log(f"Console : '{raw_command}'")
+            logger.log(f"Console : '{raw_command}'")
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)
                 except TypeError as e:
-                    Logger.error(f"Missing arguments.", e)
+                    logger.error(f"Missing arguments.", e)
             else:
-                Logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
+                logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
 
     def start(self):
         self.thread.start()  

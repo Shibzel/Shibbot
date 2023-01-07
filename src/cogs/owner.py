@@ -5,6 +5,8 @@ import traceback
 from src import Shibbot, Logger, CACHE_PATH
 
 
+logger = Logger(__name__)
+
 def setup(bot):
     bot.add_cog(OwnerCommands(bot))
 
@@ -24,7 +26,7 @@ class OwnerCommands(commands.Cog):
             await ctx.send(f"{method_name.title()}ed cog '{cog_name}' !")
         except Exception as error:
             message = f"Couldn't {method_name} '{cog_name}', the following error occured :"
-            Logger.error(message, error)
+            logger.error(message, error)
             await ctx.send(message, file=discord.File(fp=create_log_file(error)))
 
     @commands.command()

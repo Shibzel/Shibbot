@@ -14,6 +14,8 @@ from .models import PluginCog
 from .console import ConsoleThread
 
 
+logger = Logger(__name__)
+
 def bot_get_prefix(bot, ctx):
     return database.get_prefix(ctx)
 
@@ -23,15 +25,15 @@ class Shibbot(bridge.Bot):
     def __init__(self, test_mode = False, instance_owners: list[int] = [], extentions_path: str | None = None,
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
-        Logger.log("Initializing Shibbot...")
+        logger.log("Initializing Shibbot...")
         self.init_time = datetime.datetime.utcnow()
         self.test_mode = test_mode
         if self.test_mode:
-            Logger.warn("Test/beta mode is enabled.")
+            logger.warn("Test/beta mode is enabled.")
         self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.is_alive = None
         self.languages = []
-        self.reddit = None
+        self.reddit: Reddit = None
 
         super().__init__(command_prefix=bot_get_prefix,
                         owner_ids=[SHIBZEL_ID] if instance_owners == [] else instance_owners,
@@ -62,7 +64,7 @@ class Shibbot(bridge.Bot):
 
         # Runs gc if the program is going to run out of memory
         if gc_clear:
-            Logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
+            logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
             self.loop.create_task(auto_gc(self.specs, gc_sleep, gc_max_ram))
 
         # Synchronous clients for Sqlite3
@@ -73,7 +75,7 @@ class Shibbot(bridge.Bot):
         self.db.commit()
 
         # Loading all the cogs and extentions
-        Logger.log("Loading cogs...")
+        logger.log("Loading cogs...")
         path = convert_to_import_path(COGS_PATH)
         buildin_cogs = [f"{path}.{cog}" for cog in BUILTIN_COGS]
         path = convert_to_import_path(self.extentions_path)
@@ -83,24 +85,24 @@ class Shibbot(bridge.Bot):
             if extention.endswith(".py"): extention = extention[:-3]
             extentions.append(f"{path}.{extention}")
         if extentions == []:
-            Logger.warn(f"No extention will load because there is nothing in '{self.extentions_path}' (nothing to worry about if you didn't add any extention).")
+            logger.warn(f"No extention will load because there is nothing in '{self.extentions_path}' (nothing to worry about if you didn't add any extention).")
         for cog in buildin_cogs + extentions:
             try:
                 self.load_extension(cog)
                 continue
             except discord.ExtensionNotFound as e:
                 if cog in buildin_cogs:
-                    Logger.error(f"Couldn't find cog '{cog}' wich is a buildin, the bot may not work as expected.", e)
+                    logger.error(f"Couldn't find cog '{cog}' wich is a buildin, the bot may not work as expected.", e)
                     continue
                 error = e
             except Exception as e: error = e
-            Logger.error(f"Couldn't load cog '{cog}'.", error)
+            logger.error(f"Couldn't load cog '{cog}'.", error)
 
         if not os.path.exists("./burgir.jpg"):
-            Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
-        Logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
+        logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
                    f" Took {int((datetime.datetime.utcnow()-self.init_time).total_seconds()*1000)} ms.")
       
     @property
@@ -148,7 +150,7 @@ class Shibbot(bridge.Bot):
             user_name (str): The id of the account on which the application was created.
             password (str): The password of the account.
         """
-        Logger.log(f"Initializing Reddit client.")
+        logger.log(f"Initializing Reddit client.")
         self.reddit = Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
@@ -159,12 +161,11 @@ class Shibbot(bridge.Bot):
         if self.is_alive is None:
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
-            owners = ", ".join([f"'{user}'" for user in self.instance_owners])
-            Logger.log(f"The following users are the owners of this instance : {owners}.")
-            self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={super().user.id}&permissions=8&scope=bot%20applications.commands"
-            Logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
+            logger.log("The following users are the owners of this instance : {0}.".format(", ".join(f"'{user}'" for user in self.instance_owners)))
+            self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
+            logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
         self.is_alive = True
-        Logger.log(f"Ready. Connected as '{super().user}' (ID : {super().user.id}).")
+        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).")
 
     async def on_resumed(self) -> None:
         self.is_alive = True
@@ -174,13 +175,13 @@ class Shibbot(bridge.Bot):
             self.is_alive = False
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
-        Logger.log(f"Joined guild '{guild.name}' (ID: {guild.id}).")
+        logger.log(f"Joined guild '{guild.name}' (ID: {guild.id}).")
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        Logger.log(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
+        logger.log(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
-        Logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
+        logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
 
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""
@@ -216,7 +217,7 @@ class Shibbot(bridge.Bot):
         Raises:
             error: Reraised error, if there is one.
         """
-        Logger.error("Shibbot is being stopped, goodbye !", error)
+        logger.error("Shibbot is being stopped, goodbye !", error)
         to_close = [self.specs.close(), super().close()]
         if self.reddit:
             to_close.append(self.reddit.close())
@@ -232,4 +233,4 @@ class PterodactylShibbot(Shibbot):
         super().__init__(*args, **kwargs)
         self.specs = ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
-        Logger.quiet("Using the Pterodactyl API to get hardware usage.")
+        logger.quiet("Using the Pterodactyl API to get hardware usage.")

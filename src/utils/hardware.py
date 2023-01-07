@@ -8,6 +8,9 @@ import datetime
 
 from .logger import Logger
 
+
+logger = Logger(__name__)
+
 class Uptime:
     def __init__(self, init_time: float):
         now = datetime.datetime.utcnow()
@@ -88,7 +91,7 @@ class ServerSpecifications:
                 show_error = True
             except Exception as e:
                 if show_error:
-                    Logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
+                    logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
                     show_error = False
             for _ in range(int(300/self.secs_looping)):
                 sleep = self.secs_looping
@@ -99,7 +102,7 @@ class ServerSpecifications:
                     show_error = True
                 except Exception as e:
                     if show_error:
-                        Logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
+                        logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
                         show_error = False
                 await asyncio.sleep(sleep)
 
@@ -121,4 +124,4 @@ async def auto_gc(specs: ServerSpecifications, sleep: int = 60, max_percentage: 
         percentage = specs.memory_usage/specs.max_memory*100
         if percentage > max_percentage:
             gc.collect()
-            Logger.warn(f"Running GC, memory usage exceeding {specs.max_memory/100*max_percentage:.2f}MB (using {specs.memory_usage:.2f} out of {specs.max_memory:.2f}MB, {percentage:.2f}%).")
+            logger.warn(f"Running GC, memory usage exceeding {specs.max_memory/100*max_percentage:.2f}MB (using {specs.memory_usage:.2f} out of {specs.max_memory:.2f}MB, {percentage:.2f}%).")

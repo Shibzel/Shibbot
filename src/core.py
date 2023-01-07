@@ -92,8 +92,9 @@ class Shibbot(bridge.Bot):
                 if cog in buildin_cogs:
                     Logger.error(f"Couldn't find cog '{cog}' wich is a buildin, the bot may not work as expected.", e)
                     continue
-            except Exception as e: pass
-            Logger.error(f"Couldn't load cog '{cog}'.", e)
+                error = e
+            except Exception as e: error = e
+            Logger.error(f"Couldn't load cog '{cog}'.", error)
 
         if not os.path.exists("./burgir.jpg"):
             Logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")

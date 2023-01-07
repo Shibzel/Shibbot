@@ -1,6 +1,5 @@
 from .core import Shibbot, PterodactylShibbot
 from .utils import *
-from . import database
 from .constants import *
 from .models import *
 from .errors import *

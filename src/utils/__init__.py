@@ -2,7 +2,7 @@
 import datetime
 
 from .json import *
-from .logger import Logger
+from .logger import Logger, PStyles
 from .hardware import ServerSpecifications, auto_gc, Uptime
 from .reddit import Reddit
 from .language import factory_language, fl, get_language

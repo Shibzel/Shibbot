@@ -8,7 +8,7 @@ import datetime
 
 
 from . import database
-from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path
+from .utils import Logger, ServerSpecifications, auto_gc, Reddit, convert_to_import_path, PStyles
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
 from .models import PluginCog
 from .console import ConsoleThread
@@ -181,7 +181,7 @@ class Shibbot(bridge.Bot):
         logger.log(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
-        logger.error(f"Ignoring exception in {event_method}: \n-> {traceback.format_exc()}")
+        logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {traceback.format_exc()}")
 
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""

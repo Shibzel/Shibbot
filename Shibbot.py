@@ -6,7 +6,7 @@ import orjson
 import platform
 
 from src import Shibbot, PterodactylShibbot, __version__ as version
-from src.utils import Logger
+from src.utils import Logger, PStyles
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
 
 
@@ -135,7 +135,8 @@ try:
             raise Missing("Missing pterodactyl token."+("" if not ptero_url else f" You can it here : {ptero_url}account/api/"))
         ptero_server_id = os.getenv("PTERO_PANEL_SERVER_ID")
         if ptero_server_id in ("", None):
-            raise Missing("Missing pterodactyl server ID."+("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/\033[93m8f61b2fb\033[00m"))
+            raise Missing("Missing pterodactyl server ID." + \
+                        ("" if not ptero_url else f" The ID is at the end of the server's link in the panel : {ptero_url}server/" + PStyles.UNDERLINE + "8f61b2fb" + PStyles.ENDC))
         cls = PterodactylShibbot
         kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
 except (Missing, Syntax) as e:

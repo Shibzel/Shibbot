@@ -5,7 +5,8 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from src import Shibbot, __version__ as version
+from src import __version__ as version
+from src.core import Shibbot
 
 
 LOOP_TIME = 60  # In seconds

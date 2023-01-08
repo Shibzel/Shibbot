@@ -24,7 +24,6 @@ Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Pyth
 - [ ] Get you the latest memes it scrobes on Reddit daily
 - [ ] Offer you translation tools, articles on wikipedia and other utilities
 - [ ] Play music in the voice channel you're in (classic)
-- [ ] ~~Minecraft utilities (show the number of players into a server as a voice channel's name, ...)~~
 - [x] Become sentient and threaten humanity
 
 If you want to try it yourself on your server you can invite it by adding it on your own server by [clicking here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands) or join its server [here](https://discord.gg/TZNWfJmPwj).
@@ -53,7 +52,7 @@ Big thanks to all those listed [here](https://github.com/Shibzel/Shibbot/graphs/
 
 ## 📜 Requirements
 
-- [Python 3.8+ (idealy 3.9 or 3.10)](https://www.python.org/downloads).
+- [Python 3.8+](https://www.python.org/downloads).
 - Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
 - A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [or someone else's](https://www.google.com/search?q=free+lavalink+host).
 - For the librairies see [`requirements.txt`](https://github.com/Shibzel/Shibbot/blob/main/requirements.txt).

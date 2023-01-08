@@ -2,7 +2,10 @@ import discord
 from discord.ext import commands, bridge
 import asyncio
 
-from src import Shibbot, Logger, BaseCog, stringify_command_usage, database, get_language, CustomView
+from src import database
+from src.core import Shibbot
+from src.utils import get_language, Logger, stringify_command_usage
+from src.models import BaseCog, CustomView
 from src.errors import NotInteractionOwner, PluginDisabledError, MissingArgumentsError
 
 from . import French, English
@@ -17,27 +20,22 @@ class ErrorHandler(BaseCog):
         super().__init__(bot=bot, languages={"en": English, "fr": French}, hidden=True)
         self.cooldowns = []
 
-
     async def add_user_cooldown(self, seconds: float, command_name: str, user_id: int):
         data = (command_name, user_id,)
         self.cooldowns.append(data)
         await asyncio.sleep(seconds)
         self.cooldowns.remove(data)
 
-
     def user_on_cooldown(self, command_name: str, user_id: int):
         return (command_name, user_id) in self.cooldowns
-
 
     @discord.Cog.listener()
     async def on_application_command_error(self, ctx, error):
         await self.handle_error(ctx, error)
 
-
     @discord.Cog.listener()
     async def on_command_error(self, ctx, error):
         await self.handle_error(ctx, error)
-
 
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
         logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
@@ -72,7 +70,12 @@ class ErrorHandler(BaseCog):
             if error_name in error_dict.keys():
                 description = error_dict[error_name]
             else:
-                logger.error(f"Unexpected error in {type(self).__name__}.", error)
+                error_message = f"Unexpected error with command '{ctx.command.name}'"
+                if guild:= ctx.guild:
+                    error_message += f"on guild {guild.name} (ID: {guild.id})."
+                else:
+                    error_message += f"with user {ctx.author} (ID: {ctx.author.id})."
+                logger.error(error_message, error)
                 description = error_dict["CommandError"].format(owner=self.bot.get_user(self.bot.owner_id))
 
         dismiss_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")

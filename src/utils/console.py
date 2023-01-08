@@ -1,7 +1,8 @@
 import threading
 import gc
 
-from .utils import Logger, Uptime
+from .logger import Logger
+from .hardware import Uptime
 
 
 logger = Logger(__name__)

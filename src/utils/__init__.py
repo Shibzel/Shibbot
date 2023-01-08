@@ -8,6 +8,7 @@ from .reddit import Reddit
 from .language import factory_language, fl, get_language
 from .commands import *
 from .re import *
+from .console import ConsoleThread
 
 
 def convert_to_import_path(path: str):

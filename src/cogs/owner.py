@@ -2,7 +2,9 @@ import discord
 from discord.ext import commands
 import traceback
 
-from src import Shibbot, Logger, CACHE_PATH
+from src.core import Shibbot
+from src.utils.logger import Logger
+from src.constants import CACHE_PATH
 
 
 logger = Logger(__name__)

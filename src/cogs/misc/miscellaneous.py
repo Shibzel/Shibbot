@@ -3,7 +3,10 @@ from discord.ext import bridge, commands
 import aiohttp
 import orjson
 
-from src import Shibbot, BaseCog, relative_timestamp, date_timestamp, MissingArgumentsError, ServiceUnavailableError
+from src.core import Shibbot
+from src.utils import relative_timestamp, date_timestamp
+from src.models.cog import BaseCog
+from src.errors import ServiceUnavailableError, MissingArgumentsError
 
 from . import English, French
 

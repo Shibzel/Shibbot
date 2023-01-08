@@ -1,8 +1,9 @@
 import discord
 from discord.ext import bridge, commands
-import asyncio
+from asyncio import gather
 
-from src import Shibbot, database
+from src import database
+from src.core import Shibbot
 from src.models import BaseCog, CustomView
 from src.utils import get_language
 from src.errors import NotInteractionOwner, MissingArgumentsError
@@ -80,7 +81,7 @@ class Configuration(BaseCog):
             if interaction.user != ctx.author:
                 raise NotInteractionOwner(ctx.author, interaction.user)
             
-            await asyncio.gather(*[database.enable_plugin(ctx.guild, plugin.plugin_name, 1 if plugin.plugin_name in select.values else 0) for plugin in self.bot.plugins.values()])
+            await gather(*[database.enable_plugin(ctx.guild, plugin.plugin_name, 1 if plugin.plugin_name in select.values else 0) for plugin in self.bot.plugins.values()])
             embed = discord.Embed(title=lang.ENABLE_PLUGIN_DONE_TITLE, description=lang.ENABLE_PLUGIN_DONE_DESCRIPTION, color=discord.Color.dark_gold())
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)

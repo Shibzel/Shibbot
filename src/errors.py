@@ -1,4 +1,4 @@
-import discord
+from discord import SlashCommand, Member
 from discord.ext import commands
 
 
@@ -8,7 +8,7 @@ class PluginDisabledError(commands.CheckFailure):
         super().__init__(message or f"The '{plugin_name}' plugin is disabled.")
 
 class MissingArgumentsError(commands.CheckFailure):
-    def __init__(self, command: commands.Command | discord.SlashCommand, message: str | None = None):
+    def __init__(self, command: commands.Command | SlashCommand, message: str | None = None):
         self.command = command
         self.message = message
         if isinstance(self.command, commands.Command):
@@ -18,7 +18,7 @@ class MissingArgumentsError(commands.CheckFailure):
         super().__init__(self.message or f"Missing arguments for command '{self.command.name}'.")
 
 class NotInteractionOwner(commands.UserInputError):
-    def __init__(self, interaction_owner: discord.Member, user_interacting: discord.Member, message: str | None = None):
+    def __init__(self, interaction_owner: Member, user_interacting: Member, message: str | None = None):
         self.interaction_owner = interaction_owner
         self.user_interacting = user_interacting
         super().__init__(message or f"'{user_interacting}' doesn't have access to this interaction, it belongs to '{interaction_owner}'.")

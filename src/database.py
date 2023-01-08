@@ -1,7 +1,7 @@
 """All core database functions."""
-import aiosqlite
-import discord
-import sqlite3
+from sqlite3 import connect
+from aiosqlite import connect as aioconnect
+from discord import Guild
 
 from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
 from src.utils import Logger
@@ -10,12 +10,12 @@ from src.utils import Logger
 logger = Logger(__name__)
 
 def db():
-    return sqlite3.connect(DATABASE_FILE_PATH) 
+    return connect(DATABASE_FILE_PATH) 
 
 def aiodb():
-    return aiosqlite.connect(DATABASE_FILE_PATH)
+    return aioconnect(DATABASE_FILE_PATH)
 
-async def create_or_fetch_guild(bot, guild: discord.Guild):
+async def create_or_fetch_guild(bot, guild: Guild):
     """Fetch the infos of a guild inside the guild table or insert it."""
     async with aiodb() as db:
         async with db.execute(f"SELECT * FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
@@ -31,7 +31,7 @@ async def create_or_fetch_guild(bot, guild: discord.Guild):
 async def get_prefix(has_guild):
     """Gets the prefix."""
     try:
-        guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
+        guild = has_guild if isinstance(has_guild, Guild) else getattr(has_guild, "guild", None)
         if guild:
             async with aiodb() as db:
                 async with db.execute("SELECT prefix FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
@@ -42,7 +42,7 @@ async def get_prefix(has_guild):
         logger.error(f"Failed getting prefix on guild '{guild or has_guild}'.", e)
     return DEFAULT_PREFIX
 
-async def change_prefix(bot, guild: discord.Guild, prefix: str):
+async def change_prefix(bot, guild: Guild, prefix: str):
     await create_or_fetch_guild(bot, guild)
     async with aiodb() as db:
         async with db.execute("UPDATE guilds SET prefix=? WHERE guild_id=?", (prefix, guild.id,)):
@@ -51,7 +51,7 @@ async def change_prefix(bot, guild: discord.Guild, prefix: str):
 async def get_language(has_guild):
     """Gets the language of a guild."""
     try:
-        guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
+        guild = has_guild if isinstance(has_guild, Guild) else getattr(has_guild, "guild", None)
         if guild:
             async with aiodb() as db:
                 async with db.execute("SELECT lang FROM guilds WHERE guild_id=?", (guild.id,)) as cursor:
@@ -62,14 +62,14 @@ async def get_language(has_guild):
         logger.error(f"Failed getting language on guild '{guild or has_guild}'.", e)
     return DEFAULT_LANGUAGE
 
-async def change_language(bot, guild: discord.Guild, language: str):
+async def change_language(bot, guild: Guild, language: str):
     await create_or_fetch_guild(bot, guild)
     async with aiodb() as db:
         async with db.execute("UPDATE guilds SET lang=? WHERE guild_id=?", (language, guild.id,)):
             await db.commit()
 
 async def plugin_is_enabled(has_guild, plugin: str, guild_only: bool = False):
-    guild = has_guild if isinstance(has_guild, discord.Guild) else getattr(has_guild, "guild", None)
+    guild = has_guild if isinstance(has_guild, Guild) else getattr(has_guild, "guild", None)
     if not guild:
         return not guild_only
     async with aiodb() as db:
@@ -79,7 +79,7 @@ async def plugin_is_enabled(has_guild, plugin: str, guild_only: bool = False):
                 enabled = enabled[0]
             return enabled
 
-async def enable_plugin(guild: discord.Guild, plugin: str, enable: bool = True):
+async def enable_plugin(guild: Guild, plugin: str, enable: bool = True):
     async with aiodb() as db:
         cursor = await db.execute(f"SELECT * FROM {plugin}_plugin WHERE guild_id=?", (guild.id,))
         if not await cursor.fetchone():

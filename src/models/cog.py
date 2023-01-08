@@ -1,4 +1,4 @@
-import discord
+from discord import Cog
 from discord.ext.bridge import BridgeApplicationContext
 
 from ..utils import fl, get_language, Logger
@@ -8,7 +8,7 @@ from ..errors import PluginDisabledError
 
 logger = Logger(__name__)
 
-class BaseCog(discord.Cog):
+class BaseCog(Cog):
     """This dumbass dev forgot to add a documentation."""
 
     def __init__(self, bot, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None, hidden: bool = False):

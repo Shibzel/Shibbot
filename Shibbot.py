@@ -1,11 +1,12 @@
 """Launcher optimized to run ONE instance of Shibbot."""
 import os
 from dotenv import load_dotenv
-import requests
-import orjson
-import platform
+from requests import get
+from json import loads
+from platform import python_version, python_version_tuple
 
-from src import Shibbot, PterodactylShibbot, __version__ as version
+from src import __version__ as version
+from src.core import Shibbot, PterodactylShibbot
 from src.utils import Logger, PStyles
 from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
 
@@ -45,9 +46,9 @@ if not os.path.exists(DATABASE_FILE_PATH):
 
 ### Doing some checks
 try:
-    logger.quiet(f"Running on Python {platform.python_version()}.")
-    if not 7 < int(platform.python_version_tuple()[1]) < 11:
-        logger.error(f"Shibbot is not intended to run on version {platform.python_version()} of Python.")
+    logger.quiet(f"Running on Python {python_version()}.")
+    if not 7 < int(python_version_tuple()[1]) < 12:
+        logger.error(f"Shibbot is not intended to run on version {python_version()} of Python.")
 
     if not os.path.exists("./.env"):
         raise Missing("Missing .env file. Create a new one, copy the contents of .env.example and complete it.")
@@ -71,8 +72,8 @@ try:
 
     repo_name = "Shibzel/Shibbot"
     # Version
-    request = requests.get(f"https://api.github.com/repos/{repo_name}/tags")
-    response = orjson.loads(request.text)
+    request = get(f"https://api.github.com/repos/{repo_name}/tags")
+    response = loads(request.text)
     if request.status_code == 200:
         last_version = response[0]["name"]
         if last_version == version:

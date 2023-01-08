@@ -1,9 +1,10 @@
 import discord
 from discord.ext import bridge, commands
 from platform import python_version
-import random
+from random import choice
 
-from src import Shibbot, __version__ as version, __github__ as github_link, database
+from src import __version__ as version, __github__ as github_link, database
+from src.core import Shibbot
 from src.models import BaseCog, CustomView
 from src.utils import get_description_localization, stringify_command_usage, get_language, Uptime
 from src.constants import SERVER_INVITATION_LINK
@@ -52,7 +53,7 @@ class About(BaseCog):
             embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME, value=lang.SHOW_HELP_FIELD2_VALUE.format(github_link=github_link+"/realeases/latest"), inline=True)
             embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME, value=lang.SHOW_HELP_FIELD3_VALUE.format(prefix=await database.get_prefix(ctx)), inline=False)
             embed.set_thumbnail(url=self.bot.user.avatar)
-            embed.set_footer(text=FOOTER+random.choice(lang.SHOW_HELP_FOOTER_HOME))
+            embed.set_footer(text=FOOTER+choice(lang.SHOW_HELP_FOOTER_HOME))
 
             view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, timeout=300, disable_on_timeout=True))
             return embed

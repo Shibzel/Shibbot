@@ -1,15 +1,15 @@
-import asyncio
-import asyncpraw
+from asyncio import sleep, AbstractEventLoop, gather
+from asyncpraw import Reddit as BaseReddit
 
 from src.utils import Logger
 
 
 logger = Logger(__name__)
 
-class Reddit(asyncpraw.Reddit):
+class Reddit(BaseReddit):
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, loop: asyncio.AbstractEventLoop, two_af: bool=False, *args, **kwargs):
+    def __init__(self, loop: AbstractEventLoop, two_af: bool=False, *args, **kwargs):
         self.loop = loop
         self.two_af = two_af
         self.running = True
@@ -22,14 +22,14 @@ class Reddit(asyncpraw.Reddit):
 
     async def clear_requests_loop(self):
         while self.running:
-            await asyncio.sleep(60.0)
+            await sleep(60.0)
             self.n_requests = 0
 
     async def get_sub(self, subreddit: str, limit: int=500):
         """Gets the latest hot submissions from a subreddit."""
         while self.n_requests >= self.max_requests:
             # Check every second if the number of requests is back to 0
-            await asyncio.sleep(1.0)
+            await sleep(1.0)
         self.n_requests += 1
         subreddit = await self.subreddit(subreddit)
         return [sub async for sub in subreddit.hot(limit=limit)]
@@ -44,7 +44,7 @@ class Reddit(asyncpraw.Reddit):
             except Exception as e:
                 logger.error(f"Failed fetching submissions from r/'{subreddit}' on Reddit.", e)
         tasks = [append_submits(subreddit) for subreddit in subreddits]
-        await asyncio.gather(*tasks)
+        await gather(*tasks)
         return submissions
 
     @staticmethod

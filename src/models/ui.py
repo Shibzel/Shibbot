@@ -1,8 +1,8 @@
-import discord
+from discord import ui, NotFound
 
 
-class CustomView(discord.ui.View):
-    def __init__(self, *items: discord.ui.Item, bot = None, **kwargs):
+class CustomView(ui.View):
+    def __init__(self, *items: ui.Item, bot = None, **kwargs):
         self.bot = bot
         super().__init__(*items, **kwargs)
 
@@ -15,11 +15,11 @@ class CustomView(discord.ui.View):
             try:
                 if self._message:
                     for child in self.children:
-                        if isinstance(child, discord.ui.Button) and child.url:
+                        if isinstance(child, ui.Button) and child.url:
                             continue
                         child.disabled = True
                     await self._message.edit(view=self) 
-            except discord.NotFound:
+            except NotFound:
                 pass
 
 class EmbedViewer(CustomView):

@@ -1,8 +1,8 @@
 import threading
 import gc
 
-from .logger import Logger
-from .hardware import Uptime
+from .utils.logger import Logger
+from .utils.hardware import Uptime
 
 
 logger = Logger(__name__)
@@ -16,7 +16,7 @@ def command(foo):
         commands[foo.__name__] = foo
         return foo
 
-class ConsoleThread:
+class Console:
     def __init__(self, bot):
         self.bot = bot
         self.running = True
@@ -97,7 +97,7 @@ class ConsoleThread:
         self.kill()
 
     def main(self):
-        logger.log(f"Console commands available ({', '.join(commands.keys())}).")
+        logger.log("Console commands available. Type 'help'.")
 
         while self.running:
             raw_command = input()

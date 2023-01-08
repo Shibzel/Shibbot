@@ -9,6 +9,7 @@ from time import perf_counter
 
 from . import database
 from . import utils
+from .console import Console
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
 from .models import PluginCog
 
@@ -203,8 +204,8 @@ class Shibbot(bridge.Bot):
         """
         try:
             if command_input:
-                self.console_thread = utils.ConsoleThread(self)
-                self.console_thread.start()
+                self.console = Console(self)
+                self.console.start()
             super().run(token, *args, **kwargs)
         except Exception as e:
             # Closing everything and reraising error

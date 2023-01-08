@@ -175,7 +175,7 @@ class Miscellaneous(BaseCog):
             raise MissingArgumentsError(ctx.command)
         
         try: 
-            result = await self.req_short_url("https://v.gd/create.php", url)
+            result = await self.req_short_url("https://is.gd/create.php", url)
         except ServiceUnavailableError: 
-            result = await self.shorten_url("https://is.gd/create.php", url)
+            result = await self.req_short_url("https://v.gd/create.php", url)
         await ctx.respond(content=result["shorturl"])

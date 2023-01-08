@@ -93,7 +93,7 @@ class ServerSpecifications:
                     logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
                     show_error = False
             for _ in range(int(300/self.secs_looping)):
-                sleep = self.secs_looping
+                _sleep = self.secs_looping
                 try:
                     current = await self._get_current()
                     self._memory_usage = current["memory_bytes"]/1_000_000 # Bytes -> MB
@@ -103,7 +103,7 @@ class ServerSpecifications:
                     if show_error:
                         logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
                         show_error = False
-                await sleep(sleep)
+                await sleep(_sleep)
 
     async def _get_location(self):
         async with ClientSession() as session:

@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from requests import get
-from json import loads
+from orjson import loads
 from platform import python_version, python_version_tuple
 
 from src import __version__ as version

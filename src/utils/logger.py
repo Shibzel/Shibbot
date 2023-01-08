@@ -1,5 +1,5 @@
-import datetime
-import traceback
+from datetime import datetime
+from traceback import format_exception
 
 from src.constants import LOGS_PATH
 
@@ -17,7 +17,7 @@ class PStyles:
     ITALICIZED = "\033[3m"
 
 def _write(string):
-    with open(f"{LOGS_PATH}/{datetime.datetime.now().strftime('%Y-%m-%d')}.log", "a+", encoding="utf-8") as f:
+    with open(f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}.log", "a+", encoding="utf-8") as f:
         f.write(string+"\n")
 
 class Logger:
@@ -26,7 +26,7 @@ class Logger:
         self.package_name = package_name
 
     @staticmethod
-    def formated_time(): return datetime.datetime.now().strftime("%H:%M:%S.%f")[:12]
+    def formated_time(): return datetime.now().strftime("%H:%M:%S.%f")[:12]
 
     def log(self, string):
         string = f"[{Logger.formated_time()} INFO @{self.package_name}] {string}"
@@ -48,13 +48,13 @@ class Logger:
         print(PStyles.ERROR + string + PStyles.ENDC)
         error_string = None
         if error:
-            error_string = "  ".join(traceback.format_exception(type(error), error, error.__traceback__, 3)).replace("\n\n", "")
+            error_string = "  ".join(format_exception(type(error), error, error.__traceback__, 3)).replace("\n\n", "")
             error_string = f"-> {error_string}"
             print(error_string)
         _write(string+f"\n{error_string}" if error_string else "")
 
     @staticmethod
-    def start(): _write(f"### Starting logging ({datetime.datetime.now()}) ###")
+    def start(): _write(f"### Starting logging ({datetime.now()}) ###")
 
     @staticmethod
-    def end(): _write(f"### Program stopped corectly ({datetime.datetime.now()}) ###")
+    def end(): _write(f"### Program stopped corectly ({datetime.now()}) ###")

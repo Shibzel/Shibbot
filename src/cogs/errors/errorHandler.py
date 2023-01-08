@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, bridge
-import asyncio
+from asyncio import sleep
 
 from src import database
 from src.core import Shibbot
@@ -23,7 +23,7 @@ class ErrorHandler(BaseCog):
     async def add_user_cooldown(self, seconds: float, command_name: str, user_id: int):
         data = (command_name, user_id,)
         self.cooldowns.append(data)
-        await asyncio.sleep(seconds)
+        await sleep(seconds)
         self.cooldowns.remove(data)
 
     def user_on_cooldown(self, command_name: str, user_id: int):

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import bridge, commands
-import aiohttp
-import orjson
+from aiohttp import ClientSession
+from orjson import loads
 
 from src.core import Shibbot
 from src.utils import relative_timestamp, date_timestamp
@@ -153,13 +153,13 @@ class Miscellaneous(BaseCog):
 
     @staticmethod
     async def req_short_url(service_url, url_to_shorten):
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
             data = {
                 'format': 'json',
                 'url': url_to_shorten,
             }
             response = await session.get(url=service_url, params=data)
-            result = orjson.loads(await response.text()) # Somehow await response.json() doesn't work here.
+            result = loads(await response.text()) # Somehow await response.json() doesn't work here.
             if result.get("errorcode"):
                 error_code = result["errorcode"]
                 if error_code in (1, 2):

@@ -9,3 +9,4 @@ psutil==5.9.4
 py-cord==2.3.2
 python-dotenv==0.21.0
 requests==2.28.1
+orjson==3.8.4

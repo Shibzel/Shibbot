@@ -4,6 +4,7 @@ from psutil import cpu_count, cpu_percent, virtual_memory
 from aiohttp import ClientSession
 from asyncio import sleep, AbstractEventLoop
 from datetime import datetime
+from orjson import loads
 
 from .logger import Logger
 
@@ -68,7 +69,7 @@ class ServerSpecifications:
     async def _request(self, url):
         async with ClientSession(headers=self._headers) as session:
             response = await session.get(url)
-            result = (await response.json())
+            result = (await response.json(loads=loads))
             if response.status != 200:
                 raise Exception(result)
             return result
@@ -111,7 +112,7 @@ class ServerSpecifications:
             while not got_response:
                 try:
                     result = await session.get("http://ip-api.com/json/?fields=country,city")
-                    json_result = await result.json()
+                    json_result = await result.json(loads=loads)
                     self.location = f"{json_result['city']}, {json_result['country']}"
                     got_response = True
                 except:

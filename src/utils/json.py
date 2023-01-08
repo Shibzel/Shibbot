@@ -1,19 +1,19 @@
 from asyncio import gather
 from aiohttp import ClientSession
-from json import dump as _dump, load as _load
+from orjson import loads, dumps
 
 
 async def dump(_object: object, fpath: str, *args, **kwargs) -> None:
     """Writes a json file, wow."""
-    with open(fpath, "w+") as out_file:
-        _dump(_object, out_file, *args, **kwargs)
+    with open(fpath, "wb+") as out_file:
+        out_file.write(dumps(_object, *args, **kwargs))
 
 async def load(fpath: str):
     """Loads a json file, incredible."""
-    with open(fpath, 'r') as json_file:
-        return _load(json_file)
+    with open(fpath, 'rb') as json_file:
+        return loads(json_file.read())
 
 async def json_from_urls(urls: list, *args, **kwargs) -> list:
     """Asynchronous way to get the json content from an API."""
     async with ClientSession(*args, **kwargs) as session:
-        return [await response.json() for response in await gather(*[session.get(url) for url in urls])]
+        return [await response.json(loads=loads) for response in await gather(*[session.get(url) for url in urls])]

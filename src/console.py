@@ -32,7 +32,7 @@ class Console:
     def help(self, command_name: str | None = None, *args):
         """Shows all console commands. Args: 'command_name' (optional)."""
         if not command_name:
-            logger.log("Available commands :\n"+"\n".join([self.strinify_command(name) for name in commands.keys()]))
+            logger.log("Available commands :\n"+"\n".join([self.strinify_command(name) for name in commands]))
         elif commands.get(command_name):
             logger.log(self.strinify_command(command_name))
         else:
@@ -41,7 +41,7 @@ class Console:
     @command
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs.keys())))
+        logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs)))
 
     @staticmethod
     def apply_on_cog(method, method_name, cog_name):

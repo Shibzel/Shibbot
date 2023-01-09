@@ -67,7 +67,7 @@ class ErrorHandler(BaseCog):
             return
         else:
             error_name = type(error).__name__
-            if error_name in error_dict.keys():
+            if error_name in error_dict:
                 description = error_dict[error_name]
             else:
                 error_message = f"Unexpected error with command '{ctx.command.name}'"

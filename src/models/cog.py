@@ -32,7 +32,7 @@ class BaseCog(Cog):
         self.description = description
         if languages:
             self.languages = languages
-            for lang in self.languages.keys():
+            for lang in self.languages:
                 self.bot.add_language(lang)
         self.emoji = emoji
         

@@ -1,7 +1,6 @@
 from datetime import datetime
 from traceback import format_exception
-from os import rename, path, remove
-from shutil import copyfile
+from os import path, remove
 from gzip import open as gzip_open
 
 from src import __version__
@@ -14,7 +13,6 @@ LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger_cache.json"
 LATEST_LOGS_FILE_PATH = LOGS_PATH + "/latest" + LOG_EXTENSION
 if not path.exists(LOGGER_CACHE_FILE_PATH):
     dump({}, LOGGER_CACHE_FILE_PATH)
-logger_cache = load(LOGGER_CACHE_FILE_PATH)
 
 class PStyles:
     ENDC = "\033[00m"
@@ -28,10 +26,14 @@ class PStyles:
     UNDERLINE = "\033[4m"
     ITALICIZED = "\033[3m"
 
+def _print(*args, **kwargs):
+    if Logger.is_enabled():
+        print(*args, **kwargs)
+
 def _write(string):
     with open(LATEST_LOGS_FILE_PATH, "a+") as f:
         f.write(string+"\n")
-        
+            
 def _close():
     extension = LOG_EXTENSION + ".gz"
     raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
@@ -48,23 +50,42 @@ def _close():
     with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
         with gzip_open(f"{out_file}{extension}", "wb+") as gzip_file:
             gzip_file.write(log_file.read())
-    logger_cache["closed"] = True
+    _set("closed", True)
+    
+def _set(key, value):
+    logger_cache = load(LOGGER_CACHE_FILE_PATH)
+    logger_cache[key] = value
     dump(logger_cache, LOGGER_CACHE_FILE_PATH)
 
 class Logger:
     """This dumbass dev forgot to add a documentation."""
     def __init__(self, package_name):
         self.package_name = package_name
+     
+    @staticmethod   
+    def is_enabled():
+        logger_cache = load(LOGGER_CACHE_FILE_PATH)
+        if "enabled" not in logger_cache:
+            logger_cache["enabled"] = True
+            dump(logger_cache, LOGGER_CACHE_FILE_PATH)
+        return logger_cache["enabled"]
+
+    @staticmethod 
+    def enable():
+        _set("enabled", True)
+
+    @staticmethod
+    def disable():
+        _set("enabled", False)
 
     @staticmethod
     def start():
-        global logger_cache
+        logger_cache = load(LOGGER_CACHE_FILE_PATH)
         if "closed" in logger_cache and not logger_cache["closed"]:
             _close()
+        _set("closed", False)
         if path.exists(LATEST_LOGS_FILE_PATH):
             remove(LATEST_LOGS_FILE_PATH)
-        logger_cache["closed"] = False
-        dump(logger_cache, LOGGER_CACHE_FILE_PATH)
         _write(f"### Starting logging ({datetime.now()}) ###")
 
     @staticmethod
@@ -77,25 +98,25 @@ class Logger:
 
     def log(self, string):
         string = f"[{Logger.formated_time()} INFO @{self.package_name}] {string}"
-        print(string)
+        _print(string)
         _write(string)
 
     def quiet(self, string):
         string = f"[{Logger.formated_time()} QUIET @{self.package_name}] {string}"
-        print(PStyles.QUIET + string + PStyles.ENDC)
+        _print(PStyles.QUIET + string + PStyles.ENDC)
         _write(string)
 
     def warn(self, string):
         string = f"[{Logger.formated_time()} WARN @{self.package_name}] {string}"
-        print(PStyles.WARNING + string + PStyles.ENDC)
+        _print(PStyles.WARNING + string + PStyles.ENDC)
         _write(string)
 
     def error(self, string, error=None):
         string = f"[{Logger.formated_time()} ERROR @{self.package_name}] {string}"
-        print(PStyles.ERROR + string + PStyles.ENDC)
+        _print(PStyles.ERROR + string + PStyles.ENDC)
         error_string = None
         if error:
             error_string = "  ".join(format_exception(type(error), error, error.__traceback__, 3)).replace("\n\n", "")
             error_string = f"-> {error_string}"
-            print(error_string)
+            _print(error_string)
         _write(string+f"\n{error_string}" if error_string else "")

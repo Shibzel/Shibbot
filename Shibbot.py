@@ -7,8 +7,7 @@ from platform import python_version, python_version_tuple
 
 from src import __version__ as version
 from src.core import Shibbot, PterodactylShibbot
-from src.utils import Logger, PStyles
-from src.constants import DATABASE_FILE_PATH, LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH
+from src.utils import Logger
 
 
 print(f"""
@@ -31,18 +30,9 @@ cls = Shibbot
 kwargs = {"test_mode": True,}
 class Missing(Exception): pass
 class Syntax(Exception): pass
-
-folders_to_create = (LOGS_PATH, CACHE_PATH, EXTENSIONS_PATH)
-for dir in folders_to_create:
-    if not os.path.exists(dir):
-        os.makedirs(dir)
         
 logger = Logger(__name__)
 logger.start()
-
-if not os.path.exists(DATABASE_FILE_PATH):
-    open(DATABASE_FILE_PATH, "x")
-    logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
 
 ### Doing some checks
 try:

@@ -2,6 +2,7 @@
 from sqlite3 import connect
 from aiosqlite import connect as aioconnect
 from discord import Guild
+from os import path
 
 from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
 from src.utils import Logger
@@ -9,10 +10,17 @@ from src.utils import Logger
 
 logger = Logger(__name__)
 
+def create_db_if_not_exists():
+    if not path.exists(DATABASE_FILE_PATH):
+        open(DATABASE_FILE_PATH, "x")
+    logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
+
 def db():
+    create_db_if_not_exists()
     return connect(DATABASE_FILE_PATH) 
 
 def aiodb():
+    create_db_if_not_exists()
     return aioconnect(DATABASE_FILE_PATH)
 
 async def create_or_fetch_guild(bot, guild: Guild):

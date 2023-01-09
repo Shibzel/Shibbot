@@ -1,19 +1,29 @@
 from discord import Cog
 from discord.ext.bridge import BridgeApplicationContext
 
+from .. import __version__
 from ..utils import fl, get_language, Logger
 from .. import database
-from ..errors import PluginDisabledError
+from ..errors import PluginDisabledError, DeprecatedBotError
 
 
 logger = Logger(__name__)
 
+def deprecated(min_version: str, current_version: str):
+    current_version, min_version = current_version.split("."), min_version.split(".")
+    if current_version[0] == min_version[0]: # Major
+        return current_version[1] < min_version[1] # Minor
+    else:
+        return False
+
 class BaseCog(Cog):
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, bot, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None, hidden: bool = False):
-        super().__init__()
+    def __init__(self, bot, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None,
+                 hidden: bool = False, author: str | None = None, min_version_supported: str = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.bot = bot or getattr(self, "bot", None)
+        
         if not isinstance(name, dict) and name is not None:
             raise TypeError("'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
         self.name = name
@@ -25,11 +35,15 @@ class BaseCog(Cog):
             for lang in self.languages.keys():
                 self.bot.add_language(lang)
         self.emoji = emoji
+        
         self.is_hidden = hidden
+        self.author = author
+        if min_version_supported and deprecated(min_version_supported, __version__):
+            raise DeprecatedBotError(min_version_supported, type(self).__name__)
 
     async def cog_before_invoke(self, ctx: BridgeApplicationContext):
         guild_string = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
-        logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{ctx.command}' command{guild_string}.")
+        logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{type(self).__name__}.{ctx.command}' command{guild_string}.")
         return await super().cog_before_invoke(ctx)
 
     def get_name(self, lang_code: str) -> str:

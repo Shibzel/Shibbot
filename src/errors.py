@@ -1,6 +1,8 @@
 from discord import SlashCommand, Member
 from discord.ext import commands
 
+from . import __version__
+
 
 class PluginDisabledError(commands.CheckFailure):
     def __init__(self, plugin_name: str, message: str | None = None):
@@ -23,10 +25,17 @@ class NotInteractionOwner(commands.UserInputError):
         self.user_interacting = user_interacting
         super().__init__(message or f"'{user_interacting}' doesn't have access to this interaction, it belongs to '{interaction_owner}'.")
 
+class ServiceUnavailableError(commands.CommandError):
+    def __init__(self, message: str | None):
+        super().__init__(message)
+        
 class CogDependanceMissing(Exception):
     def __init__(self, message: str | None = None, cog_name: str | None = None):
         super().__init__(message or "This cog depends on another."+("" if not cog_name else f" Missing Cog: {cog_name}."))
-
-class ServiceUnavailableError(commands.CommandError):
-    def __init__(self, message: str | None):
+        
+class DeprecatedBotError(Exception):
+    def __init__(self, min_version: str, cog_name: str | None = None, message: str | None = None):
+        if not message:
+            message = f"{0} cannot be loaded because this version of Shibbot is deprecated (cog: {min_version}, shibbot: {__version__}).".format(
+                      "This cog" if not cog_name else f"'{cog_name}")
         super().__init__(message)

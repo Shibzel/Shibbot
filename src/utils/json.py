@@ -3,12 +3,12 @@ from aiohttp import ClientSession
 from orjson import loads, dumps
 
 
-async def dump(_object: object, fpath: str, *args, **kwargs) -> None:
+def dump(_object: object, fpath: str, *args, **kwargs) -> None:
     """Writes a json file, wow."""
     with open(fpath, "wb+") as out_file:
         out_file.write(dumps(_object, *args, **kwargs))
 
-async def load(fpath: str):
+def load(fpath: str):
     """Loads a json file, incredible."""
     with open(fpath, 'rb') as json_file:
         return loads(json_file.read())

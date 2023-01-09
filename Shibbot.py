@@ -154,7 +154,7 @@ try:
     shibbot.run(token=token, command_input=True)
 except Exception as e:
     logger.error("Oops... Shibbot stopped ?", e)
-    logger.end()
 
+logger.end()
 # Exiting Program (there can be threads running in the background, that's why this exit func is here)
 exit()

@@ -37,7 +37,7 @@ def _print(*args, **kwargs):
         print(*args, **kwargs)
 
 def _write(string):
-    with open(LATEST_LOGS_FILE_PATH, "a+") as f:
+    with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
         f.write(string+"\n")
 
 def _set(key, value):
@@ -106,10 +106,8 @@ class Logger:
         _print(string)
         _write(string)
 
-    def quiet(self, string: str, print_anyway: bool = False) -> None:
+    def quiet(self, string: str) -> None:
         string = f"[{self.formated_time()} QUIET @{self.package_name}] {string}"
-        if print_anyway:
-            _print(PStyles.QUIET + string + PStyles.ENDC)
         _write(string)
 
     def warn(self, string: str) -> None:
@@ -119,12 +117,12 @@ class Logger:
 
     def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
         string = f"[{self.formated_time()} ERROR @{self.package_name}] {string}"
-        _print(PStyles.ERROR + string + PStyles.ENDC)
         error_string = None
         if isinstance(error_or_traceback, Exception):
-            error_string = "  ".join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3)).replace("\n\n", "")
-            error_string = f"-> {error_string}"
-        else:
+            error_string = f"-> {''.join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3))}".replace("\n\n", "")
+        elif isinstance(error_or_traceback, str):
             error_string = error_or_traceback
-        _print(error_string)
+        _print(PStyles.ERROR + string + PStyles.ENDC)
+        if error_string:
+            _print(error_string)
         _write(string+f"\n{error_string}" if error_string else "")

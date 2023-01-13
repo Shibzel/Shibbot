@@ -10,17 +10,14 @@ from src.logging import Logger
 
 logger = Logger(__name__)
 
-def create_db_if_not_exists():
-    if not path.exists(DATABASE_FILE_PATH):
-        open(DATABASE_FILE_PATH, "x")
+if not path.exists(DATABASE_FILE_PATH):
+    open(DATABASE_FILE_PATH, "x")
     logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
 
 def db():
-    create_db_if_not_exists()
     return connect(DATABASE_FILE_PATH) 
 
 def aiodb():
-    create_db_if_not_exists()
     return aioconnect(DATABASE_FILE_PATH)
 
 async def create_or_fetch_guild(bot, guild: Guild):

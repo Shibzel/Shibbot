@@ -37,6 +37,11 @@ class Console:
             logger.log(self.strinify_command(command_name))
         else:
             logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
+            
+    @command
+    def ping(self, *args):
+        """Returns the ping of the bot."""
+        logger.log(f"Ping: {round(self.bot.latency*1000, 2)} ms.")
     
     @command
     def cogs(self, *args):
@@ -95,12 +100,13 @@ class Console:
         try: raise ConsoleInterruption
         except ConsoleInterruption as e: self.bot.loop.create_task(self.bot.close(e))
         self.kill()
-
+        
     def main(self):
         logger.log("Console commands available. Type 'help'.")
 
         while self.running:
             raw_command = input()
+            if raw_command == "": continue
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
             logger.log(f"Console : '{raw_command}'")

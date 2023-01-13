@@ -14,16 +14,21 @@ logger = Logger(__name__)
 class Uptime:
     def __init__(self, init_time: float):
         now = datetime.utcnow()
-        delta = now - init_time
-        hours, remainder = divmod(int(delta.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
+        self._delta = now - init_time
+        hours, remainder = divmod(int(self._delta.total_seconds()), 3600)
         days, hours = divmod(hours, 24)
+        minutes, seconds = divmod(remainder, 60)
 
         self.seconds = seconds
         self.minutes = minutes
         self.hours = hours
         self.days = days
 
+    def __repr__(self) -> str:
+        return f"<{__name__}.{type(self).__name__} delta={self._delta}>"
+    
+    def __str__(self) -> str:
+        return f"{__name__}.{type(self).__name__}(days={self.days}, hours={self.hours}, minutes={self.minutes}, seconds={self.seconds})"
 
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""

@@ -3,7 +3,7 @@ from discord.ext import commands
 import traceback
 
 from src.core import Shibbot
-from src.utils.logger import Logger
+from src.logging import Logger
 from src.constants import CACHE_PATH
 
 

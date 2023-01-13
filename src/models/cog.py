@@ -2,8 +2,9 @@ from discord import Cog
 from discord.ext.bridge import BridgeApplicationContext
 
 from .. import __version__
-from ..utils import fl, get_language, Logger
+from ..utils import fl, get_language
 from .. import database
+from ..logging import Logger
 from ..errors import PluginDisabledError, DeprecatedBotError
 
 

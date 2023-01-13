@@ -6,7 +6,7 @@ from asyncio import sleep, AbstractEventLoop
 from datetime import datetime
 from orjson import loads
 
-from .logger import Logger
+from ..logging import Logger
 
 
 logger = Logger(__name__)

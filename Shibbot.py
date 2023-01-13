@@ -7,7 +7,7 @@ from platform import python_version, python_version_tuple
 
 from src import __version__ as version
 from src.core import Shibbot, PterodactylShibbot
-from src.utils import Logger
+from src.logging import Logger, PStyles
 
 
 print(f"""

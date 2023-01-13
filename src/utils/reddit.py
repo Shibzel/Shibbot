@@ -1,7 +1,7 @@
 from asyncio import sleep, AbstractEventLoop, gather
 from asyncpraw import Reddit as BaseReddit
 
-from src.utils import Logger
+from src.logging import Logger
 
 
 logger = Logger(__name__)

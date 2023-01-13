@@ -4,7 +4,8 @@ from asyncio import sleep
 
 from src import database
 from src.core import Shibbot
-from src.utils import get_language, Logger, stringify_command_usage
+from src.utils import get_language, stringify_command_usage
+from src.logging import Logger
 from src.models import BaseCog, CustomView
 from src.errors import NotInteractionOwner, PluginDisabledError, MissingArgumentsError
 

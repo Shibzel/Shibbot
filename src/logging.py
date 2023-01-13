@@ -1,3 +1,6 @@
+"""Really shitty logging module, I could have used logging instead but I wanted to do it my way.
+
+Note: Logging with a mehtod of `Logger` takes around 3ms to run."""
 from datetime import datetime
 from traceback import format_exception
 from os import path, remove
@@ -11,6 +14,9 @@ from src.utils.json import load, dump
 LOG_EXTENSION = ".log"
 LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger_cache.json"
 LATEST_LOGS_FILE_PATH = LOGS_PATH + "/latest" + LOG_EXTENSION
+IS_CLOSED_KEY = "closed"
+IS_ENABLED_KEY = "enabled"
+
 if not path.exists(LOGGER_CACHE_FILE_PATH):
     dump({}, LOGGER_CACHE_FILE_PATH)
 
@@ -33,7 +39,12 @@ def _print(*args, **kwargs):
 def _write(string):
     with open(LATEST_LOGS_FILE_PATH, "a+") as f:
         f.write(string+"\n")
-            
+
+def _set(key, value):
+    logger_cache = load(LOGGER_CACHE_FILE_PATH)
+    logger_cache[key] = value
+    dump(logger_cache, LOGGER_CACHE_FILE_PATH)
+
 def _close():
     extension = LOG_EXTENSION + ".gz"
     raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
@@ -46,16 +57,10 @@ def _close():
             n += 1
     else:
         out_file = raw_name
-    out_file = out_file
     with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-        with gzip_open(f"{out_file}{extension}", "wb+") as gzip_file:
+        with gzip_open(out_file + extension, "wb+") as gzip_file:
             gzip_file.write(log_file.read())
     _set("closed", True)
-    
-def _set(key, value):
-    logger_cache = load(LOGGER_CACHE_FILE_PATH)
-    logger_cache[key] = value
-    dump(logger_cache, LOGGER_CACHE_FILE_PATH)
 
 class Logger:
     """This dumbass dev forgot to add a documentation."""
@@ -63,60 +68,63 @@ class Logger:
         self.package_name = package_name
      
     @staticmethod   
-    def is_enabled():
+    def is_enabled() -> bool:
         logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if "enabled" not in logger_cache:
-            logger_cache["enabled"] = True
+        if IS_ENABLED_KEY not in logger_cache:
+            logger_cache[IS_ENABLED_KEY] = True
             dump(logger_cache, LOGGER_CACHE_FILE_PATH)
-        return logger_cache["enabled"]
+        return logger_cache[IS_ENABLED_KEY]
 
     @staticmethod 
-    def enable():
-        _set("enabled", True)
+    def enable() -> None:
+        _set(IS_ENABLED_KEY, True)
 
     @staticmethod
-    def disable():
-        _set("enabled", False)
+    def disable() -> None:
+        _set(IS_ENABLED_KEY, False)
 
     @staticmethod
-    def start():
+    def start() -> None:
         logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if "closed" in logger_cache and not logger_cache["closed"]:
+        if IS_CLOSED_KEY in logger_cache and not logger_cache[IS_CLOSED_KEY]:
             _close()
-        _set("closed", False)
+        _set(IS_CLOSED_KEY, False)
         if path.exists(LATEST_LOGS_FILE_PATH):
             remove(LATEST_LOGS_FILE_PATH)
         _write(f"### Starting logging ({datetime.now()}) ###")
 
     @staticmethod
-    def end(): 
+    def end() -> None: 
         _write(f"### Program ended ({datetime.now()}) ###")
         _close()
     
     @staticmethod
-    def formated_time(): return datetime.now().strftime("%H:%M:%S.%f")[:12]
+    def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")[:12]
 
-    def log(self, string):
-        string = f"[{Logger.formated_time()} INFO @{self.package_name}] {string}"
+    def log(self, string: str) -> None:
+        string = f"[{self.formated_time()} INFO @{self.package_name}] {string}"
         _print(string)
         _write(string)
 
-    def quiet(self, string):
-        string = f"[{Logger.formated_time()} QUIET @{self.package_name}] {string}"
-        _print(PStyles.QUIET + string + PStyles.ENDC)
+    def quiet(self, string: str, print_anyway: bool = False) -> None:
+        string = f"[{self.formated_time()} QUIET @{self.package_name}] {string}"
+        if print_anyway:
+            _print(PStyles.QUIET + string + PStyles.ENDC)
         _write(string)
 
-    def warn(self, string):
-        string = f"[{Logger.formated_time()} WARN @{self.package_name}] {string}"
+    def warn(self, string: str) -> None:
+        string = f"[{self.formated_time()} WARN @{self.package_name}] {string}"
         _print(PStyles.WARNING + string + PStyles.ENDC)
         _write(string)
 
-    def error(self, string, error=None):
-        string = f"[{Logger.formated_time()} ERROR @{self.package_name}] {string}"
+    def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
+        string = f"[{self.formated_time()} ERROR @{self.package_name}] {string}"
         _print(PStyles.ERROR + string + PStyles.ENDC)
         error_string = None
-        if error:
-            error_string = "  ".join(format_exception(type(error), error, error.__traceback__, 3)).replace("\n\n", "")
+        if isinstance(error_or_traceback, Exception):
+            error_string = "  ".join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3)).replace("\n\n", "")
             error_string = f"-> {error_string}"
-            _print(error_string)
+        else:
+            error_string = error_or_traceback
+        _print(error_string)
         _write(string+f"\n{error_string}" if error_string else "")

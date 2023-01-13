@@ -6,7 +6,8 @@ from random import choice
 from src import __version__ as version, __github__ as github_link, database
 from src.core import Shibbot
 from src.models import BaseCog, CustomView
-from src.utils import get_description_localization, stringify_command_usage, get_language, Uptime
+from src.utils import get_description_localization, stringify_command_usage, get_language
+from src.utils.hardware import Uptime
 from src.constants import SERVER_INVITATION_LINK
 
 from . import English, French

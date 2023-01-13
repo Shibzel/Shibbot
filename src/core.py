@@ -7,14 +7,15 @@ from traceback import format_exc
 from os import listdir, path
 from time import perf_counter
 
-from . import database
-from . import utils
+from . import database, utils
+from .utils import hardware, reddit
+from .logging import Logger, PStyles
 from .console import Console
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
 from .models import PluginCog
 
 
-logger = utils.Logger(__name__)
+logger = Logger(__name__)
 
 def bot_get_prefix(bot, ctx):
     return database.get_prefix(ctx)
@@ -34,7 +35,7 @@ class Shibbot(bridge.Bot):
         self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.is_alive = None
         self.languages = []
-        self.reddit: utils.Reddit = None
+        self.reddit: reddit.Reddit = None
 
         super().__init__(command_prefix=bot_get_prefix,
                         owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
@@ -61,7 +62,7 @@ class Shibbot(bridge.Bot):
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
-        self.specs = utils.ServerSpecifications(bot=self)
+        self.specs = hardware.ServerSpecifications(bot=self)
 
         # Runs gc if the program is going to run out of memory
         if gc_clear:
@@ -145,7 +146,7 @@ class Shibbot(bridge.Bot):
             self.languages.append(language)
     
     def init_reddit(self, client_id: str, client_secret: str, username: str, password: str, *args, **kwargs) -> None:
-        """Initializes the utils.Reddit client.
+        """Initializes the Reddit client.
 
         Args:
             client_id (str): The application id.
@@ -153,8 +154,8 @@ class Shibbot(bridge.Bot):
             user_name (str): The id of the account on which the application was created.
             password (str): The password of the account.
         """
-        logger.log(f"Initializing utils.Reddit client.")
-        self.reddit = utils.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
+        logger.log(f"Initializing Reddit client.")
+        self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content:
@@ -184,7 +185,7 @@ class Shibbot(bridge.Bot):
         logger.quiet(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
-        logger.error(f"Ignoring exception in {event_method}: \n{utils.PStyles.ENDC}-> {format_exc()}")
+        logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
 
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""
@@ -234,6 +235,6 @@ class PterodactylShibbot(Shibbot):
 
     def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, ptero_refresh: float = 5.0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.specs = utils.ServerSpecifications(bot=self, using_ptero=True,
+        self.specs = hardware.ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
         logger.quiet("Using the Pterodactyl API to get hardware usage.")

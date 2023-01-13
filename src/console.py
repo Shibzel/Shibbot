@@ -1,7 +1,7 @@
 import threading
 import gc
 
-from .utils.logger import Logger
+from .logging import Logger
 from .utils.hardware import Uptime
 
 

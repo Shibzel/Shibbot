@@ -5,7 +5,7 @@ from discord import Guild
 from os import path
 
 from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
-from src.utils import Logger
+from src.logging import Logger
 
 
 logger = Logger(__name__)

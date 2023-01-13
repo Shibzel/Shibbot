@@ -15,6 +15,8 @@ from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
 from .models import PluginCog
 
 
+MAX_PROCESS_TIMES_LEN = 1000
+
 logger = Logger(__name__)
 
 def bot_get_prefix(bot, ctx):
@@ -26,16 +28,20 @@ class Shibbot(bridge.Bot):
     def __init__(self, test_mode = False, instance_owners: list[int] = None, extentions_path: str | None = None,
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
+        self.test_mode = test_mode
+        self.extentions_path = extentions_path or EXTENSIONS_PATH
+        
         logger.log("Initializing Shibbot...")
         start_time = perf_counter()
         self.init_time = datetime.utcnow()
-        self.test_mode = test_mode
+        
         if self.test_mode:
             logger.warn("Test/beta mode is enabled.")
-        self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.is_alive = None
         self.languages = []
         self.reddit: reddit.Reddit = None
+        self.process_times = []
+        self.invoked_commands = 0
 
         super().__init__(command_prefix=bot_get_prefix,
                         owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
@@ -126,6 +132,26 @@ class Shibbot(bridge.Bot):
             if isinstance(cog, PluginCog):
                 plugins[cog.plugin_name] = cog
         return plugins
+    
+    @property
+    def uptime(self) -> hardware.Uptime:
+        """The uptime of the bot.
+
+        Returns:
+            Uptime: An instance of `src.hardware.Uptime`.
+        """
+        return hardware.Uptime(self.init_time)
+    
+    @property
+    def avg_processing_time(self) -> float:
+        """The average processing time of the bot for a command.
+        
+        Returns:
+            float: The average in ms.
+        """
+        if len_prs_tms:= len(self.process_times):
+            return sum(self.process_times)/len_prs_tms*1000
+        return 0
 
     def add_bot(self, cls: object) -> object:
         """Adds the bot to the class if it has the attribute `bot`. 
@@ -161,6 +187,17 @@ class Shibbot(bridge.Bot):
         """
         logger.log(f"Initializing Reddit client.")
         self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
+        
+    async def _perf_command(self, method) -> None:
+        start_time = perf_counter()
+        await method
+        self.process_times.append(perf_counter()-start_time)
+        self.invoked_commands += 1
+        if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
+            self.process_times = self.process_times[1:]
+    async def process_commands(self, message: discord.Message): await self._perf_command(super().process_commands(message))
+    async def process_application_commands(self, interaction: discord.Interaction, auto_sync: bool | None = None):
+        await self._perf_command(super().process_application_commands(interaction, auto_sync))
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content and before.created_at.timestamp() >= (datetime.utcnow()-timedelta(minutes=5)).timestamp():

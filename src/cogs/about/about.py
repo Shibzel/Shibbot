@@ -7,7 +7,6 @@ from src import __version__ as version, __github__ as github_link, database
 from src.core import Shibbot
 from src.models import BaseCog, CustomView
 from src.utils import get_description_localization, stringify_command_usage, get_language
-from src.utils.hardware import Uptime
 from src.constants import SERVER_INVITATION_LINK
 
 from . import English, French
@@ -132,7 +131,7 @@ class About(BaseCog):
 
         embed = discord.Embed(color=discord.Color.dark_gold())
         embed.set_author(name=lang.GET_INFOS_TITLE.format(version=version), icon_url=self.bot.user.avatar)
-        embed.add_field(name=lang.GET_INFOS_FIELD1_NAME,
+        embed.add_field(inline=False, name=lang.GET_INFOS_FIELD1_NAME,
                         value=lang.GET_INFOS_FIELD1_DESCRIPTION.format(n_servers=len(self.bot.guilds),
                                                                        n_users=len(self.bot.users),
                                                                        owner_github="https://github.com/Shibzel",
@@ -146,28 +145,11 @@ class About(BaseCog):
                                                                        ram_usage=round(specs.memory_usage, 2),
                                                                        n_ram=round(specs.max_memory, 2),
                                                                        place=specs.location))
+        uptime = self.bot.uptime
+        embed.add_field(name=lang.GET_INFOS_FIELD4_NAME, value=lang.GET_INFOS_FIELD4_DESCRIPTION.format(d=uptime.days, h=uptime.hours, m=uptime.minutes, s=uptime.seconds,
+                                                                                                        commands=self.bot.invoked_commands, processing_time=round(self.bot.avg_processing_time, 2),
+                                                                                                        members=max([len(guild.members) for guild in self.bot.guilds])))
         embed.add_field(name=lang.GET_INFOS_FIELD3_NAME, value=lang.GET_INFOS_FIELD3_DESCRIPTION, inline=False)
-
-        await ctx.respond(embed=embed)
-
-    @bridge.bridge_command(name="uptime", description="Displays since when the bot has been online.",
-                                          description_localizations={"fr" : "Affiche depuis quand le bot est en ligne."})
-    @commands.cooldown(1, 7, commands.BucketType.member)
-    async def get_uptime(self, ctx: bridge.BridgeApplicationContext):
-        lang = await self.get_lang(ctx)
-
-        # TODO: Get the uptime of the bot
-        uptime = 0
-        if uptime > 90: emoji, color = "🟢", discord.Color.green()
-        elif 75 > uptime >= 90: emoji, color = "🟠", discord.Color.orange()
-        elif not uptime: emoji, color = "⚪", 0xffffff
-        else: emoji, color = "🔴", discord.Color.red()
-
-        ut = Uptime(self.bot.init_time)
-
-        embed = discord.Embed(color=color)
-        embed.add_field(name=lang.GET_UPTIME_FIELD2_NAME, value=lang.GET_UPTIME_FIELD2_VALUE.format(emoji=emoji, uptime=uptime))
-        embed.add_field(name=lang.GET_UPTIME_FIELD1_NAME, value=lang.GET_UPTIME_FIELD1_VALUE.format(d=ut.days, h=ut.hours, m=ut.minutes, s=ut.seconds))
 
         await ctx.respond(embed=embed)
 

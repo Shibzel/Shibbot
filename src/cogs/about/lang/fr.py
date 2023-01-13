@@ -30,8 +30,5 @@ class French(English):
     GET_INFOS_FIELD2_DESCRIPTION = "Le bot tourne actuellement sur :\n🐍 Version Python : `{python_version}`\n⚡ Version Pycord : `{pycord_version}`\n❤ Coeurs : `{n_threads} thread(s) ({cpu_percent}%)`\n📏 RAM : `{ram_usage}/{n_ram}MB`\n🖥 Hébergé à : `{place}`"
     GET_INFOS_FIELD3_NAME = "Supportez le projet"
     GET_INFOS_FIELD3_DESCRIPTION = "**Tous les retours, rapports de bugs, branches github et suggestions sont le bienvenus !** N'héistez surtout pas à aller voir [la page de rapports de bugs](https://github.com/Shibzel/Shibbot/issues) ou à rejoindre [notre serveur Discord](https://discord.gg/TZNWfJmPwj) pour ça. Vous pouvez aussi faire un don au créateur du bot via la commande `tip`."
-
-    GET_UPTIME_FIELD1_NAME = "En ligne depuis :"
-    GET_UPTIME_FIELD1_VALUE = "`{d}` jours et `{h}` heures."
-    GET_UPTIME_FIELD2_NAME = "Uptime :"
-    GET_UPTIME_FIELD2_VALUE = "{emoji} `{uptime}`%"
+    GET_INFOS_FIELD4_NAME = "Stats"
+    GET_INFOS_FIELD4_DESCRIPTION = "⏲️ Uptime : `{d}d {h}h {m}m {s}s`\n⌨️ Commandes invoquées : `{commands}`\n⏱️ Temps moyen de réponse : `{processing_time}ms`\n⭐ Plus gros serveur : `{members}` members"

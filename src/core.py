@@ -2,7 +2,7 @@
 import discord
 from discord.ext import bridge
 from asyncio import gather
-from datetime import datetime
+from datetime import datetime, timedelta
 from traceback import format_exc
 from os import listdir, path
 from time import perf_counter
@@ -99,7 +99,12 @@ class Shibbot(bridge.Bot):
                     logger.error(f"Couldn't find cog '{cog}' wich is a builtin, the bot may not work as expected.", e)
                     continue
                 error = e
-            except Exception as e: error = e
+            except ImportError as e:
+                if cog in extentions:
+                    logger.error(f"Couldn't import the necessary modules inside this extension. Try to install them if you didn't.", e)
+                error = e
+            except Exception as e:
+                error = e
             logger.error(f"Couldn't load cog '{cog}'.", error)
 
         if not path.exists("./burgir.jpg"):
@@ -108,7 +113,7 @@ class Shibbot(bridge.Bot):
 
         logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
-      
+
     @property
     def plugins(self) -> dict[str, PluginCog]:
         """A read-only mapping of plugin name to PluginCog.
@@ -158,7 +163,7 @@ class Shibbot(bridge.Bot):
         self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
-        if before.content != after.content:
+        if before.content != after.content and before.created_at.timestamp() >= (datetime.utcnow()-timedelta(minutes=5)).timestamp():
             await self.process_commands(after)
 
     async def on_ready(self) -> None:

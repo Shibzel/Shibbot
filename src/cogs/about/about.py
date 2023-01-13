@@ -148,7 +148,7 @@ class About(BaseCog):
         uptime = self.bot.uptime
         embed.add_field(name=lang.GET_INFOS_FIELD4_NAME, value=lang.GET_INFOS_FIELD4_DESCRIPTION.format(d=uptime.days, h=uptime.hours, m=uptime.minutes, s=uptime.seconds,
                                                                                                         commands=self.bot.invoked_commands, processing_time=round(self.bot.avg_processing_time, 2),
-                                                                                                        members=max([len(guild.members) for guild in self.bot.guilds])))
+                                                                                                        members=max(len(guild.members) for guild in self.bot.guilds)))
         embed.add_field(name=lang.GET_INFOS_FIELD3_NAME, value=lang.GET_INFOS_FIELD3_DESCRIPTION, inline=False)
 
         await ctx.respond(embed=embed)

@@ -12,9 +12,15 @@ class ConsoleInterruption(Exception):
         super().__init__(message or "Shibbot was asked to stop by the console.")
 
 commands = {}
-def command(foo):
-        commands[foo.__name__] = foo
+def command(name: str = None, aliases: list = None):
+    def pred(foo):
+        nonlocal name
+        name = name or foo.__name__
+        names = [name, *aliases] if aliases else [name]
+        for name in names:
+            commands[name] = foo
         return foo
+    return pred
 
 class Console:
     def __init__(self, bot):
@@ -28,22 +34,22 @@ class Console:
         _command = commands[command_name]
         return f"{command_name}: {_command.__doc__ if _command.__doc__ else 'No description provided.'}"
 
-    @command
+    @command()
     def help(self, command_name: str | None = None, *args):
         """Shows all console commands. Args: 'command_name' (optional)."""
         if not command_name:
-            logger.log("Available commands :\n"+"\n".join([self.strinify_command(name) for name in commands]))
+            logger.log(f"Available commands : {', '.join(commands)}.")
         elif commands.get(command_name):
             logger.log(self.strinify_command(command_name))
         else:
             logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
             
-    @command
+    @command()
     def ping(self, *args):
         """Returns the ping of the bot."""
-        logger.log(f"Ping: {round(self.bot.latency*1000, 2)} ms.")
+        logger.log(f"Ping: {round(self.bot.latency*1000, 2)}ms.")
     
-    @command
+    @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
         logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs)))
@@ -56,50 +62,54 @@ class Console:
         except Exception as e:
             logger.error(f"Could not {method_name} '{cog_name}' cog.", e)
     
-    @command
+    @command()
     def load(self, cog_name, *args):
         """Loads a cog. Args: 'cog_name' (needed)."""
         self.apply_on_cog(self.bot.load_extension, "load", cog_name)
 
-    @command
+    @command()
     def unload(self, cog_name, *args):
         """Unloads a cog. Args: 'cog_name' (needed)."""
         self.apply_on_cog(self.bot.unload_extension, "unload", cog_name)
 
-    @command
+    @command()
     def reload(self, cog_name, *args):
         """Reloads a cog. Args: 'cog_name' (needed)."""
         self.apply_on_cog(self.bot.reload_extension, "reload", cog_name)
 
-    @command
+    @command()
     def gc(self, *args):
         """Runs the garbage collector."""
         gc.collect()
         logger.log("Done running GC !")
 
-    @command
+    @command()
     def uptime(self, *args):
         """Shows the uptime."""
-        uptime = Uptime(self.bot.init_time)
+        uptime = self.bot.uptime
         logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
 
-    @command
-    def servers(self, *args):
-        """Shows the numbers of guilds."""
-        logger.log(f"This instance is currently on {len(self.bot.guilds)} servers.")
-    
-    @command
-    def users(self, *args):
-        """Shows the numbers of users."""
-        logger.log(f"This instance is watching over {len(self.bot.users)} users.")
+    @command()
+    def stats(self, *args):
+        """Shows some stats."""
+        ut = self.bot.uptime
+        logger.log(f"Statistics :\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\nAverage processing time : {self.bot.avg_processing_time:.4f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
 
-    @command
+    @command(aliases=["close"])
     def stop(self, *args):
         """Stops the bot."""
+        response = input("Are you sure ? (Y/N)")
+        if response.lower() in ("y", ""):
+            self.adios()
+        else:
+            logger.log("Aborted.")
+
+    @command(aliases=["forcestop"])
+    def adios(self, *args):
+        """Stops the bot without asking if the user is sure."""
         logger.log("Stopping Shibbot...")
-        try: raise ConsoleInterruption
-        except ConsoleInterruption as e: self.bot.loop.create_task(self.bot.close(e))
-        self.kill()
+        self.bot.loop.create_task(self.bot.close(ConsoleInterruption()))
+        self.running = False
         
     def main(self):
         logger.log("Console commands available. Type 'help'.")
@@ -113,13 +123,14 @@ class Console:
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)
+                except ConsoleInterruption as e:
+                    raise e
                 except TypeError as e:
                     logger.error(f"Missing arguments.", e)
+                except Exception:
+                    logger.error("Something went wrong in the console.", e)
             else:
                 logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
 
     def start(self):
-        self.thread.start()  
-
-    def kill(self):
-        self.running = False
+        self.thread.start()

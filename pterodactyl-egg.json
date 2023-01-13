@@ -2,7 +2,7 @@
     "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
     "meta": {
         "version": "PTDL_v2",
-        "update_url": null
+        "update_url": "https://github.com/Shibzel/Shibbot/blob/main/pterodactyl-egg.json"
     },
     "exported_at": "2022-12-24T21:58:25+01:00",
     "name": "Shibbot Python Egg",
@@ -20,7 +20,7 @@
         "files": "{}",
         "startup": "{\r\n    \"done\": \"change this part\"\r\n}",
         "logs": "{}",
-        "stop": "stop"
+        "stop": "adios"
     },
     "scripts": {
         "installation": {

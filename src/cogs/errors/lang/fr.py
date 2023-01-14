@@ -5,7 +5,7 @@ class French(English):
         "BadArgument": "Désolé, mauvais argument(s). Réessayez.",
         "BotMissingPermissions": "On dirait qu'il me manque les permissions nécessaires à la réalisation de cette commande.",
         "ChannelNotFound": "Je n'ai pas pu trouver ce salon.",
-        "CommandOnCooldown": "Hé, attends ! Cette commande est en cooldown, attendez que ce message disparaisse pour l'utiliser à nouveau (`{secs} second(s)`).",
+        "CommandOnCooldown": "Hé, attends ! Cette commande est en cooldown, attendez que ce message disparaisse pour l'utiliser à nouveau (`{n_secs} second(s)`).",
         "CommandError": "Une erreur m'a empêché de faire ça.",
         "PrivateMessageOnly": "Cette commande est réservée aux messages privés.",
         "PluginDisabledError": "Le plugin `{plugin}` est désactivé.",

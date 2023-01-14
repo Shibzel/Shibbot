@@ -25,18 +25,18 @@ def bot_get_prefix(bot, ctx):
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
-    def __init__(self, test_mode = False, instance_owners: list[int] = None, extentions_path: str | None = None,
+    def __init__(self, debug = False, instance_owners: list[int] = None, extentions_path: str | None = None,
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
-        self.test_mode = test_mode
+        self.debug_mode = debug
         self.extentions_path = extentions_path or EXTENSIONS_PATH
         
         logger.log("Initializing Shibbot...")
         start_time = perf_counter()
         self.init_time = datetime.utcnow()
         
-        if self.test_mode:
-            logger.warn("Test/beta mode is enabled.")
+        if self.debug_mode:
+            logger.warn("Debug/beta mode is enabled.")
         self.is_alive = None
         self.languages = []
         self.reddit: reddit.Reddit = None
@@ -95,6 +95,7 @@ class Shibbot(bridge.Bot):
             logger.warn(f"No extention will load because folder '{self.extentions_path}' is empty.")
         for cog in buildin_cogs + extentions:
             try:
+                logger.debug(f"Initializing cog '{cog}'.")
                 self.load_extension(cog)
                 continue
             except discord.ExtensionNotFound as e:
@@ -111,7 +112,7 @@ class Shibbot(bridge.Bot):
             logger.error(f"Couldn't load cog '{cog}'.", error)
 
         if not path.exists("./burgir.jpg"):
-            logger.quiet("File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
@@ -171,6 +172,7 @@ class Shibbot(bridge.Bot):
         if not isinstance(language, str):
             raise TypeError(f"'language' must be an 'str' object and not '{type(language).__name__}'.")
         if language not in self.languages:
+            logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
     
     def init_reddit(self, client_id: str, client_secret: str, username: str, password: str, *args, **kwargs) -> None:
@@ -182,20 +184,23 @@ class Shibbot(bridge.Bot):
             user_name (str): The id of the account on which the application was created.
             password (str): The password of the account.
         """
-        logger.quiet(f"Initializing Reddit client.")
+        logger.debug(f"Initializing Reddit client.")
         self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
         
-    async def _perf_command(self, method) -> None:
+    async def _perf_command(self, method, ctx) -> None:
         start_time = perf_counter()
-        await method
-        self.process_times.append(perf_counter()-start_time)
-        self.invoked_commands += 1
+        await method(ctx)
+        result = perf_counter() - start_time
+        self.process_times.append(result)
+        on_guild = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
+        logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}. Took took {result*1000:.2f}ms.")
         if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
             self.process_times = self.process_times[1:]
+        self.invoked_commands += 1
     async def invoke(self, ctx):
-        await self._perf_command(super().invoke(ctx))
+        await self._perf_command(super().invoke, ctx)
     async def invoke_application_command(self, ctx):
-        await self._perf_command(super().invoke_application_command(ctx))
+        await self._perf_command(super().invoke_application_command, ctx)
         
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""
@@ -223,18 +228,18 @@ class Shibbot(bridge.Bot):
 
     async def on_resumed(self) -> None:
         self.is_alive = True
-        logger.quiet("Resuming.")
+        logger.debug("Resuming.")
 
     async def on_disconnect(self) -> None:
         if self.is_alive != False:
             self.is_alive = False
-            logger.quiet("Disconnected.")
+            logger.debug("Disconnected.")
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
-        logger.quiet(f"Joined guild '{guild.name}' (ID: {guild.id}).")
+        logger.debug(f"Joined guild '{guild.name}' (ID: {guild.id}).")
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
-        logger.quiet(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
+        logger.debug(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
@@ -278,6 +283,6 @@ class PterodactylShibbot(Shibbot):
 
     def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, ptero_refresh: float = 5.0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        logger.debug("Using the Pterodactyl API to get hardware usage.")
         self.specs = hardware.ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
-        logger.quiet("Using the Pterodactyl API to get hardware usage.")

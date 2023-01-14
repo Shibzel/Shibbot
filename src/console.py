@@ -1,3 +1,4 @@
+"""Everything about the terminal and the actions that can be taken with it."""
 import threading
 import gc
 
@@ -7,11 +8,13 @@ from .logging import Logger
 logger = Logger(__name__)
 
 class ConsoleInterruption(Exception):
+    """Raised when the bot is stopping because of an user interaction."""
     def __init__(self, message=None):
         super().__init__(message or "Shibbot was asked to stop by the console.")
 
 commands = {}
 def command(name: str = None, aliases: list = None):
+    """A decorator indicating that this function is a console command."""
     def pred(foo):
         nonlocal name
         name = name or foo.__name__
@@ -22,7 +25,22 @@ def command(name: str = None, aliases: list = None):
     return pred
 
 class Console:
+    """Console object for Shibbot.
+    
+    Attributes:
+    ----------
+    bot: Shibbot
+        The instance of Shibbot.
+    running: bool
+        Watever the input loop is running or not.
+    thread: threading.Thread
+        The thread object.
+    """
     def __init__(self, bot):
+        """Parameters:
+        ----------
+        bot: Shibbot
+            The instance of Shibbot."""
         self.bot = bot
         self.running = True
 
@@ -30,6 +48,7 @@ class Console:
 
     @staticmethod
     def strinify_command(command_name):
+        
         _command = commands[command_name]
         return f"{command_name}: {_command.__doc__ if _command.__doc__ else 'No description provided.'}"
 
@@ -54,7 +73,7 @@ class Console:
         logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs)))
 
     @staticmethod
-    def apply_on_cog(method, method_name, cog_name):
+    def _apply_on_cog(method, method_name, cog_name):
         try:
             method(cog_name)
             logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
@@ -64,17 +83,17 @@ class Console:
     @command()
     def load(self, cog_name, *args):
         """Loads a cog. Args: 'cog_name' (needed)."""
-        self.apply_on_cog(self.bot.load_extension, "load", cog_name)
+        self._apply_on_cog(self.bot.load_extension, "load", cog_name)
 
     @command()
     def unload(self, cog_name, *args):
         """Unloads a cog. Args: 'cog_name' (needed)."""
-        self.apply_on_cog(self.bot.unload_extension, "unload", cog_name)
+        self._apply_on_cog(self.bot.unload_extension, "unload", cog_name)
 
     @command()
     def reload(self, cog_name, *args):
         """Reloads a cog. Args: 'cog_name' (needed)."""
-        self.apply_on_cog(self.bot.reload_extension, "reload", cog_name)
+        self._apply_on_cog(self.bot.reload_extension, "reload", cog_name)
 
     @command()
     def gc(self, *args):
@@ -92,12 +111,14 @@ class Console:
     def stats(self, *args):
         """Shows some stats."""
         ut = self.bot.uptime
-        logger.log(f"Statistics :\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\nAverage processing time : {self.bot.avg_processing_time:.4f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
+        logger.log(f"Statistics :\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\n" + \
+            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
 
     @command(aliases=["close"])
     def stop(self, *args):
         """Stops the bot."""
-        response = input("Are you sure ? (Y/N)")
+        logger.log("Are you sure ? (Y/N) :")
+        response = input()
         if response.lower() in ("y", ""):
             self.adios()
         else:
@@ -111,6 +132,7 @@ class Console:
         self.running = False
         
     def main(self):
+        """The code running inside the thread."""
         logger.log("Console commands available. Type 'help'.")
 
         while self.running:
@@ -132,4 +154,5 @@ class Console:
                 logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
 
     def start(self):
+        """Starts the input thread."""
         self.thread.start()

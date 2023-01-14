@@ -49,6 +49,7 @@ class ServerSpecifications:
         self.location: str | None = "None"
 
         if self.using_pterodactyl:
+            logger.debug("Begins to retrieve server hardware usage on the Pterodactyl API.")
             self._loop.create_task(self._get_specs_loop())
         self._loop.create_task(self._get_location())
 
@@ -113,12 +114,14 @@ class ServerSpecifications:
 
     async def _get_location(self):
         async with ClientSession() as session:
+            logger.debug("Trying to get the location of the machine.")
             got_response = False
             while not got_response:
                 try:
                     result = await session.get("http://ip-api.com/json/?fields=country,city")
                     json_result = await result.json(loads=loads)
                     self.location = f"{json_result['city']}, {json_result['country']}"
+                    logger.debug("Got location.")
                     got_response = True
                 except:
                     await sleep(40)
@@ -128,5 +131,5 @@ async def auto_gc(specs: ServerSpecifications, _sleep: int = 60, max_percentage:
         await sleep(_sleep)
         percentage = specs.memory_usage/specs.max_memory*100
         if percentage > max_percentage:
-            collect()
             logger.warn(f"Running GC, memory usage exceeding {specs.max_memory/100*max_percentage:.2f}MB (using {specs.memory_usage:.2f} out of {specs.max_memory:.2f}MB, {percentage:.2f}%).")
+            collect()

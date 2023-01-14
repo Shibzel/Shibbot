@@ -39,7 +39,7 @@ class ErrorHandler(BaseCog):
         await self.handle_error(ctx, error)
 
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
-        logger.quiet(f"Handling error in {type(self).__name__} : {type(error).__name__}: {str(error)}")
+        logger.debug(f"Handling error : {type(error).__name__}: {str(error)}")
         if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
             return
 
@@ -63,7 +63,7 @@ class ErrorHandler(BaseCog):
         elif isinstance(error, commands.NSFWChannelRequired):
             description = error_dict["NSFWChannelRequired"].format(channel=error.channel.mention)
         elif isinstance(error, commands.MissingPermissions):
-            description = error_dict["MissingPermissions"].format(permissions=" & ".join([permission.replace("_", " ") for permission in error.missing_permissions]))
+            description = error_dict["MissingPermissions"].format(permissions=" & ".join(permission.replace("_", " ") for permission in error.missing_permissions))
         elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)):
             return
         else:

@@ -36,7 +36,7 @@ class About(BaseCog):
         options = [discord.SelectOption(label=lang.SHOW_HELP_OPTION_HOME_LABEL, emoji="🏡", value="home", default=True)]
         cogs: list[BaseCog] = []
         for cog in list(self.bot.cogs.values()):
-            if not getattr(cog, "is_hidden", True) and isinstance(cog, BaseCog):
+            if isinstance(cog, BaseCog) and not cog.is_hidden:
                 cogs.append(cog)
                 options.append(discord.SelectOption(label=cog.get_name(lang_code), description=cog.get_description(lang_code),
                                                     emoji=cog.emoji, value=str(id(cog))))

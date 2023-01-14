@@ -20,10 +20,12 @@ def deprecated(min_version: str, current_version: str):
 class BaseCog(Cog):
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, bot, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None,
+    def __init__(self, bot = None, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None,
                  hidden: bool = False, author: str | None = None, min_version_supported: str = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bot = bot or getattr(self, "bot", None)
+        self.bot = getattr(self, "bot", None) or bot
+        if self.bot is None:
+            raise TypeError(f"{self.__name__} missing required argument: 'bot'.")
         
         if not isinstance(name, dict) and name is not None:
             raise TypeError("'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
@@ -42,11 +44,6 @@ class BaseCog(Cog):
         if min_version_supported and deprecated(min_version_supported, __version__):
             raise DeprecatedBotError(min_version_supported, type(self).__name__)
 
-    async def cog_before_invoke(self, ctx: BridgeApplicationContext):
-        guild_string = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
-        logger.quiet(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the '{type(self).__name__}.{ctx.command}' command{guild_string}.")
-        return await super().cog_before_invoke(ctx)
-
     def get_name(self, lang_code: str) -> str:
         return get_language(self.name, lang_code) if self.name else self.__name__
 
@@ -62,6 +59,7 @@ class PluginCog(BaseCog):
         self.plugin_name = plugin_name
         self.guild_only = guild_only
         super().__init__(*args, **kwargs)
+        logger.debug(f"Creating '{plugin_name}_plugin' table in database.")
         self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS {plugin_name}_plugin (guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
         self.bot.db.commit()
         

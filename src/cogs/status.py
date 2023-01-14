@@ -30,36 +30,38 @@ class ChangeActivity(commands.Cog):
                               "Cyberpunk 2069", "HEE HEE HE HA", "Minecwaft", "Shiba Horizon 5", "Portel 2", "Underfail", "Genshit Impact", "Off",
                               "Absolutely accurate battle simulator", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️"]
 
-        self.bot.loop.create_task(self.start_status_loop())
-        self.halloween_statutes = ["it is spooky month !!", "🎃", "OOGA BOOGA 🧟‍♀️", "Boo 👻", "oh man i'm dead 💀⚰️"]
-        self.bot.loop.create_task(self.monthly_calender_event(self.halloween_statutes, month=10))
-        self.chrismas_statutes = ["Merry CHRIIIIIIISMAAAAAAAAAAAAAAAAAAS", "🎅🎄",]
-        self.bot.loop.create_task(self.monthly_calender_event(self.chrismas_statutes, month=12))
-        self.new_year_statutes = ["happy new year",]
-        self.bot.loop.create_task(self.monthly_calender_event(self.new_year_statutes, month=1))
+    #     self.bot.loop.create_task(self.start_status_loop())
+    #     self.halloween_statutes = ["it is spooky month !!", "🎃", "OOGA BOOGA 🧟‍♀️", "Boo 👻", "oh man i'm dead 💀⚰️"]
+    #     self.bot.loop.create_task(self.monthly_calender_event(self.halloween_statutes, month=10))
+    #     self.chrismas_statutes = ["Merry CHRIIIIIIISMAAAAAAAAAAAAAAAAAAS", "🎅🎄",]
+    #     self.bot.loop.create_task(self.monthly_calender_event(self.chrismas_statutes, month=12))
+    #     self.new_year_statutes = ["happy new year",]
+    #     self.bot.loop.create_task(self.monthly_calender_event(self.new_year_statutes, month=1))
 
-    async def monthly_calender_event(self, statutes: list, month: int,):
-        while True:
-            # TODO: improve the code below.
-            now = datetime.datetime.utcnow()
-            if now.month == month:
-                sleep = 60
-            elif now.month > month:
-                next_date = datetime.datetime(year=now.year+1, month=month, day=1)
-                sleep = (next_date-now).total_seconds()
-            elif now.month < month:
-                next_date = datetime.datetime(year=now.year, month=month, day=1)
-                sleep = (next_date-now).total_seconds()
-            await asyncio.sleep(sleep)
+    # async def monthly_calender_event(self, statutes: list, month: int,):
+    #     while True:
+    #         # TODO: improve the code below.
+    #         now = datetime.datetime.utcnow()
+    #         if now.month == month:
+    #             sleep = 60
+    #         elif now.month > month:
+    #             next_date = datetime.datetime(year=now.year+1, month=month, day=1)
+    #             sleep = (next_date-now).total_seconds()
+    #         elif now.month < month:
+    #             next_date = datetime.datetime(year=now.year, month=month, day=1)
+    #             sleep = (next_date-now).total_seconds()
+    #         print(sleep)
+    #         await asyncio.sleep(sleep)
 
-            self.bot_statutes.extend(statutes)
-            after_sleep_now = datetime.datetime.utcnow()
-            year, month = now.year, now.month
-            if month == 12: year, month = year+1, 1
-            end_date = datetime.datetime(year=year, month=month, day=1)
-            await asyncio.sleep((end_date-after_sleep_now).total_seconds())
-            for status in statutes:
-                self.bot_statutes.remove(status)
+    #         self.bot_statutes.extend(statutes)
+    #         print(self.bot_statutes)
+    #         after_sleep_now = datetime.datetime.utcnow()
+    #         year, month = now.year, now.month
+    #         if month == 12: year, month = year+1, 1
+    #         end_date = datetime.datetime(year=year, month=month, day=1)
+    #         await asyncio.sleep((end_date-after_sleep_now).total_seconds())
+    #         for status in statutes:
+    #             self.bot_statutes.remove(status)
 
     async def start_status_loop(self):
         await asyncio.sleep(10)

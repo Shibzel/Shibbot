@@ -192,9 +192,20 @@ class Shibbot(bridge.Bot):
         self.invoked_commands += 1
         if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
             self.process_times = self.process_times[1:]
-    async def process_commands(self, message: discord.Message): await self._perf_command(super().process_commands(message))
-    async def process_application_commands(self, interaction: discord.Interaction, auto_sync: bool | None = None):
-        await self._perf_command(super().process_application_commands(interaction, auto_sync))
+    async def invoke(self, ctx):
+        await self._perf_command(super().invoke(ctx))
+    async def invoke_application_command(self, ctx):
+        await self._perf_command(super().invoke_application_command(ctx))
+        
+    def _on_cog(self, method, *args, **kwargs) -> None:
+        """Fixes a bug beacause using methods like loading must run twice."""
+        try:
+            method(*args, **kwargs)
+        except AttributeError:
+            method(*args, **kwargs)
+    def load_extension(self, *args, **kwargs): self._on_cog(super().load_extension, *args, **kwargs)
+    def unload_extension(self, *args, **kwargs): self._on_cog(super().unload_extension, *args, **kwargs)
+    def reload_extension(self, *args, **kwargs): self._on_cog(super().reload_extension, *args, **kwargs)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content and before.created_at.timestamp() >= (datetime.utcnow()-timedelta(minutes=5)).timestamp():
@@ -227,16 +238,6 @@ class Shibbot(bridge.Bot):
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
-
-    def _on_cog(self, method, *args, **kwargs) -> None:
-        """Fixes a bug beacause using methods like loading must run twice."""
-        try:
-            method(*args, **kwargs)
-        except AttributeError:
-            method(*args, **kwargs)
-    def load_extension(self, *args, **kwargs): self._on_cog(super().load_extension, *args, **kwargs)
-    def unload_extension(self, *args, **kwargs): self._on_cog(super().unload_extension, *args, **kwargs)
-    def reload_extension(self, *args, **kwargs): self._on_cog(super().reload_extension, *args, **kwargs)
 
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Runs the bot.

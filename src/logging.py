@@ -57,9 +57,12 @@ def _close():
             n += 1
     else:
         out_file = raw_name
-    with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-        with gzip_open(out_file + extension, "wb+") as gzip_file:
-            gzip_file.write(log_file.read())
+    try:
+        with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
+            with gzip_open(out_file + extension, "wb+") as gzip_file:
+                gzip_file.write(log_file.read())
+    except FileNotFoundError:
+        pass
     _set("closed", True)
 
 class Logger:

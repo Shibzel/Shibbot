@@ -63,7 +63,8 @@ class _Logger:
         """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
         Use for debugging or unimportant things."""
         string = f"[{self.formated_time()} DEBUG @{self.file_name}] {string}"
-        if load(LOGGER_CACHE_FILE_PATH)[IS_DEBUGGING_KEY]:
+        logger_cache = load(LOGGER_CACHE_FILE_PATH)
+        if IS_DEBUGGING_KEY in logger_cache and not logger_cache[IS_DEBUGGING_KEY]:
             _print(PStyles.QUIET + string + PStyles.ENDC)
         _write(string)
 

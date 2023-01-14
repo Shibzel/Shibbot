@@ -101,9 +101,9 @@ class Logger:
     @staticmethod
     def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")[:12]
 
-    def log(self, string: str) -> None:
+    def log(self, string: str, color: str | None = None) -> None:
         string = f"[{self.formated_time()} INFO @{self.package_name}] {string}"
-        _print(string)
+        _print((color or "") + string + PStyles.ENDC)
         _write(string)
 
     def quiet(self, string: str) -> None:

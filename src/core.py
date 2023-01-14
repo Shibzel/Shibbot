@@ -44,10 +44,10 @@ class Shibbot(bridge.Bot):
         self.invoked_commands = 0
 
         super().__init__(command_prefix=bot_get_prefix,
-                        owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
-                        # Being mentionned by a bot is very annoying, that's why it's all set to False.
-                        allowed_mentions=discord.AllowedMentions.none(),
-                        intents=discord.Intents(
+                         owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
+                         # Being mentionned by a bot is very annoying, that's why it's all set to False.
+                         allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=True, replied_user=False),
+                         intents=discord.Intents(
                             bans=True,
                             dm_messages=True, # Waterver we want the bot to respond to dms or not
                             emojis=True,          
@@ -59,12 +59,9 @@ class Shibbot(bridge.Bot):
                             message_content=True,
                             presences=True,
                             voice_states=False),
-                        case_insensitive=True,
-                        activity=discord.Streaming(
-                            name="connecting...",
-                            # Don't put this link on your browser or you'll regret it.
-                            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-                        *args, **kwargs)
+                         case_insensitive=True,
+                         activity=discord.Streaming(name="connecting...", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"), 
+                         *args, **kwargs)                               # Don't put this link on your browser or you might regret it.
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
@@ -73,7 +70,7 @@ class Shibbot(bridge.Bot):
         # Runs gc if the program is going to run out of memory
         if gc_clear:
             logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
-            self.loop.create_task(utils.auto_gc(self.specs, gc_sleep, gc_max_ram))
+            self.loop.create_task(hardware.auto_gc(self.specs, gc_sleep, gc_max_ram))
 
         # Synchronous clients for Sqlite3
         self.db = database.db()
@@ -185,7 +182,7 @@ class Shibbot(bridge.Bot):
             user_name (str): The id of the account on which the application was created.
             password (str): The password of the account.
         """
-        logger.log(f"Initializing Reddit client.")
+        logger.quiet(f"Initializing Reddit client.")
         self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
         
     async def _perf_command(self, method) -> None:
@@ -211,14 +208,16 @@ class Shibbot(bridge.Bot):
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
             logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
         self.is_alive = True
-        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).")
+        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
 
     async def on_resumed(self) -> None:
         self.is_alive = True
+        logger.quiet("Resuming.")
 
     async def on_disconnect(self) -> None:
         if self.is_alive != False:
             self.is_alive = False
+            logger.quiet("Disconnected.")
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.quiet(f"Joined guild '{guild.name}' (ID: {guild.id}).")
@@ -249,6 +248,7 @@ class Shibbot(bridge.Bot):
             if command_input:
                 self.console = Console(self)
                 self.console.start()
+            logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
             super().run(token, *args, **kwargs)
         except Exception as e:
             # Closing everything and reraising error

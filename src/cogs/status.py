@@ -30,7 +30,7 @@ class ChangeActivity(commands.Cog):
                               "Cyberpunk 2069", "HEE HEE HE HA", "Minecwaft", "Shiba Horizon 5", "Portel 2", "Underfail", "Genshit Impact", "Off",
                               "Absolutely accurate battle simulator", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️"]
 
-    #     self.bot.loop.create_task(self.start_status_loop())
+        self.bot.loop.create_task(self.start_status_loop())
     #     self.halloween_statutes = ["it is spooky month !!", "🎃", "OOGA BOOGA 🧟‍♀️", "Boo 👻", "oh man i'm dead 💀⚰️"]
     #     self.bot.loop.create_task(self.monthly_calender_event(self.halloween_statutes, month=10))
     #     self.chrismas_statutes = ["Merry CHRIIIIIIISMAAAAAAAAAAAAAAAAAAS", "🎅🎄",]

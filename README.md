@@ -2,14 +2,24 @@
 
 <div align="center">
 	<h1><b>Shibbot</b></h1>
-    <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Support&logo=Discord&logoColor=white&style=for-the-badge">
-	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">
-    <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
-    <img alt="Uptime" src="https://img.shields.io/uptimerobot/ratio/m792743228-711706b27e948a5682109c4e?style=for-the-badge">
 	<h3>A feature-rich and modular Discord bot written in Python.</h3>
+	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge">
+    <img alt="Release" src="https://img.shields.io/github/v/release/Shibzel/Shibbot?include_prereleases&label=Latest%20Release&logo=github&sort=semver&style=for-the-badge&logoColor=white&color=red">
+    <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
+    <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Server&logo=Discord&logoColor=white&style=for-the-badge">
+    <img alt="Uptime" src="https://img.shields.io/uptimerobot/ratio/m792743228-711706b27e948a5682109c4e?style=for-the-badge">
 </div>
+<p align="center">
+    <a href="#-description--motivation">Description</a>
+    |
+    <a href="#-self-hosting">Hosting</a>
+    |
+    <a href="#-contributing--issues">Contributing</a>
+    |
+    <a href="https://github.com/Shibzel/Shibbot/blob/main/LICENSE">Liscense</a>
+</p>
 
-> **⚠️ This project is being rewrited, don't use it.**
+> # **⚠️ This project is being rewrited, don't use it.**
 
 ## 🔮 Description & Motivation
 
@@ -37,6 +47,15 @@ Of course, a new instance of the bot can be hosted on your machine with your own
 
 Nevertheless, using our own hosted instance of the bot is also a higly recommended option if you just don't want to undergo all the issues that it is to host a Discord bot.
 
+## 📜 Requirements
+
+- [Python 3.8+](https://www.python.org/downloads).
+- Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
+- A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [someone else's](https://www.google.com/search?q=free+lavalink+host).
+- For the librairies see [`requirements.txt`](https://github.com/Shibzel/Shibbot/blob/main/requirements.txt).
+
+Remember to fulfill the dependencies by running `python -m pip install -r requirements.txt` into your console before starting the bot.
+
 ## 🤝 Contributing & Issues
 
 **All feedbacks, bugs reports, forks and suggestions are welcome !** Do not hesistate to check out our [issues page](https://github.com/Shibzel/Shibbot/issues) or join our [Discord server](https://discord.gg/TZNWfJmPwj) for that.
@@ -49,15 +68,6 @@ It is maybe an useless reminder but a basic understanding of Python and the stru
 - [Cloudy_Paul](https://github.com/Cloudy-Paul) : For his incredible translation job.
 
 Big thanks to all those listed [here](https://github.com/Shibzel/Shibbot/graphs/contributors) too !
-
-## 📜 Requirements
-
-- [Python 3.8+](https://www.python.org/downloads).
-- Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
-- A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [or someone else's](https://www.google.com/search?q=free+lavalink+host).
-- For the librairies see [`requirements.txt`](https://github.com/Shibzel/Shibbot/blob/main/requirements.txt).
-
-Remember to fulfill the dependencies by running `python -m pip install -r requirements.txt` into your console before starting the bot.
 
 ## 💗 Credits
 

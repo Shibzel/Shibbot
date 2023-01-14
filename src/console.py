@@ -45,6 +45,32 @@ class Console:
         self.running = True
 
         self.thread = threading.Thread(target=self.main, name="ConsoleThread")
+             
+    def main(self):
+        """The code running inside the thread."""
+        logger.log("Console commands available. Type 'help'.")
+
+        while self.running:
+            raw_command = input()
+            if raw_command == "": continue
+            list_command = raw_command.split(" ")
+            command_name, command_args = list_command[0], list_command[1:]
+            logger.log(f"Console : '{raw_command}'")
+            if commands.get(command_name):
+                try:
+                    commands[command_name](self, *command_args)
+                except ConsoleInterruption as e:
+                    raise e
+                except TypeError as e:
+                    logger.error(f"Missing arguments.", e)
+                except Exception:
+                    logger.error("Something went wrong in the console.", e)
+            else:
+                logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
+
+    def start(self) -> None:
+        """Starts the input thread."""
+        self.thread.start()
 
     @staticmethod
     def strinify_command(command_name):
@@ -130,29 +156,3 @@ class Console:
         logger.log("Stopping Shibbot...")
         self.bot.loop.create_task(self.bot.close(ConsoleInterruption()))
         self.running = False
-        
-    def main(self):
-        """The code running inside the thread."""
-        logger.log("Console commands available. Type 'help'.")
-
-        while self.running:
-            raw_command = input()
-            if raw_command == "": continue
-            list_command = raw_command.split(" ")
-            command_name, command_args = list_command[0], list_command[1:]
-            logger.log(f"Console : '{raw_command}'")
-            if commands.get(command_name):
-                try:
-                    commands[command_name](self, *command_args)
-                except ConsoleInterruption as e:
-                    raise e
-                except TypeError as e:
-                    logger.error(f"Missing arguments.", e)
-                except Exception:
-                    logger.error("Something went wrong in the console.", e)
-            else:
-                logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
-
-    def start(self):
-        """Starts the input thread."""
-        self.thread.start()

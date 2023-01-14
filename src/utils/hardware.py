@@ -33,7 +33,7 @@ class Uptime:
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, bot, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 5.0,):
+    def __init__(self, bot, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
         self.bot = bot
         self._loop: AbstractEventLoop = bot.loop
         self.using_pterodactyl = using_ptero
@@ -44,14 +44,9 @@ class ServerSpecifications:
         self._headers = {"Accept": "application/json",
                         "Content-Type": "application/json",
                         "Authorization": f"Bearer {self._token}"}
-        self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
         self.looping = True
+        self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
         self.location: str | None = "None"
-
-        if self.using_pterodactyl:
-            logger.debug("Begins to retrieve server hardware usage on the Pterodactyl API.")
-            self._loop.create_task(self._get_specs_loop())
-        self._loop.create_task(self._get_location())
 
     @property
     def max_memory(self):
@@ -68,6 +63,12 @@ class ServerSpecifications:
     @property
     def threads(self):
         return cpu_count(logical=True) if not self.using_pterodactyl else self._threads
+    
+    def start(self):
+        if self.using_pterodactyl:
+            logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
+            self._loop.create_task(self._get_specs_loop())
+        self._loop.create_task(self._get_location())
 
     async def close(self):
         self.looping = False

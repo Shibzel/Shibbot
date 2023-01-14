@@ -19,6 +19,11 @@ class Reddit(BaseReddit):
         super().__init__(user_agent=(f"Shibbot v1 (by /u/JeanLeShiba", "https://github.com/Shibzel/Shibbot/"), *args, **kwargs)
         
         self.loop.create_task(self.clear_requests_loop())
+        
+    async def close(self):
+        logger.debug(f"Closing Reddit client.")
+        self.running = False
+        await super().close()
 
     async def clear_requests_loop(self):
         while self.running:
@@ -70,7 +75,3 @@ class Reddit(BaseReddit):
             if value:
                 _dict.update({key: getattr(submission, key, None)})
         return _dict
-
-    async def close(self):
-        self.running = False
-        await super().close()

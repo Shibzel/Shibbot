@@ -90,9 +90,12 @@ class _Logger:
         
     def start(self) -> None: raise NotImplementedError()
     def end(self) -> None: raise NotImplementedError()
-    def enable(self) -> None: raise NotImplementedError()
-    def disable(self) -> None: raise NotImplementedError()
-    def set_debug_mode(self): raise NotImplementedError()
+    @staticmethod
+    def enable() -> None: raise NotImplementedError()
+    @staticmethod
+    def disable() -> None: raise NotImplementedError()
+    @staticmethod
+    def set_debug_mode() -> None: raise NotImplementedError()
         
 logger = _Logger(__name__)
 
@@ -164,6 +167,6 @@ class Logger(_Logger):
         _set(IS_ENABLED_KEY, False)
         
     @staticmethod
-    def set_debug_mode(boolean: bool):
+    def set_debug_mode(boolean: bool) -> None:
         logger.debug(f"Setting debug mode for logging as '{boolean}'.")
         _set(IS_DEBUGGING_KEY, boolean)

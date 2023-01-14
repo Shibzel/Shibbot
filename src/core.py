@@ -23,23 +23,62 @@ def bot_get_prefix(bot, ctx):
     return database.get_prefix(ctx)
 
 class Shibbot(bridge.Bot):
-    """Subclass of `bridge.Bot`, our little Shibbot :3."""
+    """Subclass of `bridge.Bot`, our little Shibbot :3.
+    
+    Attributes
+    ----------
+    debug_mode: `bool`
+        Whatever the bot is in debug mode or not.
+    extention_path: `str`
+        Where the extentions are located.
+    init_time: `datetime.datetime`
+        The UTC datetime the bot initialized.
+    is_alive: `bool`
+        Whaterver the bot is alive or not. None if the bot never connected to Discord.
+    languages: `list`
+        The list of languages that the bot supports.
+    reddit: `.utils.reddit.Reddit`
+        The reddit client. Can be None.
+    repidapi_token: `str`
+        The Rapid API token for some commands. Can be None.
+    process_times: `list`
+        A list of times it took for the commands to execute (in sec).
+    invoked_commands: `int`
+        The number of commands that have been invoked since initialization."""
 
     def __init__(self, debug = False, instance_owners: list[int] = None, extentions_path: str | None = None,
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
-        self.debug_mode = debug
-        self.extentions_path = extentions_path or EXTENSIONS_PATH
-        
+        """Parameters
+        ----------
+        debug: `bool`
+            Whatever the bot is in debug mode or not.
+        instance_owners: List[`int`]
+            The ids of the owner(s) of this bot instance.
+        extention_path: `str`
+            Where the extentions are located.
+        gc_clear: `bool`
+            If the automatic garbage collector must be enabled.
+        gc_time: `float`
+            The time in seconds to wait before the auto gc checks if it must run.
+        gc_max_ram: `float`
+            The maximum percentage of ram to exceed.
+        args: `tuple` & kwargs: dict[`str`, `object`]
+            Arguments that are directly passed into `bridge.Bot`.
+        """
         logger.log("Initializing Shibbot...")
         start_time = perf_counter()
-        self.init_time = datetime.utcnow()
         
+        self.debug_mode = debug
         if self.debug_mode:
             logger.warn("Debug/beta mode is enabled.")
+        self.extentions_path = extentions_path or EXTENSIONS_PATH
+        
+        self.init_time = datetime.utcnow()
         self.is_alive = None
         self.languages = []
         self.reddit: reddit.Reddit = None
+        self.rapidapi_token = None
         self.process_times = []
         self.invoked_commands = 0
 
@@ -117,13 +156,53 @@ class Shibbot(bridge.Bot):
 
         logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
+        
+    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
+        """Runs the bot.
+
+        Parameters
+        ----------
+        command_input: `bool`
+            Accept command input from the user. Defaults to False.
+        """
+        try:
+            if command_input:
+                self.console = Console(self)
+                self.console.start()
+            self.specs.start()
+            logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
+            super().run(token, *args, **kwargs)
+        except Exception as e:
+            # Closing everything and reraising error
+            self.loop.create_task(self.close(e))
+
+    async def close(self, error: Exception = None) -> None:
+        """Closes the bot.
+
+        Parameters
+        ----------
+        error: `Exception`
+            The error which caused the bot to stop. Defaults to None.
+
+        Raises
+        ------
+        `Exception`: Reraised error, if there is one.
+        """
+        logger.error("Shibbot is being stopped, goodbye !", error)
+        to_close = [self.specs.close(), super().close()]
+        if self.reddit: to_close.append(self.reddit.close())
+        await gather(*to_close)
+        self.loop.close()
+        self.db.close()
+        if error: raise error
 
     @property
     def plugins(self) -> dict[str, PluginCog]:
         """A read-only mapping of plugin name to PluginCog.
 
-        Returns:
-            dict[str, PluginCog]
+        Returns
+        -------
+        dict[`str`, `.models.PluginCog`]
         """
         plugins = {}
         for cog in self.cogs.values():
@@ -135,8 +214,9 @@ class Shibbot(bridge.Bot):
     def uptime(self) -> hardware.Uptime:
         """The uptime of the bot.
 
-        Returns:
-            Uptime: An instance of `src.hardware.Uptime`.
+        Returns
+        -------
+        `Uptime`:  An instance of `.utils.hardware.Uptime`.
         """
         return hardware.Uptime(self.init_time)
     
@@ -144,8 +224,9 @@ class Shibbot(bridge.Bot):
     def avg_processing_time(self) -> float:
         """The average processing time of the bot for a command.
         
-        Returns:
-            float: The average in ms.
+        Returns
+        -------
+        `float`: The average in ms.
         """
         if len_prs_tms:= len(self.process_times):
             return sum(self.process_times)/len_prs_tms*1000
@@ -154,8 +235,9 @@ class Shibbot(bridge.Bot):
     def add_bot(self, cls: object) -> object:
         """Adds the bot to the class if it has the attribute `bot`. 
 
-        Returns:
-            Any: The instance of your object with the bot.
+        Returns
+        -------
+        `object`: The instance of your object with the bot.
         """
         cls.bot = self
         return cls
@@ -163,11 +245,14 @@ class Shibbot(bridge.Bot):
     def add_language(self, language: str) -> None:
         """Adds a language to the bot.
 
-        Args:
-            language (str): Must be an language code like `en`, `de` or `fr`.
+        Parameters
+        ----------
+        language: `str`
+            Must be an language code like `en`, `de` or `fr`.
 
-        Raises:
-            TypeError: `language` isn't an str object.
+        Raises
+        ------
+        `TypeError`: `language` isn't an str object.
         """
         if not isinstance(language, str):
             raise TypeError(f"'language' must be an 'str' object and not '{type(language).__name__}'.")
@@ -178,16 +263,24 @@ class Shibbot(bridge.Bot):
     def init_reddit(self, client_id: str, client_secret: str, username: str, password: str, *args, **kwargs) -> None:
         """Initializes the Reddit client.
 
-        Args:
-            client_id (str): The application id.
-            client_secret (str): The application secret.
-            user_name (str): The id of the account on which the application was created.
-            password (str): The password of the account.
+        Parameters
+        ----------
+        client_id: `str`
+            The application id.
+        client_secret: `str`
+            The application secret.
+        user_name: `str`
+            The id of the account on which the application was created.
+        password: `str`
+            The password of the account.
         """
         logger.debug(f"Initializing Reddit client.")
+        if self.reddit:
+            self.loop.create_task(self.reddit.close())
         self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
         
     async def _perf_command(self, method, ctx) -> None:
+        if not ctx.command: return
         start_time = perf_counter()
         await method(ctx)
         result = perf_counter() - start_time
@@ -244,44 +337,22 @@ class Shibbot(bridge.Bot):
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
 
-    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
-        """Runs the bot.
-
-        Args:
-            command_input (bool, optional): Accept command input from the user. Defaults to False.
-        """
-        try:
-            if command_input:
-                self.console = Console(self)
-                self.console.start()
-            logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
-            super().run(token, *args, **kwargs)
-        except Exception as e:
-            # Closing everything and reraising error
-            self.loop.create_task(self.close(e))
-
-    async def close(self, error: Exception = None) -> None:
-        """Closes the bot.
-
-        Args:
-            error (Exception, optional): The error which caused the bot to stop. Defaults to None.
-
-        Raises:
-            error: Reraised error, if there is one.
-        """
-        logger.error("Shibbot is being stopped, goodbye !", error)
-        to_close = [self.specs.close(), super().close()]
-        if self.reddit:
-            to_close.append(self.reddit.close())
-        await gather(*to_close)
-        self.loop.close()
-        self.db.close()
-        if error: raise error
-
 class PterodactylShibbot(Shibbot):
     """A subclass of `Shibbot` using the Pterodactyl API for hardware usage."""
 
-    def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, ptero_refresh: float = 5.0, *args, **kwargs):
+    def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, ptero_refresh: float = 15.0, *args, **kwargs):
+        """Parameters
+        ----------
+        ptero_url: `str`
+            The url to your Pterodactyl Panel.
+        ptero_token: `str`
+            The token of your panel.
+        ptero_server_id: `str`
+            The id of the server the bot is running on.
+        ptero_refresh: `float`
+            The time to wait before getting the usage again.
+        args: `tuple` & kwargs: dict[`str`, `object`]
+            Arguments that are directly passed into `.Shibbot`."""
         super().__init__(*args, **kwargs)
         logger.debug("Using the Pterodactyl API to get hardware usage.")
         self.specs = hardware.ServerSpecifications(bot=self, using_ptero=True,

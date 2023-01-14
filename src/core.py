@@ -286,7 +286,7 @@ class Shibbot(bridge.Bot):
         result = perf_counter() - start_time
         self.process_times.append(result)
         on_guild = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
-        logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}. Took took {result*1000:.2f}ms.")
+        logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}. Took {result*1000:.2f}ms.")
         if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
             self.process_times = self.process_times[1:]
         self.invoked_commands += 1

@@ -38,7 +38,7 @@ class ErrorHandler(BaseCog):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
         error_dict: dict[str, str] = lang.ON_COMMAND_ERROR
-        time = None if self.bot.test_mode else 20
+        time = None if self.bot.debug_mode else 20
 
         if isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown.get_retry_after()
@@ -47,9 +47,9 @@ class ErrorHandler(BaseCog):
             description = error_dict["CommandOnCooldown"].format(n_secs=round(cooldown, 2))
         elif isinstance(error, NotInteractionOwner):
             content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
-            return ctx.reply(content=content, ephemeral=True)
+            return await ctx.reply(content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
-            return ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name))
+            return await ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name))
         elif isinstance(error, MissingArgumentsError):
             description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
         elif isinstance(error, commands.NSFWChannelRequired):

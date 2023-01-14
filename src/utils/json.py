@@ -2,6 +2,7 @@ from asyncio import gather
 from aiohttp import ClientSession
 from orjson import loads, dumps
 
+from ..errors import ServiceUnavailableError
 
 def dump(_object: object, fpath: str, *args, **kwargs) -> None:
     """Writes a json file, wow."""
@@ -15,5 +16,8 @@ def load(fpath: str):
 
 async def json_from_urls(urls: list, *args, **kwargs) -> list:
     """Asynchronous way to get the json content from an API."""
-    async with ClientSession(*args, **kwargs) as session:
-        return [await response.json(loads=loads) for response in await gather(*[session.get(url) for url in urls])]
+    try:
+        async with ClientSession(*args, **kwargs) as session:
+            return [await response.json(loads=loads) for response in await gather(*[session.get(url) for url in urls])]
+    except Exception:
+        raise ServiceUnavailableError()

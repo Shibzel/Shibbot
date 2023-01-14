@@ -16,3 +16,11 @@ def relative_timestamp(datetime: datetime) -> str:
 
 def date_timestamp(datetime: datetime) -> str:
     return f"<t:{int(datetime.timestamp())}:f>"
+
+def filter_doubles(_list: list) -> list:
+    """Return the list without doubles of the same object."""
+    filtered = []
+    for obj in _list:
+        if obj not in filtered:
+            filtered.append(obj)
+    return filtered

@@ -73,7 +73,7 @@ class Configuration(BaseCog):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
 
-        select = discord.ui.Select(placeholder=lang.ENABLE_PLUGINS_PLACEHOLDER, min_values=0, max_values=None,
+        select = discord.ui.Select(placeholder=lang.ENABLE_PLUGINS_PLACEHOLDER, min_values=0,
                                    options=[discord.SelectOption(label=plugin.get_name(lang_code), description=plugin.get_description(lang_code) if plugin.description else "...",
                                                                 emoji=plugin.emoji, default=await database.plugin_is_enabled(ctx, plugin.plugin_name), value=plugin.plugin_name) 
                                                                 for plugin in self.bot.plugins.values()])

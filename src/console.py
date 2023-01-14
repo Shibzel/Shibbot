@@ -55,7 +55,7 @@ class Console:
             if raw_command == "": continue
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
-            logger.log(f"Console : '{raw_command}'")
+            logger.log(f"Console input : '{raw_command}'")
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)

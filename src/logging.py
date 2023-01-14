@@ -64,7 +64,7 @@ class _Logger:
         Use for debugging or unimportant things."""
         string = f"[{self.formated_time()} DEBUG @{self.file_name}] {string}"
         logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if IS_DEBUGGING_KEY in logger_cache and not logger_cache[IS_DEBUGGING_KEY]:
+        if IS_DEBUGGING_KEY in logger_cache and logger_cache[IS_DEBUGGING_KEY]:
             _print(PStyles.QUIET + string + PStyles.ENDC)
         _write(string)
 

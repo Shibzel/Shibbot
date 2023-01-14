@@ -1,4 +1,3 @@
-"""Launcher optimized to run ONE instance of Shibbot."""
 import os
 from dotenv import load_dotenv
 from requests import get
@@ -115,7 +114,8 @@ def main():
             raise Missing("Missing Lavalink password.")
 
         # RapidAPI
-        if os.getenv("RAPID_API_TOKEN") in ("", None):
+        rapid_api_token = os.getenv("RAPID_API_TOKEN")
+        if rapid_api_token in ("", None):
             raise Missing("Missing RapidAPI token. Get yours here : https://rapidapi.com/developer/new/")
 
         # Pterodactyl (for the hardware stats, optional)
@@ -144,6 +144,7 @@ def main():
     # Starting the bot
     try:
         shibbot = cls(**kwargs)
+        shibbot.rapidapi_token = rapid_api_token
         shibbot.init_reddit(
             client_id=reddit_client_id,
             client_secret=reddit_client_secret,

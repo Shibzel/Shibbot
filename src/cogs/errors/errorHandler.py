@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, bridge
-from asyncio import sleep
+from asyncio import sleep as async_sleep
 
 from src import database
 from src.core import Shibbot
@@ -24,19 +24,11 @@ class ErrorHandler(BaseCog):
     async def add_user_cooldown(self, seconds: float, command_name: str, user_id: int):
         data = (command_name, user_id,)
         self.cooldowns.append(data)
-        await sleep(seconds)
+        await async_sleep(seconds)
         self.cooldowns.remove(data)
 
     def user_on_cooldown(self, command_name: str, user_id: int):
         return (command_name, user_id) in self.cooldowns
-
-    @discord.Cog.listener()
-    async def on_application_command_error(self, ctx, error):
-        await self.handle_error(ctx, error)
-
-    @discord.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        await self.handle_error(ctx, error)
 
     async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
         logger.debug(f"Handling error : {type(error).__name__}: {str(error)}")
@@ -91,3 +83,7 @@ class ErrorHandler(BaseCog):
 
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
         await ctx.respond(embed=embed, view=view, delete_after=time)
+    @discord.Cog.listener()
+    async def on_application_command_error(self, ctx, error): await self.handle_error(ctx, error)
+    @discord.Cog.listener()
+    async def on_command_error(self, ctx, error): await self.handle_error(ctx, error)

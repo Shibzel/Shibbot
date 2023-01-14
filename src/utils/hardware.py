@@ -2,7 +2,7 @@ from gc import collect
 from math import ceil
 from psutil import cpu_count, cpu_percent, virtual_memory
 from aiohttp import ClientSession
-from asyncio import sleep, AbstractEventLoop
+from asyncio import sleep as async_sleep, AbstractEventLoop
 from datetime import datetime
 from orjson import loads
 
@@ -101,7 +101,7 @@ class ServerSpecifications:
                     logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
                     show_error = False
             for _ in range(int(300/self.secs_looping)):
-                _sleep = self.secs_looping
+                sleep = self.secs_looping
                 try:
                     current = await self._get_current()
                     self._memory_usage = current["memory_bytes"]/1_000_000 # Bytes -> MB
@@ -111,7 +111,7 @@ class ServerSpecifications:
                     if show_error:
                         logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
                         show_error = False
-                await sleep(_sleep)
+                await async_sleep(sleep)
 
     async def _get_location(self):
         async with ClientSession() as session:
@@ -125,11 +125,11 @@ class ServerSpecifications:
                     logger.debug("Got location.")
                     got_response = True
                 except:
-                    await sleep(40)
+                    await async_sleep(40)
             
 async def auto_gc(specs: ServerSpecifications, _sleep: int = 60, max_percentage: float = 80.0):
     while True:
-        await sleep(_sleep)
+        await async_sleep(_sleep)
         percentage = specs.memory_usage/specs.max_memory*100
         if percentage > max_percentage:
             logger.warn(f"Running GC, memory usage exceeding {specs.max_memory/100*max_percentage:.2f}MB (using {specs.memory_usage:.2f} out of {specs.max_memory:.2f}MB, {percentage:.2f}%).")

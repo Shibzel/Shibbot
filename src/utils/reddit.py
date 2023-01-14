@@ -1,4 +1,4 @@
-from asyncio import sleep, AbstractEventLoop, gather
+from asyncio import sleep as async_sleep, AbstractEventLoop, gather
 from asyncpraw import Reddit as BaseReddit
 
 from src.logging import Logger
@@ -27,14 +27,14 @@ class Reddit(BaseReddit):
 
     async def clear_requests_loop(self):
         while self.running:
-            await sleep(60.0)
+            await async_sleep(60.0)
             self.n_requests = 0
 
     async def get_sub(self, subreddit: str, limit: int=500):
         """Gets the latest hot submissions from a subreddit."""
         while self.n_requests >= self.max_requests:
             # Check every second if the number of requests is back to 0
-            await sleep(1.0)
+            await async_sleep(1.0)
         self.n_requests += 1
         subreddit = await self.subreddit(subreddit)
         return [sub async for sub in subreddit.hot(limit=limit)]

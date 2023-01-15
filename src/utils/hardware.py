@@ -122,7 +122,7 @@ class ServerSpecifications:
                     result = await session.get("http://ip-api.com/json/?fields=country,city")
                     json_result = await result.json(loads=loads)
                     self.location = f"{json_result['city']}, {json_result['country']}"
-                    logger.debug("Got location.")
+                    logger.debug(f"Got location '{self.location}'.")
                     got_response = True
                 except:
                     await async_sleep(40)

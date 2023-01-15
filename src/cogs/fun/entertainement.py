@@ -9,7 +9,7 @@ from src.core import Shibbot
 from src.models import PluginCog, EmbedViewer, CustomView
 from src.utils import filter_doubles
 from src.utils.json import json_from_urls
-from src.errors import ServiceUnavailableError
+from src.errors import ServiceUnavailableError, MissingArgumentsError
 
 from . import English, French
 
@@ -27,6 +27,12 @@ class Fun(PluginCog):
             languages={"en": English, "fr": French}, emoji="🎉"
         )
         
+    @discord.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        content = message.content
+        if "(╯°□°)╯︵ ┻━┻" in content and not randint(0, 9):
+            await message.reply("┬─┬ノ( º _ ºノ)")
+        
     @bridge.bridge_command(name="meal", aliases=["dish"], description="Give a random dish that you could cook !")
     @commands.cooldown(1, 7, commands.BucketType.default)
     @commands.cooldown(1, 15, commands.BucketType.channel)
@@ -36,48 +42,86 @@ class Fun(PluginCog):
             if request.status != 200: raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["meals"][0]
         
+        use_reveal_button = False
         view = CustomView()
-        embed = discord.Embed(title=response['strMeal'], url=response["strSource"])
+        embed = discord.Embed(title=response['strMeal'], url=response["strSource"], color=discord.Color.yellow())
         full_desc = response["strInstructions"]
-        if len(full_desc) <= 512:
+        if len(full_desc) <= 256:
             desc = full_desc
         else:
-            desc = full_desc[:499] + "..."
-            full_recipe_button = discord.ui.Button(label="Show full recipe", style=discord.ButtonStyle.green, emoji="⤵️")
-            async def show_full_recipe(interaction: discord.Interaction):
-                nonlocal embed
-                embed.description = full_desc
-                for field in embed.fields:
-                    if field.name == "Recipe":
-                        embed.fields.remove(field)
-                        break
-                full_recipe_button.disabled = True
-                await interaction.response.edit_message(embed=embed, view=view)
-            full_recipe_button.callback = show_full_recipe
-            view.add_item(full_recipe_button)
+            desc = full_desc[:256].replace("\n\n", "\n") + "..."
+            use_reveal_button = True
         embed.add_field(name="Recipe", value=desc, inline=False)
         if youtube_url:= response["strYoutube"]:
             youtube_button = discord.ui.Button(label="Youtube video", url=youtube_url, emoji="🎥")
             view.add_item(youtube_button)
-        ingredients = ""
+        ingredient_list = []
         for i in range(1, 20):
-            if response[f"strIngredient{i}"] == "":
+            measure, ingredient = response[f'strMeasure{i}'], response[f'strIngredient{i}']
+            if measure in ("", " ") and ingredient in ("", " "):
                 break
-            ingredients += f"- {response[f'strMeasure{i}']} {response[f'strIngredient{i}']}\n"
+            ingredient_list.append(f"{measure}{f' {ingredient}'.title() if measure != '' else f'{ingredient}'}")
+        if len(ingredient_list) > 3:
+            ingredients = ", ".join(ingredient_list[:3]) + "..."
+            use_reveal_button = True
+        else:
+            ingredients = "".join(f"- {ing}\n" for ing in ingredient_list)
         embed.add_field(name="Ingredients", value=ingredients)
         embed.add_field(name="Catergory", value=response["strCategory"])
         embed.add_field(name="Area/Country", value=response["strArea"])
-        if tags:= response["strTags"]:
-            embed.add_field(name="Tag(s)", value=", ".join(tag.title() for tag in tags.split(",")))
-        embed.set_thumbnail(url=response["strMealThumb"])
+        embed.set_image(url=response["strMealThumb"])
         embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author))
+        if use_reveal_button:
+            full_recipe_button = discord.ui.Button(label="Show full recipe", style=discord.ButtonStyle.green, emoji="⤵️")
+            async def show_full_recipe(interaction: discord.Interaction):
+                nonlocal embed
+                embed.description = full_desc
+                embed.fields.pop(0)
+                embed.fields[0].value = "".join(f"- {ing}\n" for ing in ingredient_list)
+                embed.set_thumbnail(url=embed.image.url)
+                embed._image = None
+                full_recipe_button.disabled = True
+                await interaction.response.edit_message(embed=embed, view=view)
+            full_recipe_button.callback = show_full_recipe
+            view.add_item(full_recipe_button)
         
         await ctx.respond(embed=embed, view=view)
         
-    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
-        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=next_button_text)
-        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
+    @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Searches a definition of your word on urban dictionary.",
+                           options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
+    @commands.cooldown(1, 7, commands.BucketType.default)
+    async def urbdict(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
+        if not word:
+            raise MissingArgumentsError(ctx.command)
         
+        async with ClientSession(headers=HEADERS) as session:
+            request = await session.get(f"https://api.urbandictionary.com/v0/define?term={word}")
+            if request.status != 200: raise ServiceUnavailableError()
+            response = (await request.json(loads=loads))["list"]
+        if response == []:
+            raise commands.BadArgument()
+        
+        def clean_string(string: str):
+            return string.replace("[", "**").replace("]", "**").replace("\n\n", "\n")
+        embeds = []
+        for definition in response:
+            embed = discord.Embed(color=0x2faaee)
+            embed.set_author(name="Urban Dictionary", url=definition["permalink"],
+                             icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg")
+            _def = clean_string(definition["definition"])
+            example = clean_string(definition["example"])
+            embed.add_field(name=f"Definition of \"{definition['word']}\" (by {definition['author']})", value=_def if len(_def) <= 1024 else _def[:1021]+"...", inline=False)
+            embed.add_field(name="Example", value=example if len(example) <= 1024 else example[:1021]+"...", inline=False)
+            embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author) + f" | 👍 {definition['thumbs_up']} • 👎 {definition['thumbs_down']}")
+            embeds.append(embed)
+        shuffle(embeds)
+        
+        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label="Next Definition")
+        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
+        embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True)
+        await embed_viewer.send_message(ctx)
+        
+    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
         author = ctx.author
         avatar = author.avatar.url
         embeds = []
@@ -87,6 +131,8 @@ class Fun(PluginCog):
             embed.set_footer(text=footer.format(user=author), icon_url=avatar)
             embeds.append(embed)
         
+        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=next_button_text)
+        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
         embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
         await embed_viewer.send_message(ctx)
         

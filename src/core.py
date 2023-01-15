@@ -78,7 +78,6 @@ class Shibbot(bridge.Bot):
         self.is_alive = None
         self.languages = []
         self.reddit: reddit.Reddit = None
-        self.rapidapi_token = None
         self.process_times = []
         self.invoked_commands = 0
 

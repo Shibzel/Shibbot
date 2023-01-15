@@ -113,11 +113,6 @@ def main():
         if os.getenv("LAVALINK_PASSWORD") in ("", None):
             raise Missing("Missing Lavalink password.")
 
-        # RapidAPI
-        rapid_api_token = os.getenv("RAPID_API_TOKEN")
-        if rapid_api_token in ("", None):
-            raise Missing("Missing RapidAPI token. Get yours here : https://rapidapi.com/developer/new/")
-
         # Pterodactyl (for the hardware stats, optional)
         if os.getenv("USE_PTERO_API").lower() in ('true', '1'):
             ptero_url = os.getenv("PTERO_PANEL_URL")
@@ -144,7 +139,6 @@ def main():
     # Starting the bot
     try:
         shibbot = cls(**kwargs)
-        shibbot.rapidapi_token = rapid_api_token
         shibbot.init_reddit(
             client_id=reddit_client_id,
             client_secret=reddit_client_secret,

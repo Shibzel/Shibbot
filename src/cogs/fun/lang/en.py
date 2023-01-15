@@ -1,5 +1,5 @@
 class English:
-    DEFAULT_FOOTER = "Requested by {user}."
+    DEFAULT_FOOTER = "Requested by {user}"
     
     GET_SHIBES_NEXT_BUTTON = "Next Shibe"
     GET_SHIBES_PREVIOUS_BUTTON = "Previous"
@@ -9,3 +9,6 @@ class English:
     
     GET_BIRDS_NEXT_BUTTON = "Next Birb"
     GET_BIRDS_PREVIOUS_BUTTON = "Previous"
+    
+    GET_CAPY_NEXT_BUTTON = "Next Capy"
+    GET_CAPY_PREVIOUS_BUTTON = "Previous"

@@ -24,7 +24,7 @@ class Miscellaneous(BaseCog):
     @bridge.bridge_command(name="avatar", aliases=["av"], description="Gives the profile picture.", description_localizations={"fr": "Donne l'image de profil."})
     @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User, required=False, 
                     description="The user whose profile picture you want.", description_localizations={"fr": "L'utilisateur dont vous souhaitez l'image de profil."})
-    @commands.cooldown(3, 10, commands.BucketType.user)
+    @commands.cooldown(3, 15, commands.BucketType.default)
     async def get_avatar(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
         user = user if user else ctx.author
         lang = await self.get_lang(ctx)
@@ -39,7 +39,7 @@ class Miscellaneous(BaseCog):
                                                                             description_localizations={"fr": "Donne des infos sur un compte."})
     @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User,
                     description="The user you want more info about.", description_localizations={"fr": "L'utilisateur sur lequel voulez plus d'infos."})
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.default)
     async def get_user_info(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
         user = user if user else ctx.author
         lang = await self.get_lang(ctx)
@@ -72,7 +72,8 @@ class Miscellaneous(BaseCog):
     @bridge.bridge_command(name="serverinfo", aliases=["sinfo", "server-info"], description="Gives info about the server you're in.",
                                                                             description_localizations={"fr": "Donne des infos sur le serveur sur lequel vous êtes."})
     @bridge.guild_only()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 15, commands.BucketType.channel)
+    @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_server_info(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
         
@@ -147,6 +148,7 @@ class Miscellaneous(BaseCog):
 
     @bridge.bridge_command(name="id", description="Get the id of an account.", description_localizations={"fr": "Obtiens l'id d'un compte."})
     @discord.option(name="user", name_localizations={"fr": "utilisateur"}, input_type=discord.User)
+    @commands.cooldown(1, 5, commands.BucketType.default)
     async def _get_id(self, ctx: bridge.BridgeApplicationContext, user: discord.User = None):
         user = user or ctx.author
         await ctx.respond(content=f"{user}: `{user.id}`")
@@ -170,6 +172,7 @@ class Miscellaneous(BaseCog):
         
     @bridge.bridge_command(name="shorturl", aliases=["short"], description="Shorten a URL link.", description_localizations={"fr": "Raccourcit un lien URL."},
                            options=[discord.Option(name="url", description="The link to shorten.", description_localizations={"fr": "Le lien à raccourcir."})])
+    @commands.cooldown(1, 7, commands.BucketType.default)
     async def shorten_url(self, ctx: bridge.BridgeApplicationContext, url: str = None):
         if not url:
             raise MissingArgumentsError(ctx.command)

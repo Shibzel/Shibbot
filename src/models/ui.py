@@ -8,9 +8,9 @@ from ..logging import Logger
 logger = Logger(__name__)
 
 class CustomView(ui.View):
-    def __init__(self, *items: ui.Item, bot = None, **kwargs):
+    def __init__(self, *items: ui.Item, bot = None, disable_on_timeout: bool = True, **kwargs):
         self.bot = bot
-        super().__init__(*items, **kwargs)
+        super().__init__(*items, disable_on_timeout=disable_on_timeout, **kwargs)
 
     async def on_error(self, error: Exception, item: ui.Item, interaction: discord.Interaction) -> None:
         logger.error(f"An unexpected error occured with item {item}.", error)

@@ -26,7 +26,7 @@ class Configuration(BaseCog):
                            options=[discord.Option(required=True, name="prefix", description="The prefix you want to set.",
                                                                                  description_localizations={"fr": "Le préfixe que vous voulez définir."})])
     @bridge.has_permissions(administrator=True)
-    @commands.cooldown(2, 10, commands.BucketType.member)
+    @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
     async def change_prefix(self, ctx: bridge.BridgeApplicationContext, prefix: str = None):
         if not prefix:
@@ -40,7 +40,7 @@ class Configuration(BaseCog):
 
     @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
-    @commands.cooldown(2, 10, commands.BucketType.member)
+    @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
     async def change_lang(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)
@@ -67,7 +67,7 @@ class Configuration(BaseCog):
 
     @bridge.bridge_command(name="plugins", aliases=["plugin"], description="Enables or disables plugins.", description_localizations={"fr": "Active ou désactive des plugins."})
     @bridge.has_permissions(administrator=True)
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.guild)
     @bridge.guild_only()
     async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)

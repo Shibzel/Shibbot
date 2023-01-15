@@ -23,7 +23,8 @@ class About(BaseCog):
         )
 
     @bridge.bridge_command(name="help", description="Shows help.", description_localizations={"fr": "Affiche de l'aide."})
-    @commands.cooldown(1, 10, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    @commands.cooldown(1, 15, commands.BucketType.channel)
     async def show_help(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
@@ -94,7 +95,7 @@ class About(BaseCog):
         await ctx.respond(embed=embed, view=view)
 
     @bridge.bridge_command(name="ping", description="Gets the bot's ping.", description_localizations={"fr": "Obtient le ping du bot."})
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.default)
     async def ping(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
         embed = discord.Embed(
@@ -108,7 +109,7 @@ class About(BaseCog):
     
     @bridge.bridge_command(name="invite", aliases=["botinvite", "support"], description="Gets you the bot's invitation links.", 
                                                                             description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.default)
     async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
 
@@ -154,7 +155,7 @@ class About(BaseCog):
         await ctx.respond(embed=embed)
 
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au crétaeur du bot."})
-    @commands.cooldown(1, 7, commands.BucketType.member)
+    @commands.cooldown(1, 7, commands.BucketType.default)
     async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
         # TODO: Complete this command.
         await ctx.respond("Command not available yet.")

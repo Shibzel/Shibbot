@@ -87,15 +87,24 @@ class Fun(PluginCog):
         
         await ctx.respond(embed=embed, view=view)
         
-    @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Searches a definition of your word on urban dictionary.",
-                           options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
-    @commands.cooldown(1, 7, commands.BucketType.default)
-    async def urbdict(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
-        if not word:
-            raise MissingArgumentsError(ctx.command)
+    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
+        author = ctx.author
+        avatar = author.avatar.url
+        embeds = []
+        for url in urls:
+            embed = discord.Embed(color=discord.Color.dark_gold())
+            embed.set_image(url=url)
+            embed.set_footer(text=footer.format(user=author), icon_url=avatar)
+            embeds.append(embed)
         
+        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=next_button_text)
+        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
+        embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
+        await embed_viewer.send_message(ctx)
+        
+    async def urbdict_command(self, ctx, url):        
         async with ClientSession(headers=HEADERS) as session:
-            request = await session.get(f"https://api.urbandictionary.com/v0/define?term={word}")
+            request = await session.get(url)
             if request.status != 200: raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["list"]
         if response == []:
@@ -120,21 +129,22 @@ class Fun(PluginCog):
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
         embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True)
         await embed_viewer.send_message(ctx)
+    
+    @bridge.bridge_group(aliases=["udict"])
+    async def urbdict(self, *args): pass
         
-    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
-        author = ctx.author
-        avatar = author.avatar.url
-        embeds = []
-        for url in urls:
-            embed = discord.Embed(color=discord.Color.dark_gold())
-            embed.set_image(url=url)
-            embed.set_footer(text=footer.format(user=author), icon_url=avatar)
-            embeds.append(embed)
+    @urbdict.command(name="random", description="Gives the definition of a random definition on Urban Dictionary.")
+    async def urbdict_random(self, ctx: bridge.BridgeApplicationContext):
+        await self.urbdict_command(ctx, url="https://api.urbandictionary.com/v0/random")
+    
+    @urbdict.command(name="search", description="Searches a definition of your word on Urban Dictionary.",
+                           options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
+    @commands.cooldown(1, 7, commands.BucketType.default)
+    async def urbdict_search(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
+        if not word:
+            raise MissingArgumentsError(ctx.command)
         
-        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=next_button_text)
-        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
-        embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
-        await embed_viewer.send_message(ctx)
+        await self.urbdict_command(ctx, url=f"https://api.urbandictionary.com/v0/define?term={word}")
         
     @bridge.bridge_command(name="shiba", aliases=["shibe", "shibes", "shibas"], description="Shows cute lil' pics of shibes.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})

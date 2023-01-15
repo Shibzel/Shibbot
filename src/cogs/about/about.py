@@ -81,6 +81,8 @@ class About(BaseCog):
                 embed.set_footer(text=FOOTER+lang.SHOW_HELP_FOOTER)
                 value = ""
                 for command in cog.get_commands():
+                    if not command.parent and not command.description:
+                        continue
                     # Getting the command's description
                     command_description = get_description_localization(command, lang_code)
                     # Stringifying the command's options

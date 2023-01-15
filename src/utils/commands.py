@@ -23,5 +23,5 @@ def stringify_command_usage(command: discord.SlashCommand | commands.Command, la
             command_options += f" [{option_name}]" if option.required else f" <{option_name}>"
     elif isinstance(command, commands.Command):
         for name, inspct in command.clean_params.items():
-            command_options += f" [{name}]" if inspct.default else f" <{name}>"
-    return f"{command.name}{command_options}"
+            command_options += f" <{name}>" if inspct.default else f" [{name}]"
+    return f"{f'{command.full_parent_name} 'if command.parent else ''}{command.name}{command_options}"

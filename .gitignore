@@ -1,11 +1,9 @@
 # For this project
-.idea
-.vscode
-.replit
 **.sqlite3
-cache/
-logs/
 ideas.txt
+cache/*
+logs/*
+extensions/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

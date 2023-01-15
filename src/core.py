@@ -310,11 +310,11 @@ class Shibbot(bridge.Bot):
 
     async def on_ready(self) -> None:
         if self.is_alive is None:
+            self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
+            logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             logger.log("The following users are the owners of this instance : {0}.".format(", ".join(f"'{user}'" for user in self.instance_owners)))
-            self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
-            logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
         self.is_alive = True
         logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
 

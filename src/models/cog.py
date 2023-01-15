@@ -1,5 +1,5 @@
-from discord import Cog
-from discord.ext.bridge import BridgeApplicationContext
+from discord import Cog, SlashCommand
+from discord.ext import bridge, commands
 
 from .. import __version__
 from ..utils import fl, get_language
@@ -50,8 +50,17 @@ class BaseCog(Cog):
     def get_description(self, lang_code: str) -> str:
         return get_language(self.description, lang_code) if self.description else None
 
-    def get_lang(self, ctx):
+    def get_lang(self, ctx) -> object:
         return fl(ctx, self.languages)
+    
+    def get_commands(self) -> list[SlashCommand | commands.Command]:
+        slash_commands = [c for c in self.__cog_commands__ if isinstance(c, SlashCommand)]
+        prefixed_commands = [c for c in self.__cog_commands__ if isinstance(c, commands.Command)]
+        for slash_command in slash_commands:          
+            for prefixed_command in prefixed_commands:
+                if slash_command.name == prefixed_command.name:
+                    prefixed_commands.remove(prefixed_command)
+        return slash_commands + prefixed_commands
 
 
 class PluginCog(BaseCog):
@@ -63,10 +72,10 @@ class PluginCog(BaseCog):
         self.bot.cursor.execute(f"CREATE TABLE IF NOT EXISTS {plugin_name}_plugin (guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
         self.bot.db.commit()
         
-    async def is_enabled(self, ctx: BridgeApplicationContext):
+    async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
         return await database.plugin_is_enabled(ctx, self.plugin_name, self.guild_only)
 
-    async def cog_before_invoke(self, ctx: BridgeApplicationContext):
+    async def cog_before_invoke(self, ctx: bridge.BridgeApplicationContext):
         if not await self.is_enabled(ctx):
             raise PluginDisabledError(self.plugin_name)
         return await super().cog_before_invoke(ctx)

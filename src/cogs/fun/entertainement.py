@@ -1,6 +1,6 @@
 import discord
 from discord.ext import bridge, commands
-from random import randint
+from random import randint, shuffle, randint
 from aiohttp import ClientSession
 from orjson import loads
 
@@ -134,4 +134,20 @@ class Fun(PluginCog):
             if url not in urls: urls.append(url)
         lang = await lang
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON, lang.GET_CAPY_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | capy.lol")
-        
+    
+    @commands.command(name="ratio", description="fatherless + L + stay mad")
+    @commands.cooldown(1, 7, commands.BucketType.channel)
+    async def _ratio(self, ctx: commands.Context):
+        await ctx.message.delete()
+        words = ["ratio", "nobody asked", "fatherless", "maidenless",
+                 "no bitches", "don't care", "L", "ur bad", "poor",
+                 "skill issue", "ew", "motherless", "orphan", "friendless",
+                 "lifeless", "you're the reason your dad left", "cry about it",
+                 "stay mad", "adios", ]
+        shuffle(words)
+        shuffled_words = words[:randint(3, 5)]
+        text = " + ".join(shuffled_words)
+        if ctx.message.reference:
+            reply_message = ctx.channel.get_partial_message(ctx.message.reference.message_id)
+            return await reply_message.reply(text)
+        await ctx.send(text)

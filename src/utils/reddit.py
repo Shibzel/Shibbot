@@ -1,6 +1,7 @@
 from asyncio import sleep as async_sleep, AbstractEventLoop, gather
 from asyncpraw import Reddit as BaseReddit
 
+from src import __version__ as version
 from src.logging import Logger
 
 
@@ -16,7 +17,7 @@ class Reddit(BaseReddit):
         self.n_requests = 0  # Current number of requests.
         self.max_requests = 60 if self.two_af else 30  # per min
 
-        super().__init__(user_agent=(f"Shibbot v1 (by /u/JeanLeShiba", "https://github.com/Shibzel/Shibbot/"), *args, **kwargs)
+        super().__init__(user_agent=(f"Shibbot v{version} (by /u/JeanLeShiba", "https://github.com/Shibzel/Shibbot/"), *args, **kwargs)
         
         self.loop.create_task(self.clear_requests_loop())
         

@@ -1,7 +1,7 @@
 """Shibbot's base."""
 import discord
 from discord.ext import bridge
-from asyncio import gather
+from asyncio import gather, sleep as async_sleep
 from datetime import datetime, timedelta
 from traceback import format_exc
 from os import listdir, path
@@ -315,6 +315,8 @@ class Shibbot(bridge.Bot):
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             logger.log("The following users are the owners of this instance : {0}.".format(", ".join(f"'{user}'" for user in self.instance_owners)))
+        elif self.is_alive is False:
+            await self.on_resumed()
         self.is_alive = True
         logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
 
@@ -323,9 +325,12 @@ class Shibbot(bridge.Bot):
         logger.debug("Resuming.")
 
     async def on_disconnect(self) -> None:
-        if self.is_alive != False:
+        if self.is_alive is not False:
             self.is_alive = False
             logger.debug("Disconnected.")
+            await async_sleep(60)
+            if self.is_alive is False:
+                logger.error("Shibbot has been offline for over a minute, maybe there are network issues ?")
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.debug(f"Joined guild '{guild.name}' (ID: {guild.id}).")

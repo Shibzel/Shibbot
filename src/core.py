@@ -11,7 +11,7 @@ from . import database, utils
 from .utils import hardware, reddit
 from .logging import Logger, PStyles
 from .console import Console
-from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS
+from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS, CORE_COGS
 from .models import PluginCog
 
 
@@ -119,16 +119,16 @@ class Shibbot(bridge.Bot):
 
         # Loading all the cogs and extentions
         logger.log("Loading cogs...")
-        _path = utils.convert_to_import_path(COGS_PATH)
-        buildin_cogs = [f"{_path}.{cog}" for cog in BUILTIN_COGS]
-        _path = utils.convert_to_import_path(self.extentions_path)
+        builtin_path = utils.convert_to_import_path(COGS_PATH)
+        buildin_cogs = [f"{builtin_path}.{cog}" for cog in BUILTIN_COGS]
+        extension_path = utils.convert_to_import_path(self.extentions_path)
         extentions = []
         for extention in listdir(self.extentions_path):
             if extention in ("__pycache__",) or extention.endswith((".md",)): 
                 continue
             if extention.endswith(".py"): 
                 extention = extention[:-3]
-            extentions.append(f"{_path}.{extention}")
+            extentions.append(f"{extension_path}.{extention}")
         if extentions == []:
             logger.warn(f"No extention will load because folder '{self.extentions_path}' is empty.")
         for cog in buildin_cogs + extentions:
@@ -137,7 +137,7 @@ class Shibbot(bridge.Bot):
                 self.load_extension(cog)
                 continue
             except discord.ExtensionNotFound as e:
-                if cog in buildin_cogs:
+                if cog.replace(builtin_path+".", "") in CORE_COGS:
                     logger.error(f"Couldn't find cog '{cog}' wich is a builtin, the bot may not work as expected.", e)
                     continue
                 error = e

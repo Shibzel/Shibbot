@@ -1,4 +1,4 @@
 from . import (
-    about, config, errors, misc, owner, status,
-    # automod, mod, fun, utils, music
+    about, config, errors, misc, owner, status, fun
+    # ,automod, mod, utils, music
 )

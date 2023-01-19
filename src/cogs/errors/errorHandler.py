@@ -39,17 +39,19 @@ class ErrorHandler(BaseCog):
         lang = get_language(self.languages, lang_code)
         error_dict: dict[str, str] = lang.ON_COMMAND_ERROR
         time = None if self.bot.debug_mode else 20
+        ephemeral = False
 
         if isinstance(error, commands.CommandOnCooldown):
             cooldown = error.cooldown.get_retry_after()
             time = error.cooldown.per
+            ephemeral = True
             self.bot.loop.create_task(self.add_user_cooldown(cooldown, ctx.command.name, ctx.author.id))
             description = error_dict["CommandOnCooldown"].format(n_secs=round(cooldown, 2))
         elif isinstance(error, NotInteractionOwner):
             content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
             return await ctx.reply(content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
-            return await ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name))
+            return await ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name), ephemeral=True)
         elif isinstance(error, MissingArgumentsError):
             description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
         elif isinstance(error, commands.NSFWChannelRequired):
@@ -82,7 +84,7 @@ class ErrorHandler(BaseCog):
         view = self.bot.add_bot(CustomView(dismiss_button, disable_on_timeout=True))
 
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
-        await ctx.respond(embed=embed, view=view, delete_after=time)
+        await ctx.respond(embed=embed, view=view, delete_after=time, ephemeral=ephemeral)
     @discord.Cog.listener()
     async def on_application_command_error(self, ctx, error): await self.handle_error(ctx, error)
     @discord.Cog.listener()

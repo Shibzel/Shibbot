@@ -30,7 +30,7 @@ class ErrorHandler(BaseCog):
     def user_on_cooldown(self, command_name: str, user_id: int):
         return (command_name, user_id) in self.cooldowns
 
-    async def handle_error(self, ctx: bridge.BridgeApplicationContext, error):
+    async def handle_error(self, ctx: bridge.BridgeContext, error):
         logger.debug(f"Handling error : {type(error).__name__}: {str(error)}")
         if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
             return
@@ -73,15 +73,18 @@ class ErrorHandler(BaseCog):
                 logger.error(error_message, error)
                 description = error_dict["CommandError"].format(owner=self.bot.get_user(self.bot.owner_id))
 
-        dismiss_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")
-        async def delete_message(interaction: discord.Interaction):
-            try:
-                await interaction.message.delete()
-                await interaction.message.reference.cached_message.delete()
-            except (discord.Forbidden, discord.NotFound, AttributeError):
-                pass
-        dismiss_button.callback = delete_message
-        view = self.bot.add_bot(CustomView(dismiss_button, disable_on_timeout=True))
+        if not ephemeral:
+            dismiss_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")
+            async def delete_message(interaction: discord.Interaction):
+                try:
+                    await interaction.message.delete()
+                    await interaction.message.reference.cached_message.delete()
+                except (discord.Forbidden, discord.NotFound, AttributeError):
+                    pass
+            dismiss_button.callback = delete_message
+            view = self.bot.add_bot(CustomView(dismiss_button, disable_on_timeout=True))
+        else:
+            view = None
 
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
         await ctx.respond(embed=embed, view=view, delete_after=time, ephemeral=ephemeral)

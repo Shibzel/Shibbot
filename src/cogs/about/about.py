@@ -25,7 +25,7 @@ class About(BaseCog):
     @bridge.bridge_command(name="help", description="Shows help.", description_localizations={"fr": "Affiche de l'aide."})
     @commands.cooldown(1, 7, commands.BucketType.user)
     @commands.cooldown(1, 15, commands.BucketType.channel)
-    async def show_help(self, ctx: bridge.BridgeApplicationContext):
+    async def show_help(self, ctx: bridge.BridgeContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
 
@@ -51,7 +51,7 @@ class About(BaseCog):
             nonlocal view
             embed = discord.Embed(title=TITLE, description=lang.SHOW_HELP_DESCRIPTION, color=discord.Color.dark_gold())
             embed.add_field(name=lang.SHOW_HELP_FIELD1_NAME, value=lang.SHOW_HELP_FIELD1_VALUE, inline=True)
-            embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME, value=lang.SHOW_HELP_FIELD2_VALUE.format(github_link=github_link+"/realeases/latest"), inline=True)
+            embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME, value=lang.SHOW_HELP_FIELD2_VALUE.format(github_link=github_link+"/releases/latest"), inline=True)
             embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME, value=lang.SHOW_HELP_FIELD3_VALUE.format(prefix=await database.get_prefix(ctx)), inline=False)
             embed.set_thumbnail(url=self.bot.user.avatar)
             embed.set_footer(text=FOOTER+choice(lang.SHOW_HELP_FOOTER_HOME))
@@ -98,7 +98,7 @@ class About(BaseCog):
 
     @bridge.bridge_command(name="ping", description="Gets the bot's ping.", description_localizations={"fr": "Obtient le ping du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def ping(self, ctx: bridge.BridgeApplicationContext):
+    async def ping(self, ctx: bridge.BridgeContext):
         lang = await self.get_lang(ctx)
         embed = discord.Embed(
             title="🏓 "+lang.PING_EMBED_TITLE,
@@ -112,7 +112,7 @@ class About(BaseCog):
     @bridge.bridge_command(name="invite", aliases=["botinvite", "support"], description="Gets you the bot's invitation links.", 
                                                                             description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
+    async def get_invitations(self, ctx: bridge.BridgeContext):
         lang = await self.get_lang(ctx)
 
         embed = discord.Embed(
@@ -129,7 +129,7 @@ class About(BaseCog):
     @bridge.bridge_command(name="botinfo", aliases=["about", "specs", "botspecs"], description="Gets informations about the bot.",
                                                                                    description_localizations={"fr" : "Obtiens des informartions sur le bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
-    async def get_infos(self, ctx: bridge.BridgeApplicationContext):
+    async def get_infos(self, ctx: bridge.BridgeContext):
         lang = await self.get_lang(ctx)
 
         embed = discord.Embed(color=discord.Color.dark_gold())
@@ -158,6 +158,6 @@ class About(BaseCog):
 
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au crétaeur du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
+    async def gimme_money(self, ctx: bridge.BridgeContext):
         # TODO: Complete this command.
         await ctx.respond("Command not available yet.")

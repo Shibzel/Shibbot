@@ -3,6 +3,7 @@ from discord.ext import bridge, commands
 from random import randint, shuffle, randint, choice
 from aiohttp import ClientSession
 from orjson import loads
+import uwuify
 
 from src import __version__ as version
 from src.core import Shibbot
@@ -36,7 +37,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="meal", aliases=["dish"], description="Give a random dish that you could cook !")
     @commands.cooldown(1, 7, commands.BucketType.default)
     @commands.cooldown(1, 15, commands.BucketType.channel)
-    async def get_meal(self, ctx: bridge.BridgeApplicationContext):
+    async def get_meal(self, ctx: bridge.BridgeContext):
         async with ClientSession(headers=HEADERS) as session:
             request = await session.get("https://www.themealdb.com/api/json/v1/1/random.php")
             if request.status != 200: raise ServiceUnavailableError()
@@ -87,7 +88,7 @@ class Fun(PluginCog):
         
         await ctx.respond(embed=embed, view=view)
         
-    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
+    async def _image_factory(self, ctx: bridge.BridgeContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
         author = ctx.author
         avatar = author.avatar.url
         embeds = []
@@ -134,13 +135,13 @@ class Fun(PluginCog):
     async def urbdict(self, *args): pass
         
     @urbdict.command(name="random", description="Gives the definition of a random definition on Urban Dictionary.")
-    async def urbdict_random(self, ctx: bridge.BridgeApplicationContext):
+    async def urbdict_random(self, ctx: bridge.BridgeContext):
         await self.urbdict_command(ctx, url="https://api.urbandictionary.com/v0/random")
     
     @urbdict.command(name="search", description="Searches a definition of your word on Urban Dictionary.",
                            options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def urbdict_search(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
+    async def urbdict_search(self, ctx: bridge.BridgeContext, *, word: str = None):
         if not word:
             raise MissingArgumentsError(ctx.command)
         
@@ -149,7 +150,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="shiba", aliases=["shibe", "shibes", "shibas"], description="Shows cute lil' pics of shibes.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_shibe_pictures(self, ctx: bridge.BridgeApplicationContext):
+    async def get_shibe_pictures(self, ctx: bridge.BridgeContext):
         lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/shibes?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
@@ -160,7 +161,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="cat", aliases=["cats"], description="Shows cute lil' pics of cats.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de chat."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_cat_pictures(self, ctx: bridge.BridgeApplicationContext):
+    async def get_cat_pictures(self, ctx: bridge.BridgeContext):
         lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/cats?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
@@ -171,7 +172,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="bird", aliases=["birb", "birds"], description="Shows cute lil' pics of birb.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos d'oiseau."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_birb_pictures(self, ctx: bridge.BridgeApplicationContext):
+    async def get_birb_pictures(self, ctx: bridge.BridgeContext):
         lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/birds?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
@@ -182,7 +183,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="capybara", aliases=["capy",], description="Shows cute lil' pics of capybaras.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de capybaras."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_capy_pictures(self, ctx: bridge.BridgeApplicationContext):
+    async def get_capy_pictures(self, ctx: bridge.BridgeContext):
         lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
         while len(urls) != 200:
@@ -192,7 +193,7 @@ class Fun(PluginCog):
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON, lang.GET_CAPY_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | capy.lol")
     
     @commands.command(name="ratio", description="fatherless + L + stay mad")
-    @commands.cooldown(1, 7, commands.BucketType.channel)
+    @commands.cooldown(1, 10, commands.BucketType.channel)
     async def _ratio(self, ctx: commands.Context):
         await ctx.message.delete()
         words = ["ratio", "nobody asked", "fatherless", "maidenless", "no bitches", "don't care", "L", "ur bad", "poor", "skill issue", "ew",
@@ -204,66 +205,75 @@ class Fun(PluginCog):
             return await reply_message.reply(text)
         await ctx.send(text)
         
-    @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
-    @commands.cooldown(1, 180, commands.BucketType.channel)
-    async def funni_button(self, ctx: bridge.BridgeApplicationContext):
-        lang = await self.get_lang(ctx)
+    @bridge.bridge_command(name="uwuify", aliases=["uwu"], description="Uwuifies a given text.", description_localizations={"fr": "Uwuifie un texte qui a été donné."},
+                           options=[discord.Option(name="text", description="The text to uwuify.", description_localizations={"fr": "Le texte à uwuifier."})])
+    @commands.cooldown(1, 7, commands.BucketType.channel)
+    async def _uwu(self, ctx: bridge.BridgeContext, *, text: str = None):
+        if not text:
+            raise MissingArgumentsError(ctx.command)
         
-        actions_list = []
-        def action(foo): actions_list.append(foo)
-        @action
-        async def message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_MESSAGES).format(user=interaction.user.mention))
-        @action
-        async def ephemeral_message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_EPHEMERAL_MESSAGES), ephemeral=True)
-        @action
-        async def chonk_shibe(interaction):
-            smol_to_chonk_shibes = [
-                "",
-                "",
-            ]
-            embeds = []
-            for shibe in smol_to_chonk_shibes:
-                embed = discord.Embed(color=discord.Color.dark_gold())
-                embed.set_image(url=shibe)
-            next_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BIGGER_SHIBE_BUTTON)
-            previous_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.FUNNI_BUTTON_smoller_SHIBE_BUTTON)
-            embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
-            embed_viewer.next_button.disabled = False
-            embed_viewer.previous_button.disabled = False
-            embed_viewer.page = int(len(smol_to_chonk_shibes)/2)
-            await reply_method(embed=embeds[embed_viewer.page], view=embed_viewer)
-        # @action
-        # async def shrek_script(interaction):
-        #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not randint(0, 99): # Very low chances of happening
-        #         async for chunk in get_local_data("/fun/funni_button/shrek.json"):
-        #             await reply_method(chunk)    
-        #     else:
-        #         await the_button_callback(interaction)
-        @action
-        async def gif_or_images(interaction):
-            links = [
-                "",
-                "",
-            ]
-            await reply_method(choice(links), delete_after=5)
-        @action
-        async def kick(interaction):
-            if not randint(0, 99) and ctx.guild:
-                try: 
-                    return await ctx.guild.kick(interaction.user)
-                except: pass
-            await the_button_callback(interaction)
-        @action
-        async def another_button(interaction): await reply_method(view=CustomView(the_button, timeout=300))
+        await ctx.respond(uwuify.uwu(text, flags=uwuify.SMILEY | uwuify.YU | uwuify.STUTTER))
         
-        the_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BUTTON_NAME)
-        async def the_button_callback(interaction: discord.Interaction):
-            action = choice(actions_list)
-            await action(interaction)
-        the_button.callback = the_button_callback
+    # @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
+    # @commands.cooldown(1, 180, commands.BucketType.channel)
+    # async def funni_button(self, ctx: bridge.BridgeContext):
+    #     lang = await self.get_lang(ctx)
+        
+    #     actions_list = []
+    #     def action(foo): actions_list.append(foo)
+    #     @action
+    #     async def message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_MESSAGES).format(user=interaction.user.mention))
+    #     @action
+    #     async def ephemeral_message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_EPHEMERAL_MESSAGES), ephemeral=True)
+    #     @action
+    #     async def chonk_shibe(interaction):
+    #         smol_to_chonk_shibes = [
+    #             "",
+    #             "",
+    #         ]
+    #         embeds = []
+    #         for shibe in smol_to_chonk_shibes:
+    #             embed = discord.Embed(color=discord.Color.dark_gold())
+    #             embed.set_image(url=shibe)
+    #         next_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BIGGER_SHIBE_BUTTON)
+    #         previous_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.FUNNI_BUTTON_smoller_SHIBE_BUTTON)
+    #         embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
+    #         embed_viewer.next_button.disabled = False
+    #         embed_viewer.previous_button.disabled = False
+    #         embed_viewer.page = int(len(smol_to_chonk_shibes)/2)
+    #         await reply_method(embed=embeds[embed_viewer.page], view=embed_viewer)
+    #     # @action
+    #     # async def shrek_script(interaction):
+    #     #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not randint(0, 99): # Very low chances of happening
+    #     #         async for chunk in get_local_data("/fun/funni_button/shrek.json"):
+    #     #             await reply_method(chunk)    
+    #     #     else:
+    #     #         await the_button_callback(interaction)
+    #     @action
+    #     async def gif_or_images(interaction):
+    #         links = [
+    #             "",
+    #             "",
+    #         ]
+    #         await reply_method(choice(links), delete_after=5)
+    #     @action
+    #     async def kick(interaction):
+    #         if not randint(0, 99) and ctx.guild:
+    #             try: 
+    #                 return await ctx.guild.kick(interaction.user)
+    #             except: pass
+    #         await the_button_callback(interaction)
+    #     @action
+    #     async def another_button(interaction): await reply_method(view=CustomView(the_button, timeout=300))
+        
+    #     the_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BUTTON_NAME)
+    #     async def the_button_callback(interaction: discord.Interaction):
+    #         action = choice(actions_list)
+    #         await action(interaction)
+    #     the_button.callback = the_button_callback
             
-        response_message = await ctx.respond(view=CustomView(the_button, timeout=300))
-        if isinstance(response_message, discord.Message):
-            reply_method = response_message.reply
-        elif isinstance(response_message, discord.Interaction):
-            reply_method = response_message.message.reply
+    #     response_message = await ctx.respond(view=CustomView(the_button, timeout=300))
+    #     if isinstance(response_message, discord.Message):
+    #         reply_method = response_message.reply
+    #     elif isinstance(response_message, discord.Interaction):
+    #         reply_method = response_message.message.reply

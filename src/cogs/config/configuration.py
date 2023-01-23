@@ -28,7 +28,7 @@ class Configuration(BaseCog):
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
-    async def change_prefix(self, ctx: bridge.BridgeApplicationContext, prefix: str = None):
+    async def change_prefix(self, ctx: bridge.BridgeContext, prefix: str = None):
         if not prefix:
             raise MissingArgumentsError(ctx.command)
 
@@ -42,7 +42,7 @@ class Configuration(BaseCog):
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
-    async def change_lang(self, ctx: bridge.BridgeApplicationContext):
+    async def change_lang(self, ctx: bridge.BridgeContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
 
@@ -69,7 +69,7 @@ class Configuration(BaseCog):
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(1, 7, commands.BucketType.guild)
     @bridge.guild_only()
-    async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
+    async def enable_plugins(self, ctx: bridge.BridgeContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
 

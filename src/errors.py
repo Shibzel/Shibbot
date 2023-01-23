@@ -31,7 +31,7 @@ class ServiceUnavailableError(commands.CommandError):
         super().__init__(message)
         
 class CogDependanceMissing(Exception):
-    def __init__(self, message: str | None = None, cog_name: str | None = None):
+    def __init__(self, cog_name: str | None = None, message: str | None = None):
         super().__init__(message or "This cog depends on another."+("" if not cog_name else f" Missing Cog: {cog_name}."))
         
 class DeprecatedBotError(Exception):
@@ -39,4 +39,13 @@ class DeprecatedBotError(Exception):
         if not message:
             message = f"{0} cannot be loaded because this version of Shibbot is deprecated (cog: {min_version}, shibbot: {__version__}).".format(
                       "This cog" if not cog_name else f"'{cog_name}")
+        super().__init__(message)
+        
+class PluginWithSameNameError(Exception):
+    def __init__(self, plugin = None, confilcted_plugin = None, message: str | None = None):
+        if not message:
+            message = f"{0} has the plugin name for the database as {1}{3}. Please change the name or contact the developper of the extension to correct this conflict.".format(
+                "This plugin extension" if not plugin else f"'{plugin.__name__}'",
+                "another plugin" if not confilcted_plugin else f"'{confilcted_plugin.__name__}'",
+                f" : '{plugin.plugin_name}'" if plugin and confilcted_plugin else "")
         super().__init__(message)

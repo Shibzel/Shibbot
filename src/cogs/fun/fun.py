@@ -1,6 +1,6 @@
 import discord
 from discord.ext import bridge, commands
-from random import randint, shuffle, randint
+from random import randint, shuffle, randint, choice
 from aiohttp import ClientSession
 from orjson import loads
 
@@ -195,15 +195,75 @@ class Fun(PluginCog):
     @commands.cooldown(1, 7, commands.BucketType.channel)
     async def _ratio(self, ctx: commands.Context):
         await ctx.message.delete()
-        words = ["ratio", "nobody asked", "fatherless", "maidenless",
-                 "no bitches", "don't care", "L", "ur bad", "poor",
-                 "skill issue", "ew", "motherless", "orphan", "friendless",
-                 "lifeless", "you're the reason your dad left", "cry about it",
-                 "stay mad", "adios", ]
+        words = ["ratio", "nobody asked", "fatherless", "maidenless", "no bitches", "don't care", "L", "ur bad", "poor", "skill issue", "ew",
+                    "motherless", "orphan", "friendless", "lifeless", "you're the reason your dad left", "cry about it", "stay mad lmao"]
         shuffle(words)
-        shuffled_words = words[:randint(3, 5)]
-        text = " + ".join(shuffled_words)
+        text = " + ".join(words[:randint(3, 5)])
         if ctx.message.reference:
             reply_message = ctx.channel.get_partial_message(ctx.message.reference.message_id)
             return await reply_message.reply(text)
         await ctx.send(text)
+        
+    @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
+    @commands.cooldown(1, 180, commands.BucketType.channel)
+    async def funni_button(self, ctx: bridge.BridgeApplicationContext):
+        lang = await self.get_lang(ctx)
+        
+        actions_list = []
+        def action(foo): actions_list.append(foo)
+        @action
+        async def message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_MESSAGES).format(user=interaction.user.mention))
+        @action
+        async def ephemeral_message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_EPHEMERAL_MESSAGES), ephemeral=True)
+        @action
+        async def chonk_shibe(interaction):
+            smol_to_chonk_shibes = [
+                "",
+                "",
+            ]
+            embeds = []
+            for shibe in smol_to_chonk_shibes:
+                embed = discord.Embed(color=discord.Color.dark_gold())
+                embed.set_image(url=shibe)
+            next_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BIGGER_SHIBE_BUTTON)
+            previous_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.FUNNI_BUTTON_smoller_SHIBE_BUTTON)
+            embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
+            embed_viewer.next_button.disabled = False
+            embed_viewer.previous_button.disabled = False
+            embed_viewer.page = int(len(smol_to_chonk_shibes)/2)
+            await reply_method(embed=embeds[embed_viewer.page], view=embed_viewer)
+        # @action
+        # async def shrek_script(interaction):
+        #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not randint(0, 99): # Very low chances of happening
+        #         async for chunk in get_local_data("/fun/funni_button/shrek.json"):
+        #             await reply_method(chunk)    
+        #     else:
+        #         await the_button_callback(interaction)
+        @action
+        async def gif_or_images(interaction):
+            links = [
+                "",
+                "",
+            ]
+            await reply_method(choice(links), delete_after=5)
+        @action
+        async def kick(interaction):
+            if not randint(0, 99) and ctx.guild:
+                try: 
+                    return await ctx.guild.kick(interaction.user)
+                except: pass
+            await the_button_callback(interaction)
+        @action
+        async def another_button(interaction): await reply_method(view=CustomView(the_button, timeout=300))
+        
+        the_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BUTTON_NAME)
+        async def the_button_callback(interaction: discord.Interaction):
+            action = choice(actions_list)
+            await action(interaction)
+        the_button.callback = the_button_callback
+            
+        response_message = await ctx.respond(view=CustomView(the_button, timeout=300))
+        if isinstance(response_message, discord.Message):
+            reply_method = response_message.reply
+        elif isinstance(response_message, discord.Interaction):
+            reply_method = response_message.message.reply

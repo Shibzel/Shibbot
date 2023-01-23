@@ -1,6 +1,7 @@
 """Everything about the terminal and the actions that can be taken with it."""
-import threading
-import gc
+from threading import Thread
+from gc import collect
+from json import dumps
 
 from .logging import Logger
 
@@ -44,7 +45,7 @@ class Console:
         self.bot = bot
         self.running = True
 
-        self.thread = threading.Thread(target=self.main, name="ConsoleThread")
+        self.thread = Thread(target=self.main, name="ConsoleThread")
              
     def main(self):
         """The code running inside the thread."""
@@ -96,7 +97,7 @@ class Console:
     @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        logger.log("Enabled cogs :\n[\n    {0}\n]".format(',\n    '.join(self.bot.cogs)))
+        logger.log(f"Enabled cogs :\n{dumps({name: repr(cog) for name, cog in self.bot.cogs.items()}, indent=4)}")
 
     @staticmethod
     def _apply_on_cog(method, method_name, cog_name):
@@ -124,7 +125,7 @@ class Console:
     @command()
     def gc(self, *args):
         """Runs the garbage collector."""
-        gc.collect()
+        collect()
         logger.log("Done running GC !")
 
     @command()

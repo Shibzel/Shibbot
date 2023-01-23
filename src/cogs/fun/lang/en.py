@@ -12,3 +12,9 @@ class English:
     
     GET_CAPY_NEXT_BUTTON = "Next Capy"
     GET_CAPY_PREVIOUS_BUTTON = "Previous"
+    
+    FUNNI_BUTTON_BUTTON_NAME = "Button"
+    FUNNI_BUTTON_MESSAGES = ("{user} Can't you stop ?")
+    FUNNI_BUTTON_EPHEMERAL_MESSAGES = ("Can you stop actually ?", "No ?", ">:C", "hmm...", "...")
+    FUNNI_BUTTON_BIGGER_SHIBE_BUTTON = "BIGGER!!!"
+    FUNNI_BUTTON_smoller_SHIBE_BUTTON = "smoller"

@@ -3,7 +3,7 @@ from random import choice
 from discord import Game, Activity, ActivityType, Status
 from discord.ext import tasks
 
-from src import __version__ as version
+from src import __version__ as version, __github__ as __github__
 from src.core import Shibbot
 from src.models import BaseCog
 
@@ -18,26 +18,24 @@ class ChangeActivity(BaseCog):
         self.bot: Shibbot = bot
         super().__init__(hidden=True)
 
-        self.bot_statutes = [f"version v{version}", "/help", "{latency}ms", "{guilds} servers", "{users} users",]
+        self.bot_statutes = [f"version v{version}", "/help", "{latency}ms", "{guilds} servers", "{users} users", __github__]
         self.watching_statutes = [
             "after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama", "inside your soul",
-            "it's Morbin time", "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo", "JESSE, WE NEED TO COOK JESSE",
+            "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo", "JESSE, WE NEED TO COOK JESSE",
             "doesn't dwayne johnson kinda look like the rock ???", "Mandela Catalogue", "Sr Pelo", "having an existential crisis",
-            "(Mg, Fe)₇Si₈O₂₂(OH)₂",
+            "(Mg, Fe)₇Si₈O₂₂(OH)₂", "a mongo on a fork", "at the end of the day it's not that funny is it",
         ]
         self.listening_statutes = [
             "Jetpack Joyride Main Theme", "Kahoot Lobby Music", "Never Gonna Give You Up", "wenomechainsama", "Bad Computer",
             "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple", "skrr shtibi shtipi dob dop yes yes jes shtip",
+            "Petit Biscuit (my beloved)",
         ]
         self.game_statutes = [
-            "Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ", "ROBLOSS",
-            "Cyberpunk 2069", "HEE HEE HE HA", "Minecwaft", "Shiba Horizon 5", "Portel 2", "Underfail", "Genshit Impact", "Off",
-            "Absolutely accurate battle simulator", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️"
+            "Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ", "ROBLOSS", "Cyberpunk 2069", "Minecwaft",
+            "Shiba Horizon 5", "Portel 2", "Genshit Impact", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️",
         ]
 
-        self.bot.loop.create_task(self.start_status_loop())
-
-    async def start_status_loop(self):
+    async def when_fully_ready(self):
         await async_sleep(10)
         self.change_activity.start()
 
@@ -49,8 +47,8 @@ class ChangeActivity(BaseCog):
 
         if choice((True, False)):
             activity = Activity(type=ActivityType.watching, name=choice(self.bot_statutes).format(latency=latency,
-                                                                                                                         guilds=len(self.bot.guilds),
-                                                                                                                         users=len(self.bot.users)))
+                                                                                                  guilds=len(self.bot.guilds),
+                                                                                                  users=len(self.bot.users)))
         else:
             activity = choice(
                 (Activity(type=ActivityType.watching, name=choice(self.watching_statutes)),
@@ -59,5 +57,4 @@ class ChangeActivity(BaseCog):
             )
 
         status = Status.online if latency < 300 else Status.idle
-
         await self.bot.change_presence(status=status, activity=activity)

@@ -49,8 +49,7 @@ class Reddit(BaseReddit):
                     submissions.append(sub)
             except Exception as e:
                 logger.error(f"Failed fetching submissions from r/'{subreddit}' on Reddit.", e)
-        tasks = [append_submits(subreddit) for subreddit in subreddits]
-        await gather(*tasks)
+        await gather(*[append_submits(subreddit) for subreddit in subreddits])
         return submissions
 
     @staticmethod

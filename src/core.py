@@ -11,11 +11,11 @@ from . import database, utils
 from .utils import hardware, reddit
 from .logging import Logger, PStyles
 from .console import Console
-from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, BUILTIN_COGS, CORE_COGS
+from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, OPTIONAL_COGS, CORE_COGS
 from .models import PluginCog
 
 
-MAX_PROCESS_TIMES_LEN = 1000
+MAX_PROCESS_TIMES_LEN = 10000
 
 logger = Logger(__name__)
 
@@ -46,7 +46,8 @@ class Shibbot(bridge.Bot):
     invoked_commands: `int`
         The number of commands that have been invoked since initialization."""
 
-    def __init__(self, debug = False, instance_owners: list[int] = None, extentions_path: str | None = None,
+    def __init__(self, debug = False, instance_owners: list[int] = None,
+                 use_optional_cogs: bool = True, extentions_path: str | None = None, 
                  gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         """Parameters
@@ -55,6 +56,8 @@ class Shibbot(bridge.Bot):
             Whatever the bot is in debug mode or not.
         instance_owners: List[`int`]
             The ids of the owner(s) of this bot instance.
+        use_optional_cogs: `bool`
+            Whatever you want to load the optional builtin cogs.
         extention_path: `str`
             Where the extentions are located.
         gc_clear: `bool`
@@ -98,7 +101,7 @@ class Shibbot(bridge.Bot):
                             presences=True,
                             voice_states=False),
                          case_insensitive=True,
-                         activity=discord.Streaming(name="connecting...", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"), 
+                         activity=discord.Streaming(name="connecting...", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ") if use_optional_cogs else None, 
                          *args, **kwargs)                               # Don't put this link on your browser or you might regret it.
         super().remove_command("help")
 
@@ -117,47 +120,41 @@ class Shibbot(bridge.Bot):
         self.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
         self.db.commit()
 
-        # Loading all the cogs and extentions
+        # Loading all extensions and cogs
         logger.log("Loading cogs...")
         builtin_path = utils.convert_to_import_path(COGS_PATH)
-        buildin_cogs = [f"{builtin_path}.{cog}" for cog in BUILTIN_COGS]
+        for cog in [f"{builtin_path}.{cog}" for cog in CORE_COGS]: self.load_extension(cog)
+        optional_cogs = []
+        if use_optional_cogs:
+            optional_cogs.extend(f"{builtin_path}.{cog}" for cog in OPTIONAL_COGS)
         extension_path = utils.convert_to_import_path(self.extentions_path)
-        extentions = []
-        for extention in listdir(self.extentions_path):
-            if extention in ("__pycache__",) or extention.endswith((".md",)): 
-                continue
-            if extention.endswith(".py"): 
-                extention = extention[:-3]
-            extentions.append(f"{extension_path}.{extention}")
-        if extentions == []:
-            logger.warn(f"No extention will load because folder '{self.extentions_path}' is empty.")
-        for cog in buildin_cogs + extentions:
+        extensions = []
+        for extension in listdir(self.extentions_path):
+            if extension in ("__pycache__",) or extension.endswith((".md",)): continue
+            if extension.endswith(".py"): extension = extension[:-3]
+            extensions.append(f"{extension_path}.{extension}")
+        for cog in optional_cogs + extensions:
             try:
-                logger.debug(f"Initializing cog '{cog}'.")
                 self.load_extension(cog)
                 continue
-            except discord.ExtensionNotFound as e:
-                if cog.replace(builtin_path+".", "") in CORE_COGS:
-                    logger.error(f"Couldn't find cog '{cog}' wich is a builtin, the bot may not work as expected.", e)
+            except ImportError as e:
+                if cog in extensions:
+                    logger.error(f"Couldn't import the necessary modules for the extension '{cog}'."
+                                " See if there is a requirements.txt inside the folder and then install the dependencies.", e)
                     continue
                 error = e
-            except ImportError as e:
-                if cog in extentions:
-                    logger.error(f"Couldn't import the necessary modules inside this extension. Try to install them if you didn't.", e)
-                error = e
-            except Exception as e:
-                error = e
+            except Exception as e: error = e
             logger.error(f"Couldn't load cog '{cog}'.", error)
-
+        
         if not path.exists("./burgir.jpg"):
             logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
-
-        logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins.values())} plugins for {len(self.cogs.values())} cogs." + \
+            
+        logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins)} plugins for {len(self.cogs)} cogs."
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
         
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
-        """Runs the bot.
+        """Loads extensions and cogs optionally and runs the bot.
 
         Parameters
         ----------
@@ -168,7 +165,7 @@ class Shibbot(bridge.Bot):
             if command_input:
                 self.console = Console(self)
                 self.console.start()
-            self.specs.start()
+            self.specs.start()        
             logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
             super().run(token, *args, **kwargs)
         except Exception as e:
@@ -181,7 +178,7 @@ class Shibbot(bridge.Bot):
         Parameters
         ----------
         error: `Exception`
-            The error which caused the bot to stop. Defaults to None.
+            The error which caused the bot to stop.
 
         Raises
         ------
@@ -203,11 +200,7 @@ class Shibbot(bridge.Bot):
         -------
         dict[`str`, `.models.PluginCog`]
         """
-        plugins = {}
-        for cog in self.cogs.values():
-            if isinstance(cog, PluginCog):
-                plugins[cog.plugin_name] = cog
-        return plugins
+        return {cog.plugin_name: cog for cog in self.cogs.values() if isinstance(cog, PluginCog)}
     
     @property
     def uptime(self) -> hardware.Uptime:
@@ -227,7 +220,7 @@ class Shibbot(bridge.Bot):
         -------
         `float`: The average in ms.
         """
-        if len_prs_tms:= len(self.process_times):
+        if len_prs_tms:= len(self.process_times): # Returns True if the length != 0
             return sum(self.process_times)/len_prs_tms*1000
         return 0
 
@@ -300,9 +293,15 @@ class Shibbot(bridge.Bot):
             method(*args, **kwargs)
         except AttributeError:
             method(*args, **kwargs)
-    def load_extension(self, *args, **kwargs): self._on_cog(super().load_extension, *args, **kwargs)
-    def unload_extension(self, *args, **kwargs): self._on_cog(super().unload_extension, *args, **kwargs)
-    def reload_extension(self, *args, **kwargs): self._on_cog(super().reload_extension, *args, **kwargs)
+    def load_extension(self, name: str, *args, **kwargs):
+        logger.debug(f"Initializing cog '{name}'.")
+        self._on_cog(super().load_extension, name, *args, **kwargs)
+    def unload_extension(self, name: str, *args, **kwargs):
+        logger.debug(f"Unloading cog '{name}'.")
+        self._on_cog(super().unload_extension, name, *args, **kwargs)
+    def reload_extension(self, name: str, *args, **kwargs): 
+        logger.debug(f"Reloading cog '{name}'.")
+        self._on_cog(super().reload_extension, name, *args, **kwargs)
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content and before.created_at.timestamp() >= (datetime.utcnow()-timedelta(minutes=5)).timestamp():

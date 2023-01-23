@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 from requests import get
 from orjson import loads
 from platform import python_version, python_version_tuple
+from shutil import copyfile
 
-from src import __version__ as version
+from src import __version__ as version, __github__ as github
 from src.core import Shibbot, PterodactylShibbot
 from src.logging import Logger, PStyles
 
@@ -40,13 +41,19 @@ def main():
     logger.set_debug_mode(DEBUG)
 
     ### Doing some checks
+    repo_name = github.replace("https://github.com/", "")
     try:
         logger.debug(f"Running on Python {python_version()}.")
-        if not 7 < int(python_version_tuple()[1]) < 12:
+        if not 7 < int(python_version_tuple()[1]) < 12 and int(python_version_tuple()[0]) != 3: # If SOMEHOW you managed to run this script on something else than Python 3.x
             logger.error(f"Shibbot is not intended to run on version {python_version()} of Python.")
 
         if not os.path.exists("./.env"):
-            raise Missing("Missing .env file. Create a new one, copy the contents of .env.example and complete it.")
+            try:
+                copyfile("./.env.exemple", "./.env")
+            except FileNotFoundError:
+                raise Missing(f"There are missing files. To fix this you can re-download the code and try to run it again : https://github.com/{repo_name}/releases/")
+            else:
+                raise Missing("Please fulfill the requirements inside of the .env file.")
         # Loading .env
         load_dotenv()
 
@@ -65,7 +72,6 @@ def main():
                 raise Syntax("Invalid Discord ids. Be sure that the ids are separated with spaces and intergers.")
         kwargs["instance_owners"] = instance_owners
 
-        repo_name = "Shibzel/Shibbot"
         # Version
         request = get(f"https://api.github.com/repos/{repo_name}/tags")
         response = loads(request.text)
@@ -74,13 +80,11 @@ def main():
             if last_version == version:
                 logger.log("You're currently using the lastest version, thank you !")
             else:
-                version_listed = False
-                for i in response:
-                    if i["name"] == version:
-                        version_listed = True
+                for release in response:
+                    if release["name"] == version:
                         logger.warn(f"You're not using the latest version '{version}' < '{last_version}'. Download the latest one here : https://github.com/{repo_name}/releases/")
                         break
-                if not version_listed:
+                else:
                     logger.warn("You're currently using a wip/unlisted version.")
         else:
             logger.error("Couldn't verify if the bot is up to date.")
@@ -129,8 +133,8 @@ def main():
                             PStyles.UNDERLINE + "8f61b2fb" + PStyles.ENDC))
             cls = PterodactylShibbot
             kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
-    except (Missing, Syntax) as e:
-        logger.error("Eh, your forgot something.", e)
+    except Exception as e:
+        logger.error("Eh, something went wrong :", e)
         logger.end()
         return e
     else:
@@ -145,7 +149,7 @@ def main():
             username=reddit_username,
             password=reddit_password
         )
-        shibbot.run(token=token, command_input=CONSOLE)
+        shibbot.run(token, command_input=CONSOLE)
     except Exception as e:
         logger.error("Oops... Shibbot stopped ?", e)
 
@@ -154,5 +158,4 @@ def main():
 if __name__ == "__main__":
     ascii_art()
     main()
-    # Exiting Program (there can be threads still running in the background, that's why this exit func is here)
     exit()

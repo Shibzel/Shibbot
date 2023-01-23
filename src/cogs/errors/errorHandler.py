@@ -65,7 +65,7 @@ class ErrorHandler(BaseCog):
             if error_name in error_dict:
                 description = error_dict[error_name]
             else:
-                error_message = f"Unexpected error with command '{ctx.command.name}'"
+                error_message = f"Unexpected error with command '{ctx.command.name}' "
                 if guild:= ctx.guild:
                     error_message += f"on guild {guild.name} (ID: {guild.id})."
                 else:

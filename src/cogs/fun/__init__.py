@@ -1,5 +1,5 @@
 from .lang import French, English
-from .entertainement import Fun
+from .fun import Fun
 
 
 def setup(bot):

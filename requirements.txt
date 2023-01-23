@@ -2,7 +2,6 @@ aiogtrans @ git+https://github.com/Shibzel/aiogtrans
 aiohttp==3.8.3
 aiosqlite==0.17.0
 aiowiki @ git+https://github.com/Gelbpunkt/aiowiki
-alt-profanity-check==1.1.3
 asyncpraw==7.6.1
 asyncprawcore==2.3.0
 psutil==5.9.4
@@ -11,3 +10,4 @@ python-dotenv==0.21.0
 requests==2.28.1
 orjson==3.8.4
 uwuify==1.2.1
+alt-profanity-check==1.1.3

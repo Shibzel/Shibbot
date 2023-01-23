@@ -3,7 +3,7 @@
 <div align="center">
 	<h1><b>Shibbot</b></h1>
 	<h3>A feature-rich and modular Discord bot written in Python.</h3>
-	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge" href="https://www.python.org/downloads">
+	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8 | 3.9 | 3.10 | 3.11-blue?style=for-the-badge" href="https://www.python.org/downloads">
     <img alt="Release" src="https://img.shields.io/github/v/release/Shibzel/Shibbot?include_prereleases&label=Latest%20Release&logo=github&sort=semver&style=for-the-badge&logoColor=white&color=red" href="https://github.com/Shibzel/Shibbot/releases/latest">
     <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
     <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Server&logo=Discord&logoColor=white&style=for-the-badge" href="https://discord.gg/TZNWfJmPwj">
@@ -25,12 +25,12 @@
 
 Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Python (which was a bad idea... don't start with that) then gradually evolved with my skills to what it is today : **a feature rich, open source Discord bot designed to be modular and accessible**.
 
-**Its specificity** is to include several languages and plugins (which can be disabled with a command) without it being hard coded into the bot so that it can include external cogs and, use a file based database : SQLite 3 to not depend on external ressources that are not usually free. It can also use custom prefixed and `/slash` commands.
+**Its specificity** is to include several languages and plugins (which can be disabled with a command) without it being hard coded into the bot so that it can include external cogs and; use a file based database : SQLite 3 to not depend on external ressources that are not usually free. It can also use custom prefixed and `/slash` commands.
 
-#### Right now it can :
+#### Right now it can (without extensions that add more features) :
 
 - [ ] Help you with the moderation of your server (classic commands like tempban, normalize usernames, detect profanity...)
-- [ ] Show you beautiful photos of shibas, cats and birds
+- [x] Show you beautiful photos of shibas, capybaras, cats and birds
 - [ ] Get you the latest memes it scrobes on Reddit daily
 - [ ] Offer you translation tools, articles on wikipedia and other utilities
 - [ ] Play music in the voice channel you're in (classic)
@@ -43,7 +43,7 @@ If you want to try it yourself on your server you can invite it by adding it on 
 Of course, a new instance of the bot can be hosted on your machine with your own modifications or "vanilla" but you must consider some things :
 - Shibbot is not designed to be lightweight, you must provide him at least more than **64 MiB of RAM** otherwise it will not work or not proprely.
 - Since it uses a file based portable database, **"hosts" like Heroku won't fit** because they wipe all the bot's files every 24 hours or less.
-- It won't work out of the box, **don't forget to create a copy of `.env.exemple` named `.env` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use Pterodactyl you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware (optional).
+- It won't work out of the box, **don't forget to create a copy of [`.env.exemple`](/.env.exemple) named `.env` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use [Pterodactyl](https://pterodactyl.io/) you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware (optional).
 
 Nevertheless, using our own hosted instance of the bot is also a higly recommended option if you just don't want to undergo all the issues that it is to host a Discord bot.
 
@@ -52,7 +52,7 @@ Nevertheless, using our own hosted instance of the bot is also a higly recommend
 - [Python 3.8+](https://www.python.org/downloads).
 - Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
 - A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [someone else's](https://www.google.com/search?q=free+lavalink+host).
-- For the librairies see [`requirements.txt`](https://github.com/Shibzel/Shibbot/blob/main/requirements.txt).
+- For the librairies see [`requirements.txt`](/requirements.txt).
 
 Remember to fulfill the dependencies by running `python -m pip install -r requirements.txt` into your console before starting the bot.
 
@@ -76,8 +76,5 @@ A big muah 😘 to everyone without whom this project would not be as great as i
 - The contributors of  [Lavalink](https://github.com/freyacodes/lavalink/graphs/contributors) (you know, the music server)
 - [Covoxkid](https://twitter.com/covoxkid) for [Shibe.online](https://shibe.online) for the shibes, cats and birds images
 - [Javier Aviles](https://github.com/javieraviles) for [Coronavirus-19-api](https://github.com/javieraviles/covidAPI) that fetches coronavirus stats
-- The community of [RapidAPI](rapidapi.com) for the unofficial [Urban Dictionary API](https://rapidapi.com/community/api/urban-dictionary)
-
-
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

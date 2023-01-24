@@ -8,7 +8,7 @@ from os import listdir, path
 from time import perf_counter
 
 from . import database, utils
-from .utils import hardware, reddit
+from .utils.hardware import Uptime, ServerSpecifications, auto_gc
 from .logging import Logger, PStyles
 from .console import Console
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, OPTIONAL_COGS, CORE_COGS
@@ -80,7 +80,6 @@ class Shibbot(bridge.Bot):
         self.init_time = datetime.utcnow()
         self.is_alive = None
         self.languages = []
-        self.reddit: reddit.Reddit = None
         self.process_times = []
         self.invoked_commands = 0
 
@@ -106,12 +105,12 @@ class Shibbot(bridge.Bot):
         super().remove_command("help")
 
         # Client that gets the specifications of the bot
-        self.specs = hardware.ServerSpecifications(bot=self)
+        self.specs = ServerSpecifications(bot=self)
 
         # Runs gc if the program is going to run out of memory
         if gc_clear:
             logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
-            self.loop.create_task(hardware.auto_gc(self.specs, gc_sleep, gc_max_ram))
+            self.loop.create_task(auto_gc(self.specs, gc_sleep, gc_max_ram))
 
         # Synchronous clients for Sqlite3
         self.db = database.db()
@@ -203,14 +202,14 @@ class Shibbot(bridge.Bot):
         return {cog.plugin_name: cog for cog in self.cogs.values() if isinstance(cog, PluginCog)}
     
     @property
-    def uptime(self) -> hardware.Uptime:
+    def uptime(self) -> Uptime:
         """The uptime of the bot.
 
         Returns
         -------
-        `Uptime`:  An instance of `.utils.hardware.Uptime`.
+        `Uptime`:  An instance of `.utils.Uptime`.
         """
-        return hardware.Uptime(self.init_time)
+        return Uptime(self.init_time)
     
     @property
     def avg_processing_time(self) -> float:
@@ -251,25 +250,6 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
-    
-    def init_reddit(self, client_id: str, client_secret: str, username: str, password: str, *args, **kwargs) -> None:
-        """Initializes the Reddit client.
-
-        Parameters
-        ----------
-        client_id: `str`
-            The application id.
-        client_secret: `str`
-            The application secret.
-        user_name: `str`
-            The id of the account on which the application was created.
-        password: `str`
-            The password of the account.
-        """
-        logger.debug(f"Initializing Reddit client.")
-        if self.reddit:
-            self.loop.create_task(self.reddit.close())
-        self.reddit = reddit.Reddit(loop=self.loop, client_secret=client_secret, password=password, username=username, client_id=client_id, *args, **kwargs)
         
     async def _perf_command(self, method, ctx) -> None:
         if not ctx.command: return
@@ -358,5 +338,5 @@ class PterodactylShibbot(Shibbot):
             Arguments that are directly passed into `.Shibbot`."""
         super().__init__(*args, **kwargs)
         logger.debug("Using the Pterodactyl API to get hardware usage.")
-        self.specs = hardware.ServerSpecifications(bot=self, using_ptero=True,
+        self.specs = ServerSpecifications(bot=self, using_ptero=True,
                                                         ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)

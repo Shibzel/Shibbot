@@ -89,20 +89,6 @@ def main():
         else:
             logger.error("Couldn't verify if the bot is up to date.")
 
-        # Reddit
-        reddit_client_id = os.getenv("REDDIT_CLIENT_ID")
-        if reddit_client_id in ("", None):
-            raise Missing("Missing Reddit application client ID. You can get your application's ID and secret here : https://www.reddit.com/prefs/apps/")
-        reddit_client_secret = os.getenv("REDDIT_CLIENT_SECRET")
-        if reddit_client_secret in ("", None):
-            raise Missing("Missing Reddit application client secret.")
-        reddit_username = os.getenv("REDDIT_USERNAME")
-        if reddit_username in ("", None):
-            raise Missing("Missing username of your Reddit account.")
-        reddit_password = os.getenv("REDDIT_PASSWORD")
-        if reddit_password in ("", None):
-            raise Missing("Missing password of your Reddit account.")
-
         # Lavalink
         if os.getenv("LAVALINK_HOST") in ("", None):
             raise Missing("Missing Lavalink server ptero_url/IP. Self host your own Lavalink server or get a free one on the internet.")
@@ -143,12 +129,6 @@ def main():
     # Starting the bot
     try:
         shibbot = cls(**kwargs)
-        shibbot.init_reddit(
-            client_id=reddit_client_id,
-            client_secret=reddit_client_secret,
-            username=reddit_username,
-            password=reddit_password
-        )
         shibbot.run(token, command_input=CONSOLE)
     except Exception as e:
         logger.error("Oops... Shibbot stopped ?", e)

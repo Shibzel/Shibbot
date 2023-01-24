@@ -4,6 +4,7 @@ from random import randint, shuffle, randint, choice
 from aiohttp import ClientSession
 from orjson import loads
 import uwuify
+import re
 
 from src import __version__ as version
 from src.core import Shibbot
@@ -17,6 +18,9 @@ from . import English, French
 
 PLUGIN_NAME = "fun"
 HEADERS = {'User-Agent': f'Shibbot/{version} (+https://github.com/Shibzel/Shibbot)'}
+
+ER_REPLACE = re.compile(r"(\b\w{2,})er\b", re.IGNORECASE)
+UWU = str.maketrans({"r": "w", "l": "w", "R": "W", "L": "W"})
 
 class Fun(PluginCog):
     def __init__(self, bot):
@@ -212,7 +216,13 @@ class Fun(PluginCog):
         if not text:
             raise MissingArgumentsError(ctx.command)
         
-        await ctx.respond(uwuify.uwu(text, flags=uwuify.SMILEY | uwuify.YU | uwuify.STUTTER))
+        text = ER_REPLACE.sub(r"\g<1>a", text).translate(UWU)
+        result = []
+        for index, word in enumerate(text.split(" ")):
+            if index % 4 == 0: result.append(f"{word[0]}-{word[0]}{word[1:]}")
+            else: result.append(word)
+
+        await ctx.respond(" ".join(result))
         
     # @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
     # @commands.cooldown(1, 180, commands.BucketType.channel)

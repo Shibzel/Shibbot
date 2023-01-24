@@ -2,8 +2,6 @@ aiogtrans @ git+https://github.com/Shibzel/aiogtrans
 aiohttp==3.8.3
 aiosqlite==0.17.0
 aiowiki @ git+https://github.com/Gelbpunkt/aiowiki
-asyncpraw==7.6.1
-asyncprawcore==2.3.0
 psutil==5.9.4
 py-cord==2.3.2
 python-dotenv==0.21.0

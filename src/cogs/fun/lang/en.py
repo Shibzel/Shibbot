@@ -1,6 +1,9 @@
 class English:
     DEFAULT_FOOTER = "Requested by {user}"
     
+    GET_MEME_NEXT_BUTTON = "Next meme"
+    GET_MEME_PREVIOUS_BUTTON = "Previous"
+    
     GET_SHIBES_NEXT_BUTTON = "Next Shibe"
     GET_SHIBES_PREVIOUS_BUTTON = "Previous"
     

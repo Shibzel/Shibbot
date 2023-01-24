@@ -27,7 +27,7 @@ class NotInteractionOwner(commands.UserInputError):
         super().__init__(message or f"'{user_interacting}' doesn't have access to this interaction, it belongs to '{interaction_owner}'.")
 
 class ServiceUnavailableError(commands.CommandError):
-    def __init__(self, message: str | None):
+    def __init__(self, message: str | None = None):
         super().__init__(message)
         
 class CogDependanceMissing(Exception):

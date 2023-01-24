@@ -1,12 +1,10 @@
 import discord
 from discord.ext import bridge, commands
-from random import randint, shuffle, randint, choice
+from random import randint, shuffle, randint
 from aiohttp import ClientSession
 from orjson import loads
-import uwuify
 import re
 
-from src import __version__ as version
 from src.core import Shibbot
 from src.models import PluginCog, EmbedViewer, CustomView
 from src.utils import filter_doubles
@@ -17,7 +15,8 @@ from . import English, French
 
 
 PLUGIN_NAME = "fun"
-HEADERS = {'User-Agent': f'Shibbot/{version} (+https://github.com/Shibzel/Shibbot)'}
+
+MEME_SUBREDDITS = ['memes', 'dankmemes', 'me_irl']
 
 ER_REPLACE = re.compile(r"(\b\w{2,})er\b", re.IGNORECASE)
 UWU = str.maketrans({"r": "w", "l": "w", "R": "W", "L": "W"})
@@ -42,7 +41,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 7, commands.BucketType.default)
     @commands.cooldown(1, 15, commands.BucketType.channel)
     async def get_meal(self, ctx: bridge.BridgeContext):
-        async with ClientSession(headers=HEADERS) as session:
+        async with ClientSession() as session:
             request = await session.get("https://www.themealdb.com/api/json/v1/1/random.php")
             if request.status != 200: raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["meals"][0]
@@ -91,6 +90,39 @@ class Fun(PluginCog):
             view.add_item(full_recipe_button)
         
         await ctx.respond(embed=embed, view=view)
+    
+    @bridge.bridge_command(name="memes", aliases=["meme"], description="Memes from Reddit.", description_localizations={"fr": "Des memes provenant de Reddit."})
+    @discord.option(name="subreddit", choices=MEME_SUBREDDITS, description="The meme subreddit.", description_localizations={"fr": "Le subreddit de memes."})
+    @discord.option(name="nsfw", choices=["✅", "❎"], description="Include NSFW content ?", description_localizations={"fr": "Inclure du contenu NSFW ?"})
+    async def show_memes(self, ctx: bridge.BridgeContext, subreddit: str = None, nsfw: str = "❎"):
+        nsfw = nsfw == "✅"
+        if nsfw and not ctx.channel.is_nsfw():
+            raise commands.NSFWChannelRequired(ctx.channel)
+        
+        url = "https://meme-api.com/gimme"
+        number = 50
+        async with ClientSession() as session:
+            request = await session.get(url=f"{url}/{number}" if not subreddit else f"{url}/{subreddit}/{number}")
+            if request.status != 200: raise ServiceUnavailableError()
+            response = (await request.json(loads=loads))["memes"]
+        
+        lang = await self.get_lang(ctx)
+        embeds = []
+        author = ctx.author
+        avatar = author.avatar.url
+        for meme in response:
+            if meme["nsfw"] and not nsfw:
+                continue
+            embed = discord.Embed(title=meme["title"], url=meme["postLink"], color=0xff4500)
+            embed.set_image(url=meme["url"])
+            embed.set_footer(icon_url=avatar, text=lang.DEFAULT_FOOTER.format(user=author) + f" | 💖 {meme['ups']}")
+            embeds.append(embed)
+        
+        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.GET_MEME_NEXT_BUTTON)
+        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=lang.GET_MEME_PREVIOUS_BUTTON)
+        embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True, bot=self.bot)
+        await embed_viewer.send_message(ctx)
+            
         
     async def _image_factory(self, ctx: bridge.BridgeContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
         author = ctx.author
@@ -108,7 +140,7 @@ class Fun(PluginCog):
         await embed_viewer.send_message(ctx)
         
     async def urbdict_command(self, ctx, url):        
-        async with ClientSession(headers=HEADERS) as session:
+        async with ClientSession() as session:
             request = await session.get(url)
             if request.status != 200: raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["list"]
@@ -155,44 +187,40 @@ class Fun(PluginCog):
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_shibe_pictures(self, ctx: bridge.BridgeContext):
-        lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
-        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/shibes?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
+        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/shibes?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
-        lang = await lang
+        lang = await self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_SHIBES_NEXT_BUTTON, lang.GET_SHIBES_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | shibe.online")
         
     @bridge.bridge_command(name="cat", aliases=["cats"], description="Shows cute lil' pics of cats.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de chat."})
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_cat_pictures(self, ctx: bridge.BridgeContext):
-        lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
-        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/cats?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
+        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/cats?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
-        lang = await lang
+        lang = await self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_CATS_NEXT_BUTTON, lang.GET_CATS_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | shibe.online")
     
     @bridge.bridge_command(name="bird", aliases=["birb", "birds"], description="Shows cute lil' pics of birb.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos d'oiseau."})
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_birb_pictures(self, ctx: bridge.BridgeContext):
-        lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
-        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/birds?count=100&urls=true&httpsUrls=true"]*2, headers=HEADERS)):
+        for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/birds?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
-        lang = await lang
+        lang = await self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_BIRDS_NEXT_BUTTON, lang.GET_BIRDS_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | shibe.online")
         
     @bridge.bridge_command(name="capybara", aliases=["capy",], description="Shows cute lil' pics of capybaras.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de capybaras."})
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_capy_pictures(self, ctx: bridge.BridgeContext):
-        lang = self.bot.loop.create_task(self.get_lang(ctx))
         urls = []
         while len(urls) != 200:
             url = f"https://api.capy.lol/v1/capybara/{randint(1, 739)}" # https://github.com/Looskie/capybara-api/tree/main/capys
-            if url not in urls: urls.append(url)
+            if url not in urls: urls.append(self.get_lang(ctx))
         lang = await lang
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON, lang.GET_CAPY_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | capy.lol")
     

@@ -1,6 +1,5 @@
 from discord import Cog, SlashCommand
 from discord.ext import bridge, commands
-from asyncio import sleep as async_sleep
 
 from .. import __version__
 from ..utils import fl, get_language
@@ -39,6 +38,7 @@ class BaseCog(Cog):
         self.emoji = emoji
         self.is_hidden = hidden
         
+        self._cached_cogs = None
         self._when_fully_ready_called = False
         if self.bot.is_alive:
             self.bot.loop.create_task(self.when_fully_ready())
@@ -49,6 +49,7 @@ class BaseCog(Cog):
         if not self._when_fully_ready_called:
             await self.when_fully_ready()
             self._when_fully_ready_called = True
+            
     async def when_fully_ready(self) -> None:
         """Similar to `on_connect`, this method is called when the cog is reloaded or when the bot is ready for the first time."""
         pass
@@ -62,15 +63,24 @@ class BaseCog(Cog):
     def get_lang(self, ctx) -> object:
         return fl(ctx, self.languages)
     
-    def get_commands(self) -> list[SlashCommand | commands.Command]:
-        slash_commands = [c for c in self.__cog_commands__ if isinstance(c, SlashCommand)]
-        prefixed_commands = [c for c in self.__cog_commands__ if isinstance(c, commands.Command)]
-        for slash_command in slash_commands:          
-            for prefixed_command in prefixed_commands:
-                if slash_command.name == prefixed_command.name:
-                    prefixed_commands.remove(prefixed_command)
-        return slash_commands + prefixed_commands
-    
+    def get_commands(self, cached: bool = True) -> list[SlashCommand | commands.Command]:
+        if self._cached_cogs and cached:
+            return self._cached_cogs
+        _commands = list(self.__cog_commands__)
+        result = []
+        for command in _commands:
+            if isinstance(command, SlashCommand):
+                for c in result:
+                    if c.name == command.name:
+                        result[result.index(c)] = command
+                        break
+                else: result.append(command)
+            elif isinstance(command, commands.Command):
+                if command.name not in [slash.name for slash in result if isinstance(slash, SlashCommand)]:
+                    result.append(command)
+        self._cached_cogs = result
+        return self._cached_cogs
+        
 class PluginCog(BaseCog):
     def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):
         self.plugin_name = plugin_name

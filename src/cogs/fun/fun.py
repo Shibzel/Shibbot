@@ -91,14 +91,7 @@ class Fun(PluginCog):
         
         await ctx.respond(embed=embed, view=view)
     
-    @bridge.bridge_command(name="memes", aliases=["meme"], description="Memes from Reddit.", description_localizations={"fr": "Des memes provenant de Reddit."})
-    @discord.option(name="subreddit", choices=MEME_SUBREDDITS, description="The meme subreddit.", description_localizations={"fr": "Le subreddit de memes."})
-    @discord.option(name="nsfw", choices=["✅", "❎"], description="Include NSFW content ?", description_localizations={"fr": "Inclure du contenu NSFW ?"})
-    async def show_memes(self, ctx: bridge.BridgeContext, subreddit: str = None, nsfw: str = "❎"):
-        nsfw = nsfw == "✅"
-        if nsfw and not ctx.channel.is_nsfw():
-            raise commands.NSFWChannelRequired(ctx.channel)
-        
+    async def _factory_memes(self, ctx, subreddit):
         url = "https://meme-api.com/gimme"
         number = 50
         async with ClientSession() as session:
@@ -110,6 +103,7 @@ class Fun(PluginCog):
         embeds = []
         author = ctx.author
         avatar = author.avatar.url
+        nsfw = ctx.channel.is_nsfw()
         for meme in response:
             if meme["nsfw"] and not nsfw:
                 continue
@@ -122,7 +116,21 @@ class Fun(PluginCog):
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=lang.GET_MEME_PREVIOUS_BUTTON)
         embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True, bot=self.bot)
         await embed_viewer.send_message(ctx)
-            
+    
+    @discord.slash_command(name="memes", description="Memes from Reddit.", description_localizations={"fr": "Des memes provenant de Reddit."})
+    @discord.option(name="subreddit", choices=MEME_SUBREDDITS, description="The meme subreddit.", description_localizations={"fr": "Le subreddit de memes."})
+    @commands.cooldown(1, 15, commands.BucketType.default)
+    async def slash_memes(self, ctx: discord.ApplicationContext, subreddit: str = None):
+        await self._factory_memes(ctx, subreddit)
+        
+    @commands.command(name="memes", aliases=["meme"])
+    @commands.cooldown(1, 15, commands.BucketType.default)
+    async def prefixed_memes(self, ctx: commands.Context, subreddit: str = None):
+        if subreddit not in (None, *MEME_SUBREDDITS):
+            lang = await self.get_lang(ctx)
+            raise MissingArgumentsError(ctx.command, lang.GET_MEME_CHECK_SUBREDDIT.format(subreds=", ".join(MEME_SUBREDDITS)))    
+        
+        await self._factory_memes(ctx, subreddit)          
         
     async def _image_factory(self, ctx: bridge.BridgeContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
         author = ctx.author
@@ -139,7 +147,7 @@ class Fun(PluginCog):
         embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
         await embed_viewer.send_message(ctx)
         
-    async def urbdict_command(self, ctx, url):        
+    async def urbdict_factory(self, ctx, url):        
         async with ClientSession() as session:
             request = await session.get(url)
             if request.status != 200: raise ServiceUnavailableError()
@@ -172,7 +180,7 @@ class Fun(PluginCog):
         
     @urbdict.command(name="random", description="Gives the definition of a random definition on Urban Dictionary.")
     async def urbdict_random(self, ctx: bridge.BridgeContext):
-        await self.urbdict_command(ctx, url="https://api.urbandictionary.com/v0/random")
+        await self.urbdict_factory(ctx, url="https://api.urbandictionary.com/v0/random")
     
     @urbdict.command(name="search", description="Searches a definition of your word on Urban Dictionary.",
                            options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
@@ -181,7 +189,7 @@ class Fun(PluginCog):
         if not word:
             raise MissingArgumentsError(ctx.command)
         
-        await self.urbdict_command(ctx, url=f"https://api.urbandictionary.com/v0/define?term={word}")
+        await self.urbdict_factory(ctx, url=f"https://api.urbandictionary.com/v0/define?term={word}")
         
     @bridge.bridge_command(name="shiba", aliases=["shibe", "shibes", "shibas"], description="Shows cute lil' pics of shibes.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})

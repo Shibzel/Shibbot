@@ -1,6 +1,6 @@
 import discord
 from discord import ui
-from discord.ext import bridge
+from discord.ext import bridge, commands
 
 from ..logging import Logger
 
@@ -58,8 +58,11 @@ class EmbedViewer(CustomView):
         if use_extremes:
             self.add_item(self.skip_button)
          
-    async def send_message(self, ctx: bridge.BridgeApplicationContext, *args, **kwargs):
-        await ctx.respond(embed=self.embeds[self.page], view=self, *args, **kwargs)
+    async def send_message(self, ctx: discord.ApplicationContext | commands.Context, *args, **kwargs):
+        if hasattr(ctx, "respond"): method = ctx.respond
+        elif hasattr(ctx, "reply"): method = ctx.send
+        else: method = ctx.send
+        await method(embed=self.embeds[self.page], view=self, *args, **kwargs)
         
     async def edit_message(self, interaction, embed, *args, **kwargs):
         await interaction.response.edit_message(embed=embed, view=self, *args, **kwargs)

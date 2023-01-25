@@ -54,6 +54,8 @@ class ErrorHandler(BaseCog):
             return await ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name), ephemeral=True)
         elif isinstance(error, MissingArgumentsError):
             description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
+            if message:= error.error_case_msg:
+                description += f" {message}"
         elif isinstance(error, commands.NSFWChannelRequired):
             description = error_dict["NSFWChannelRequired"].format(channel=error.channel.mention)
         elif isinstance(error, commands.MissingPermissions):

@@ -10,8 +10,9 @@ class PluginDisabledError(commands.CheckFailure):
         super().__init__(message or f"The '{plugin_name}' plugin is disabled.")
 
 class MissingArgumentsError(commands.CheckFailure):
-    def __init__(self, command: commands.Command, message: str | None = None):
+    def __init__(self, command: commands.Command, error_case_msg: str | None = None, message: str | None = None):
         self.command = command
+        self.error_case_msg = error_case_msg
         if isinstance(self.command, commands.Command):
             for cog_command in self.command.cog.get_commands():
                 if cog_command.name == self.command.name:

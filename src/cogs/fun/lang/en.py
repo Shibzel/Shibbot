@@ -1,6 +1,7 @@
 class English:
     DEFAULT_FOOTER = "Requested by {user}"
     
+    GET_MEME_CHECK_SUBREDDIT = "Available subreddits : {subreds}."
     GET_MEME_NEXT_BUTTON = "Next meme"
     GET_MEME_PREVIOUS_BUTTON = "Previous"
     

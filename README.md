@@ -27,14 +27,17 @@ Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Pyth
 
 **Its specificity** is to include several languages and plugins (which can be disabled with a command) without it being hard coded into the bot so that it can include external cogs and; use a file based database : SQLite 3 to not depend on external ressources that are not usually free. It can also use custom prefixed and `/slash` commands.
 
-#### Right now it can (without extensions that add more features) :
+#### Right now it can :
 
-- [ ] Help you with the moderation of your server (classic commands like tempban, normalize usernames, detect profanity...)
+- [ ] Help you with the moderation of your server with all the classic commands like ban, tempmute, warn...
+- [ ] Additional specific commands completing the classic moderation commands ("normalize" usernames, clear a user's messages, massban ...)
+- [ ] Automod (dangerous links and profanity detection...)
 - [x] Show you beautiful photos of shibas, capybaras, cats and birds
-- [ ] Get you the latest memes it scrobes on Reddit daily
+- [x] Show you memes collected on Reddit.
 - [ ] Offer you translation tools, articles on wikipedia and other utilities
 - [ ] Play music in the voice channel you're in (classic)
 - [x] Become sentient and threaten humanity
+- [x] Have more functionality thanks to the addition of extensions (external cogs).
 
 If you want to try it yourself on your server you can invite it by adding it on your own server by [clicking here](https://discord.com/api/oauth2/authorize?client_id=838922957547765801&permissions=8&scope=bot%20applications.commands) or join its server [here](https://discord.gg/TZNWfJmPwj).
 
@@ -49,7 +52,7 @@ Nevertheless, using our own hosted instance of the bot is also a higly recommend
 
 ## 📜 Requirements
 
-- [Python 3.8+](https://www.python.org/downloads).
+- [Python 3.8 to 3.11](https://www.python.org/downloads).
 - Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
 - A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [someone else's](https://www.google.com/search?q=free+lavalink+host).
 - For the librairies see [`requirements.txt`](/requirements.txt).
@@ -71,10 +74,8 @@ Big thanks to all those listed [here](https://github.com/Shibzel/Shibbot/graphs/
 
 ## 💗 Credits
 
-A big muah 😘 to everyone without whom this project would not be as great as it is !
+A big muah 😘 to everyone without whom this project would not be as great as it is ! To :
 - The community working on [Pycord](https://github.com/Pycord-Development/pycord/graphs/contributors), the Discord API wrapper used in Shibbot.
-- The contributors of  [Lavalink](https://github.com/freyacodes/lavalink/graphs/contributors) (you know, the music server)
-- [Covoxkid](https://twitter.com/covoxkid) for [Shibe.online](https://shibe.online) for the shibes, cats and birds images
-- [Javier Aviles](https://github.com/javieraviles) for [Coronavirus-19-api](https://github.com/javieraviles/covidAPI) that fetches coronavirus stats
+- The contributor(s) of  [Lavalink](https://github.com/freyacodes/lavalink/graphs/contributors) (you know, the music server), [shibe.online](https://shibe.online), [themealdb.com](https://www.themealdb.com), [meme-api.com](https://github.com/D3vd/Meme_Api) and [capy.lol](https://github.com/Looskie/capybara-api).
 
 *Oh ? You reached the end...* <img src="https://cdn.discordapp.com/emojis/836308954601750578.webp?size=96" width="25px">

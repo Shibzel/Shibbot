@@ -184,9 +184,7 @@ class Shibbot(bridge.Bot):
         `Exception`: Reraised error, if there is one.
         """
         logger.error("Shibbot is being stopped, goodbye !", error)
-        to_close = [self.specs.close(), super().close()]
-        if self.reddit: to_close.append(self.reddit.close())
-        await gather(*to_close)
+        await gather(self.specs.close(), super().close())
         self.loop.close()
         self.db.close()
         if error: raise error

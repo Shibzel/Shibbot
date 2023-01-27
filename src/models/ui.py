@@ -63,7 +63,7 @@ class EmbedViewer(CustomView):
             self.add_item(self.skip_button)
          
     async def send_message(self, ctx: discord.ApplicationContext | Context, *args, **kwargs):
-        await send(embed=self.embeds[self.page], view=self, *args, **kwargs)
+        await send(ctx, embed=self.embeds[self.page], view=self, *args, **kwargs)
         
     async def edit_message(self, interaction, embed, *args, **kwargs):
         await interaction.response.edit_message(embed=embed, view=self, *args, **kwargs)

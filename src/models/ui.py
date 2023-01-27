@@ -1,8 +1,10 @@
 import discord
 from discord import ui
-from discord.ext import bridge, commands
+from discord.ext.commands import Context
 
 from ..logging import Logger
+from ..errors import NotInteractionOwner
+from ..utils import send
 
 
 logger = Logger(__name__)
@@ -13,7 +15,8 @@ class CustomView(ui.View):
         super().__init__(*items, disable_on_timeout=disable_on_timeout, **kwargs)
 
     async def on_error(self, error: Exception, item: ui.Item, interaction: discord.Interaction) -> None:
-        logger.error(f"An unexpected error occured with item {item}.", error)
+        if not isinstance(error, discord.NotFound):
+            await self.bot.handle_command_error(interaction, error)
 
     async def on_timeout(self):
         if self.disable_on_timeout:
@@ -29,9 +32,10 @@ class CustomView(ui.View):
 
 class EmbedViewer(CustomView):
     def __init__(self, embeds: list[discord.Embed], next_button: discord.ui.Button, previous_button: discord.ui.Button,
-                 use_extremes: bool = False, bot = None, *args, **kwargs):
+                 use_extremes: bool = False, only_author: bool = False, bot = None, *args, **kwargs):
         super().__init__(*args, bot=bot, **kwargs)
         self.embeds = tuple(embeds)
+        self.only_author = only_author
         self.page = 0
         
         self.skip_button = discord.ui.Button(emoji="⏩")
@@ -58,16 +62,15 @@ class EmbedViewer(CustomView):
         if use_extremes:
             self.add_item(self.skip_button)
          
-    async def send_message(self, ctx: discord.ApplicationContext | commands.Context, *args, **kwargs):
-        if hasattr(ctx, "respond"): method = ctx.respond
-        elif hasattr(ctx, "reply"): method = ctx.send
-        else: method = ctx.send
-        await method(embed=self.embeds[self.page], view=self, *args, **kwargs)
+    async def send_message(self, ctx: discord.ApplicationContext | Context, *args, **kwargs):
+        await send(embed=self.embeds[self.page], view=self, *args, **kwargs)
         
     async def edit_message(self, interaction, embed, *args, **kwargs):
         await interaction.response.edit_message(embed=embed, view=self, *args, **kwargs)
         
-    async def step(self, interaction):
+    async def step(self, interaction: discord.Interaction):
+        if self.only_author and (interaction.user.id != self.message.author.id):
+            raise NotInteractionOwner(self.message.author, interaction.user)
         embed = self.embeds[self.page]
         if embed == self.embeds[-1]:
             self.next_button.disabled = True
@@ -76,7 +79,9 @@ class EmbedViewer(CustomView):
         self.back_button.disabled = False
         await self.edit_message(interaction, embed)
         
-    async def back(self, interaction):
+    async def back(self, interaction: discord.Interaction):
+        if self.only_author and (interaction.user.id != self.message.author.id):
+            raise NotInteractionOwner(self.message.author, interaction.user)
         embed = self.embeds[self.page]
         if embed == self.embeds[0]:
             self.previous_button.disabled = True

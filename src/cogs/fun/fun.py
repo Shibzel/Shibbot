@@ -1,6 +1,6 @@
 import discord
 from discord.ext import bridge, commands
-from random import randint, shuffle, randint
+import random
 from aiohttp import ClientSession
 from orjson import loads
 import re
@@ -34,7 +34,7 @@ class Fun(PluginCog):
     @discord.Cog.listener()
     async def on_message(self, message: discord.Message):
         content = message.content
-        if "(╯°□°)╯︵ ┻━┻" in content and not randint(0, 9):
+        if "(╯°□°)╯︵ ┻━┻" in content and not random.randint(0, 9):
             await message.reply("┬─┬ノ( º _ ºノ)")
         
     @bridge.bridge_command(name="meal", aliases=["dish"], description="Give a random dish that you could cook !")
@@ -47,7 +47,7 @@ class Fun(PluginCog):
             response = (await request.json(loads=loads))["meals"][0]
         
         use_reveal_button = False
-        view = CustomView()
+        view = self.bot.add_bot(CustomView())
         embed = discord.Embed(title=response['strMeal'], url=response["strSource"], color=discord.Color.yellow())
         full_desc = response["strInstructions"]
         if len(full_desc) <= 256:
@@ -114,7 +114,7 @@ class Fun(PluginCog):
         
         next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.GET_MEME_NEXT_BUTTON)
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=lang.GET_MEME_PREVIOUS_BUTTON)
-        embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True, bot=self.bot)
+        embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
         await embed_viewer.send_message(ctx)
     
     @discord.slash_command(name="memes", description="Memes from Reddit.", description_localizations={"fr": "Des memes provenant de Reddit."})
@@ -144,7 +144,7 @@ class Fun(PluginCog):
         
         next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=next_button_text)
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
-        embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
+        embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button))
         await embed_viewer.send_message(ctx)
         
     async def urbdict_factory(self, ctx, url):        
@@ -168,11 +168,11 @@ class Fun(PluginCog):
             embed.add_field(name="Example", value=example if len(example) <= 1024 else example[:1021]+"...", inline=False)
             embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author) + f" | 👍 {definition['thumbs_up']} • 👎 {definition['thumbs_down']}")
             embeds.append(embed)
-        shuffle(embeds)
+        random.shuffle(embeds)
         
         next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label="Next Definition")
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
-        embed_viewer = EmbedViewer(embeds, next_button, previous_button, use_extremes=True)
+        embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
         await embed_viewer.send_message(ctx)
     
     @bridge.bridge_group(aliases=["udict"])
@@ -227,7 +227,7 @@ class Fun(PluginCog):
     async def get_capy_pictures(self, ctx: bridge.BridgeContext):
         urls = []
         while len(urls) != 200:
-            url = f"https://api.capy.lol/v1/capybara/{randint(1, 739)}" # https://github.com/Looskie/capybara-api/tree/main/capys
+            url = f"https://api.capy.lol/v1/capybara/{random.randint(1, 739)}" # https://github.com/Looskie/capybara-api/tree/main/capys
             if url not in urls: urls.append(self.get_lang(ctx))
         lang = await lang
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON, lang.GET_CAPY_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | capy.lol")
@@ -238,8 +238,8 @@ class Fun(PluginCog):
         await ctx.message.delete()
         words = ["ratio", "nobody asked", "fatherless", "maidenless", "no bitches", "don't care", "L", "ur bad", "poor", "skill issue", "ew",
                     "motherless", "orphan", "friendless", "lifeless", "you're the reason your dad left", "cry about it", "stay mad lmao"]
-        shuffle(words)
-        text = " + ".join(words[:randint(3, 5)])
+        random.shuffle(words)
+        text = " + ".join(words[:random.randint(3, 5)])
         if ctx.message.reference:
             reply_message = ctx.channel.get_partial_message(ctx.message.reference.message_id)
             return await reply_message.reply(text)
@@ -290,7 +290,7 @@ class Fun(PluginCog):
     #         await reply_method(embed=embeds[embed_viewer.page], view=embed_viewer)
     #     # @action
     #     # async def shrek_script(interaction):
-    #     #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not randint(0, 99): # Very low chances of happening
+    #     #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not random.randint(0, 99): # Very low chances of happening
     #     #         async for chunk in get_local_data("/fun/funni_button/shrek.json"):
     #     #             await reply_method(chunk)    
     #     #     else:
@@ -304,7 +304,7 @@ class Fun(PluginCog):
     #         await reply_method(choice(links), delete_after=5)
     #     @action
     #     async def kick(interaction):
-    #         if not randint(0, 99) and ctx.guild:
+    #         if not random.randint(0, 99) and ctx.guild:
     #             try: 
     #                 return await ctx.guild.kick(interaction.user)
     #             except: pass

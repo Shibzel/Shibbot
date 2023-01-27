@@ -1,10 +1,10 @@
 import discord
 from discord.ext import commands, bridge
-from asyncio import sleep as async_sleep
+import asyncio
 
 from src import database
 from src.core import Shibbot
-from src.utils import get_language, stringify_command_usage
+from src.utils import get_language, stringify_command_usage, send
 from src.logging import Logger
 from src.models import BaseCog, CustomView
 from src.errors import NotInteractionOwner, PluginDisabledError, MissingArgumentsError
@@ -14,17 +14,16 @@ from . import French, English
 
 logger = Logger(__name__)
 
-class ErrorHandler(BaseCog):
-    
+class Events(BaseCog):
     def __init__(self, bot):
         self.bot: Shibbot = bot
-        super().__init__(bot=bot, languages={"en": English, "fr": French}, hidden=True)
+        super().__init__(languages={"en": English, "fr": French}, hidden=True)
         self.cooldowns = []
 
     async def add_user_cooldown(self, seconds: float, command_name: str, user_id: int):
         data = (command_name, user_id,)
         self.cooldowns.append(data)
-        await async_sleep(seconds)
+        await asyncio.sleep(seconds)
         self.cooldowns.remove(data)
 
     def user_on_cooldown(self, command_name: str, user_id: int):
@@ -49,9 +48,9 @@ class ErrorHandler(BaseCog):
             description = error_dict["CommandOnCooldown"].format(n_secs=round(cooldown, 2))
         elif isinstance(error, NotInteractionOwner):
             content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
-            return await ctx.reply(content=content, ephemeral=True)
+            return await send(ctx, content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
-            return await ctx.respond(content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name), ephemeral=True)
+            return await send(ctx, content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name), ephemeral=True)
         elif isinstance(error, MissingArgumentsError):
             description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
             if message:= error.error_case_msg:
@@ -63,7 +62,7 @@ class ErrorHandler(BaseCog):
         elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)):
             return
         else:
-            error_name = type(error).__name__
+            error_name = type(error).__name__ if not isinstance(error, discord.Forbidden) else commands.BotMissingPermissions.__name__
             if error_name in error_dict:
                 description = error_dict[error_name]
             else:
@@ -89,7 +88,7 @@ class ErrorHandler(BaseCog):
             view = None
 
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
-        await ctx.respond(embed=embed, view=view, delete_after=time, ephemeral=ephemeral)
+        await send(ctx, embed=embed, view=view, delete_after=time, ephemeral=ephemeral)
     @discord.Cog.listener()
     async def on_application_command_error(self, ctx, error): await self.handle_error(ctx, error)
     @discord.Cog.listener()

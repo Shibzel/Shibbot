@@ -1,6 +1,6 @@
 """Everything about the terminal and the actions that can be taken with it."""
+import gc
 from threading import Thread
-from gc import collect
 from json import dumps
 
 from .logging import Logger
@@ -125,7 +125,7 @@ class Console:
     @command()
     def gc(self, *args):
         """Runs the garbage collector."""
-        collect()
+        gc.collect()
         logger.log("Done running GC !")
 
     @command()

@@ -1,10 +1,10 @@
 """Shibbot's base."""
 import discord
 from discord.ext import bridge
-from asyncio import gather, sleep as async_sleep
 from datetime import datetime, timedelta
 from traceback import format_exc
-from os import listdir, path
+import asyncio
+import os
 from time import perf_counter
 
 from . import database, utils
@@ -128,7 +128,7 @@ class Shibbot(bridge.Bot):
             optional_cogs.extend(f"{builtin_path}.{cog}" for cog in OPTIONAL_COGS)
         extension_path = utils.convert_to_import_path(self.extentions_path)
         extensions = []
-        for extension in listdir(self.extentions_path):
+        for extension in os.listdir(self.extentions_path):
             if extension in ("__pycache__",) or extension.endswith((".md",)): continue
             if extension.endswith(".py"): extension = extension[:-3]
             extensions.append(f"{extension_path}.{extension}")
@@ -145,7 +145,7 @@ class Shibbot(bridge.Bot):
             except Exception as e: error = e
             logger.error(f"Couldn't load cog '{cog}'.", error)
         
-        if not path.exists("./burgir.jpg"):
+        if not os.path.exists("./burgir.jpg"):
             logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
             
@@ -184,7 +184,7 @@ class Shibbot(bridge.Bot):
         `Exception`: Reraised error, if there is one.
         """
         logger.error("Shibbot is being stopped, goodbye !", error)
-        await gather(self.specs.close(), super().close())
+        await asyncio.gather(self.specs.close(), super().close())
         self.loop.close()
         self.db.close()
         if error: raise error
@@ -248,6 +248,12 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
+            
+    async def handle_command_error(self, ctx, error):
+        for cog in self.cogs.values():
+            if type(cog).__name__ == "Events": # Bad way
+                await cog.handle_error(ctx, error)
+                break
         
     async def _perf_command(self, method, ctx) -> None:
         if not ctx.command: return
@@ -290,7 +296,7 @@ class Shibbot(bridge.Bot):
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
             logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
-            self.instance_owners = await gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
+            self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             logger.log("The following users are the owners of this instance : {0}.".format(", ".join(f"'{user}'" for user in self.instance_owners)))
         elif self.is_alive is False:
             await self.on_resumed()
@@ -305,7 +311,7 @@ class Shibbot(bridge.Bot):
         if self.is_alive is not False:
             self.is_alive = False
             logger.debug("Disconnected.")
-            await async_sleep(60)
+            await asyncio.sleep(60)
             if self.is_alive is False:
                 logger.error("Shibbot has been offline for over a minute, maybe there are network issues ?")
 

@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from requests import get
+import requests
 from orjson import loads
 from platform import python_version, python_version_tuple
 from shutil import copyfile
@@ -73,7 +73,7 @@ def main():
         kwargs["instance_owners"] = instance_owners
 
         # Version
-        request = get(f"https://api.github.com/repos/{repo_name}/tags")
+        request = requests.get(f"https://api.github.com/repos/{repo_name}/tags")
         response = loads(request.text)
         if request.status_code == 200:
             last_version = response[0]["name"]

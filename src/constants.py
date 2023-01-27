@@ -7,7 +7,7 @@ CACHE_PATH = "./cache"
 
 COGS_PATH = "./src/cogs"
 EXTENSIONS_PATH = "./extensions"
-CORE_COGS = ("about", "config", "errors",)
+CORE_COGS = ("commands", "events",)
 OPTIONAL_COGS = ("mod", "automod", "fun", "utils", "music", "status", "owner", "misc",)
 BUILTIN_COGS = CORE_COGS + OPTIONAL_COGS
 

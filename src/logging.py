@@ -3,8 +3,8 @@
 Note: Logging with a method of `Logger` takes around 3ms to run."""
 from datetime import datetime
 from traceback import format_exception
-from os import path, remove
-from gzip import open as gzip_open
+import os
+import gzip
 
 from src import __version__
 from src.constants import LOGS_PATH, CACHE_PATH
@@ -18,7 +18,7 @@ IS_CLOSED_KEY = "closed"
 IS_ENABLED_KEY = "enabled"
 IS_DEBUGGING_KEY = "debug"
 
-if not path.exists(LOGGER_CACHE_FILE_PATH):
+if not os.path.exists(LOGGER_CACHE_FILE_PATH):
     dump({}, LOGGER_CACHE_FILE_PATH)
 
 class PStyles:
@@ -132,8 +132,8 @@ class Logger:
             _logger.debug(f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
             _logger._close()
         _logger._set_in_cache(IS_CLOSED_KEY, False)
-        if path.exists(LATEST_LOGS_FILE_PATH):
-            remove(LATEST_LOGS_FILE_PATH)
+        if os.path.exists(LATEST_LOGS_FILE_PATH):
+            os.remove(LATEST_LOGS_FILE_PATH)
         _logger.debug(f"~~ Starting logging.")
 
     @staticmethod
@@ -147,11 +147,11 @@ class Logger:
         # Compressing log file.
         extension = LOG_EXTENSION + ".gz"
         raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
-        if path.exists(raw_name+extension):
+        if os.path.exists(raw_name+extension):
             n = 1
             while True:
                 out_file = f"{raw_name}+{n}"
-                if not path.exists(out_file+extension):
+                if not os.path.exists(out_file+extension):
                     break
                 n += 1
         else:
@@ -159,12 +159,10 @@ class Logger:
         out_file += extension
         _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
         with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-            with gzip_open(out_file, "wb+") as gzip_file:
+            with gzip.open(out_file, "wb+") as gzip_file:
                 gzip_file.write(log_file.read())
         _logger.debug("Done.")
         _logger._set_in_cache("closed", True)
-        
-        # Rotating log files
         
         
 _logger = Logger(__name__)

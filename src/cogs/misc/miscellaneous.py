@@ -1,12 +1,9 @@
 import discord
 from discord.ext import bridge, commands
-from aiohttp import ClientSession
-from orjson import loads
 
 from src.core import Shibbot
 from src.utils import relative_timestamp, date_timestamp
 from src.models.cog import BaseCog
-from src.errors import ServiceUnavailableError, MissingArgumentsError
 
 from . import English, French
 
@@ -15,7 +12,6 @@ class Miscellaneous(BaseCog):
     def __init__(self, bot):
         self.bot: Shibbot = bot
         super().__init__(
-            bot=bot,
             name={"en": "Miscellaneous", "fr": "Divers"},
             description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variés."},
             languages={"en": English, "fr": French}, emoji="✨"
@@ -152,33 +148,3 @@ class Miscellaneous(BaseCog):
     async def _get_id(self, ctx: bridge.BridgeContext, user: discord.User = None):
         user = user or ctx.author
         await ctx.respond(content=f"{user}: `{user.id}`")
-
-    @staticmethod
-    async def req_short_url(service_url, url_to_shorten):
-        async with ClientSession() as session:
-            data = {
-                'format': 'json',
-                'url': url_to_shorten,
-            }
-            response = await session.get(url=service_url, params=data)
-            result = loads(await response.text()) # Somehow await response.json() doesn't work here.
-            if result.get("errorcode"):
-                error_code = result["errorcode"]
-                if error_code in (1, 2):
-                    raise commands.BadArgument
-                if error_code in (3, 4):
-                    raise ServiceUnavailableError
-            return result
-        
-    @bridge.bridge_command(name="shorturl", aliases=["short"], description="Shorten a URL link.", description_localizations={"fr": "Raccourcit un lien URL."},
-                           options=[discord.Option(name="url", description="The link to shorten.", description_localizations={"fr": "Le lien à raccourcir."})])
-    @commands.cooldown(1, 7, commands.BucketType.default)
-    async def shorten_url(self, ctx: bridge.BridgeContext, url: str = None):
-        if not url:
-            raise MissingArgumentsError(ctx.command)
-        
-        try: 
-            result = await self.req_short_url("https://is.gd/create.php", url)
-        except ServiceUnavailableError: 
-            result = await self.req_short_url("https://v.gd/create.php", url)
-        await ctx.respond(content=result["shorturl"])

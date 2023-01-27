@@ -1,6 +1,6 @@
-from asyncio import gather, wait_for
+from asyncio import gather
 from aiohttp import ClientSession
-from orjson import loads, dumps, OPT_INDENT_2
+from orjson import loads, dumps
 
 from ..errors import ServiceUnavailableError
 

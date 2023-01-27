@@ -13,7 +13,7 @@ class Miscellaneous(BaseCog):
         self.bot: Shibbot = bot
         super().__init__(
             name={"en": "Miscellaneous", "fr": "Divers"},
-            description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variés."},
+            description={"en": "Everything else.", "fr": "Tout le reste."},
             languages={"en": English, "fr": French}, emoji="✨"
         )
     

@@ -18,7 +18,7 @@ class Utilities(PluginCog):
         super().__init__(
             plugin_name=PLUGIN_NAME,
             name={"en": "Utilities", "fr": "Utilitaires"},
-            description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variés."},
+            description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variées."},
             languages={"en": English, "fr": French}, emoji="🔍"
         )
 
@@ -29,8 +29,8 @@ class Utilities(PluginCog):
             result = loads(await response.text()) # Somehow await response.json() doesn't work here.
             if result.get("errorcode"):
                 error_code = result["errorcode"]
-                if error_code in (1, 2): raise commands.BadArgument()
-                if error_code in (3, 4): raise ServiceUnavailableError()
+                if error_code in (1, 2): raise commands.BadArgument
+                if error_code in (3, 4): raise ServiceUnavailableError
             return result
         
     @bridge.bridge_command(name="shorturl", aliases=["short"], description="Shorten a URL link.", description_localizations={"fr": "Raccourcit un lien URL."},
@@ -44,4 +44,7 @@ class Utilities(PluginCog):
             result = await self.req_short_url("https://is.gd/create.php", url)
         except ServiceUnavailableError: 
             result = await self.req_short_url("https://v.gd/create.php", url)
+        except commands.BadArgument:
+            lang = await self.get_lang(ctx)
+            raise MissingArgumentsError(ctx.command, error_case_msg=lang.SHORTEN_URL_WRONG_URL)
         await ctx.respond(content=result["shorturl"])

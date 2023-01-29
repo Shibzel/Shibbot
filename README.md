@@ -53,7 +53,6 @@ Nevertheless, using our own hosted instance of the bot is also a higly recommend
 ## 📜 Requirements
 
 - [Python 3.8 to 3.11](https://www.python.org/downloads).
-- Application credentials on [Reddit](https://www.reddit.com/prefs/apps) and [RapidAPI](https://rapidapi.com/developer/new).
 - A [Lavalink Server](https://github.com/freyacodes/lavalink) you can host yourself or [someone else's](https://www.google.com/search?q=free+lavalink+host).
 - For the librairies see [`requirements.txt`](/requirements.txt).
 

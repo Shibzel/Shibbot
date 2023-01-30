@@ -160,16 +160,12 @@ class Shibbot(bridge.Bot):
         command_input: `bool`
             Accept command input from the user. Defaults to False.
         """
-        try:
-            if command_input:
-                self.console = Console(self)
-                self.console.start()
-            self.specs.start()        
-            logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
-            super().run(token, *args, **kwargs)
-        except Exception as e:
-            # Closing everything and reraising error
-            self.loop.create_task(self.close(e))
+        if command_input:
+            self.console = Console(self)
+            self.console.start()
+        self.specs.start()        
+        logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
+        super().run(token, *args, **kwargs)
 
     async def close(self, error: Exception = None) -> None:
         """Closes the bot.

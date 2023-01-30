@@ -14,14 +14,15 @@ class ConsoleInterruption(Exception):
         super().__init__(message or "Shibbot was asked to stop by the console.")
 
 commands = {}
+without_aliases = []
 def command(name: str = None, aliases: list = None):
     """A decorator indicating that this function is a console command."""
     def pred(foo):
         nonlocal name
         name = name or foo.__name__
-        names = [name, *aliases] if aliases else [name]
-        for name in names:
-            commands[name] = foo
+        without_aliases.append(name)
+        for n in [name, *aliases] if aliases else [name]:
+            commands[n] = foo
         return foo
     return pred
 
@@ -56,6 +57,7 @@ class Console:
             if raw_command == "": continue
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
+            if command_name.lower() == "^c": exit()
             logger.log(f"Console input : '{raw_command}'")
             if commands.get(command_name):
                 try:
@@ -75,7 +77,6 @@ class Console:
 
     @staticmethod
     def strinify_command(command_name):
-        
         _command = commands[command_name]
         return f"{command_name}: {_command.__doc__ if _command.__doc__ else 'No description provided.'}"
 
@@ -83,17 +84,30 @@ class Console:
     def help(self, command_name: str | None = None, *args):
         """Shows all console commands. Args: 'command_name' (optional)."""
         if not command_name:
-            logger.log(f"Available commands : {', '.join(commands)}.")
+            logger.log(f"Available commands : {', '.join(without_aliases)}.")
         elif commands.get(command_name):
             logger.log(self.strinify_command(command_name))
         else:
             logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
-            
+        
     @command()
     def ping(self, *args):
         """Returns the ping of the bot."""
         logger.log(f"Ping: {round(self.bot.latency*1000, 2)}ms.")
-    
+
+    @command()
+    def uptime(self, *args):
+        """Shows the uptime."""
+        uptime = self.bot.uptime
+        logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
+
+    @command()
+    def stats(self, *args):
+        """Shows some stats."""
+        ut = self.bot.uptime
+        logger.log(f"Statistics :\nPing: {round(self.bot.latency*1000, 2)}ms\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\n" + \
+            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
+
     @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
@@ -127,19 +141,15 @@ class Console:
         """Runs the garbage collector."""
         gc.collect()
         logger.log("Done running GC !")
-
+        
     @command()
-    def uptime(self, *args):
-        """Shows the uptime."""
-        uptime = self.bot.uptime
-        logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
-
-    @command()
-    def stats(self, *args):
-        """Shows some stats."""
-        ut = self.bot.uptime
-        logger.log(f"Statistics :\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\n" + \
-            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
+    def debug(self, enabled: str = None, *args):
+        if not enabled:
+            logger.log(f"Debug for logging is set as '{logger.is_enabled()}'. Type 'debug true/false' to enable or disable it.")
+        else:
+            enabled = enabled.lower() == "true"
+            logger.set_debug_mode(enabled)
+            if enabled: logger.log(f"Setting debug mode for logging as '{enabled}'.")
 
     @command(aliases=["close"])
     def stop(self, *args):
@@ -147,12 +157,12 @@ class Console:
         logger.log("Are you sure ? (Y/N) :")
         response = input()
         if response.lower() in ("y", ""):
-            self.adios()
+            self.forcestop()
         else:
             logger.log("Aborted.")
 
-    @command(aliases=["forcestop"])
-    def adios(self, *args):
+    @command(aliases=["adios"])
+    def forcestop(self, *args):
         """Stops the bot without asking if the user is sure."""
         logger.log("Stopping Shibbot...")
         self.bot.loop.create_task(self.bot.close(ConsoleInterruption()))

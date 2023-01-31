@@ -103,6 +103,9 @@ class Shibbot(bridge.Bot):
                          activity=discord.Streaming(name="connecting...", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ") if use_optional_cogs else None, 
                          *args, **kwargs)                               # Don't put this link on your browser or you might regret it.
         super().remove_command("help")
+        
+        # Console object
+        self.console = Console(self)
 
         # Client that gets the specifications of the bot
         self.specs = ServerSpecifications(bot=self)
@@ -151,39 +154,6 @@ class Shibbot(bridge.Bot):
             
         logger.log(f"Finished initialization : {len(self.languages)} languages and {len(self.plugins)} plugins for {len(self.cogs)} cogs."
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
-        
-    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
-        """Loads extensions and cogs optionally and runs the bot.
-
-        Parameters
-        ----------
-        command_input: `bool`
-            Accept command input from the user. Defaults to False.
-        """
-        if command_input:
-            self.console = Console(self)
-            self.console.start()
-        self.specs.start()        
-        logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
-        super().run(token, *args, **kwargs)
-
-    async def close(self, error: Exception = None) -> None:
-        """Closes the bot.
-
-        Parameters
-        ----------
-        error: `Exception`
-            The error which caused the bot to stop.
-
-        Raises
-        ------
-        `Exception`: Reraised error, if there is one.
-        """
-        logger.error("Shibbot is being stopped, goodbye !", error)
-        await asyncio.gather(self.specs.close(), super().close())
-        self.loop.close()
-        self.db.close()
-        if error: raise error
 
     @property
     def plugins(self) -> dict[str, PluginCog]:
@@ -216,6 +186,37 @@ class Shibbot(bridge.Bot):
         if len_prs_tms:= len(self.process_times): # Returns True if the length != 0
             return sum(self.process_times)/len_prs_tms*1000
         return 0
+        
+    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
+        """Loads extensions and cogs optionally and runs the bot.
+
+        Parameters
+        ----------
+        command_input: `bool`
+            Accept command input from the user. Defaults to False.
+        """
+        if command_input: self.console.start()
+        self.specs.start()        
+        logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
+        super().run(token, *args, **kwargs)
+
+    async def close(self, error: Exception = None) -> None:
+        """Closes the bot.
+
+        Parameters
+        ----------
+        error: `Exception`
+            The error which caused the bot to stop.
+
+        Raises
+        ------
+        `Exception`: Reraised error, if there is one.
+        """
+        logger.error("Shibbot is being stopped, goodbye !", error)
+        await asyncio.gather(self.specs.close(), super().close())
+        self.loop.close()
+        self.db.close()
+        if error: raise error
 
     def add_bot(self, cls: object) -> object:
         """Adds the bot to the class if it has the attribute `bot`. 

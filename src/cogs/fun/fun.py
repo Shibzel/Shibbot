@@ -185,7 +185,7 @@ class Fun(PluginCog):
         while len(urls) != 200:
             url = f"https://api.capy.lol/v1/capybara/{random.randint(1, 739)}" # https://github.com/Looskie/capybara-api/tree/main/capys
             if url not in urls: urls.append(self.get_lang(ctx))
-        lang = await lang
+        lang = await self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON, lang.GET_CAPY_PREVIOUS_BUTTON, lang.DEFAULT_FOOTER + " | capy.lol")
     
     @commands.command(name="ratio", description="fatherless + L + stay mad")

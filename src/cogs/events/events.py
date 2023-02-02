@@ -66,7 +66,7 @@ class Events(BaseCog):
             if error_name in error_dict:
                 description = error_dict[error_name]
             else:
-                if isinstance(ctx, discord.Interaction):
+                if isinstance(ctx, discord.Interaction): # TODO: Make the code more reliable that "this"
                     name = repr(ctx)
                     author = ctx.user
                 else:

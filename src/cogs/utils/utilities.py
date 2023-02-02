@@ -64,10 +64,9 @@ class Utilities(PluginCog):
     async def translate_text(self, ctx: bridge.BridgeApplicationContext, language: str = None, *, sentence: str = None):
         if not language or not sentence:
             raise MissingArgumentsError(ctx.command)
-        for i in LANGUAGES.items():
-            if language not in i:
-                lang = await self.get_lang(ctx)
-                raise MissingArgumentsError(ctx.command, lang.TRANSLATE_TEXT_LANG_CODE_ERR)
+        if language not in LANGUAGES or language not in LANGUAGES.values():
+            lang = await self.get_lang(ctx)
+            raise MissingArgumentsError(ctx.command, lang.TRANSLATE_TEXT_LANG_CODE_ERR)
             
         async with ctx.typing():
             try:
@@ -121,7 +120,7 @@ class Utilities(PluginCog):
         embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
         await embed_viewer.send_message(ctx)
         
-    @bridge.bridge_command(name="wikipedia", aliases=["wiki"])
+    @bridge.bridge_command(name="wikipedia", aliases=["wiki"]) # TODO: Add a description
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def search_on_wikipedia(self, ctx: bridge.BridgeApplicationContext, article: str = None):
         lang_code = await database.get_language(ctx)
@@ -150,7 +149,7 @@ class Utilities(PluginCog):
             url = (await page.urls())[0]
             embed.url = url
             summary = await page.summary()
-            if summary == "": summary = lang.SEARCH_ON_WIKIPEDIA_EMPTY_SUMMARY.format(link=url)
+            if summary == "": summary = lang.SEARCH_ON_WIKIPEDIA_EMPTY_SUMMARY.format(link=url) # TODO: Fetch the page text when the summary is empty
             embed.description = summary
             await wiki.close()
             await interaction.response.edit_message(embed=embed, view=None)

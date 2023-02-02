@@ -40,7 +40,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="meal", aliases=["dish"], description="Give a random dish that you could cook !")
     @commands.cooldown(1, 7, commands.BucketType.default)
     @commands.cooldown(1, 15, commands.BucketType.channel)
-    async def get_meal(self, ctx: bridge.BridgeContext):
+    async def get_meal(self, ctx: bridge.BridgeApplicationContext):
         async with ClientSession() as session:
             request = await session.get("https://www.themealdb.com/api/json/v1/1/random.php")
             if request.status != 200: raise ServiceUnavailableError()
@@ -132,7 +132,7 @@ class Fun(PluginCog):
         
         await self._factory_memes(ctx, subreddit)          
         
-    async def _image_factory(self, ctx: bridge.BridgeContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
+    async def _image_factory(self, ctx: bridge.BridgeApplicationContext, urls: list[str], next_button_text: str, previous_button_text: str, footer: str):
         author = ctx.author
         avatar = author.avatar.url
         embeds = []
@@ -146,19 +146,26 @@ class Fun(PluginCog):
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
         embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button))
         await embed_viewer.send_message(ctx)
-        
-    async def urbdict_factory(self, ctx, url):        
+    
+    @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Gives the definition of a word on Urban Dictionary.",)
+    @discord.option(name="word", description="The word you want the definition of.")
+    async def urbdict_search(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
+        url = "https://api.urbandictionary.com/v0/" + (f"define?term={word}" if word else "random")
         async with ClientSession() as session:
             request = await session.get(url)
             if request.status != 200: raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["list"]
         if response == []:
-            raise commands.BadArgument()
-        
+            raise commands.BadArgument
+        to_order = {d["thumbs_up"]: d for d in response} # TODO: Optimize this sorting algorithm with sorted()
+        order = list(to_order.keys())
+        order.sort()
+        definitions = [to_order[i] for i in order[::-1]]
+            
         def clean_string(string: str):
             return string.replace("[", "**").replace("]", "**").replace("\n\n", "\n")
         embeds = []
-        for definition in response:
+        for definition in definitions:
             embed = discord.Embed(color=0x2faaee)
             embed.set_author(name="Urban Dictionary", url=definition["permalink"],
                              icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg")
@@ -168,33 +175,16 @@ class Fun(PluginCog):
             embed.add_field(name="Example", value=example if len(example) <= 1024 else example[:1021]+"...", inline=False)
             embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author) + f" | 👍 {definition['thumbs_up']} • 👎 {definition['thumbs_down']}")
             embeds.append(embed)
-        random.shuffle(embeds)
         
         next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label="Next Definition")
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
         embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
         await embed_viewer.send_message(ctx)
-    
-    @bridge.bridge_group(aliases=["udict"])
-    async def urbdict(self, *args): pass
-        
-    @urbdict.command(name="random", description="Gives the definition of a random definition on Urban Dictionary.")
-    async def urbdict_random(self, ctx: bridge.BridgeContext):
-        await self.urbdict_factory(ctx, url="https://api.urbandictionary.com/v0/random")
-    
-    @urbdict.command(name="search", description="Searches a definition of your word on Urban Dictionary.",
-                           options=[discord.Option(required=True, name="word", description="The word you want the definition of.")])
-    @commands.cooldown(1, 7, commands.BucketType.default)
-    async def urbdict_search(self, ctx: bridge.BridgeContext, *, word: str = None):
-        if not word:
-            raise MissingArgumentsError(ctx.command)
-        
-        await self.urbdict_factory(ctx, url=f"https://api.urbandictionary.com/v0/define?term={word}")
         
     @bridge.bridge_command(name="shiba", aliases=["shibe", "shibes", "shibas"], description="Shows cute lil' pics of shibes.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_shibe_pictures(self, ctx: bridge.BridgeContext):
+    async def get_shibe_pictures(self, ctx: bridge.BridgeApplicationContext):
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/shibes?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
@@ -204,7 +194,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="cat", aliases=["cats"], description="Shows cute lil' pics of cats.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de chat."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_cat_pictures(self, ctx: bridge.BridgeContext):
+    async def get_cat_pictures(self, ctx: bridge.BridgeApplicationContext):
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/cats?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
@@ -214,7 +204,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="bird", aliases=["birb", "birds"], description="Shows cute lil' pics of birb.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos d'oiseau."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_birb_pictures(self, ctx: bridge.BridgeContext):
+    async def get_birb_pictures(self, ctx: bridge.BridgeApplicationContext):
         urls = []
         for url_list in filter_doubles(await json_from_urls([f"https://shibe.online/api/birds?count=100&urls=true&httpsUrls=true"]*2)):
             urls.extend(url_list)
@@ -224,7 +214,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="capybara", aliases=["capy",], description="Shows cute lil' pics of capybaras.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de capybaras."})
     @commands.cooldown(1, 10, commands.BucketType.default)
-    async def get_capy_pictures(self, ctx: bridge.BridgeContext):
+    async def get_capy_pictures(self, ctx: bridge.BridgeApplicationContext):
         urls = []
         while len(urls) != 200:
             url = f"https://api.capy.lol/v1/capybara/{random.randint(1, 739)}" # https://github.com/Looskie/capybara-api/tree/main/capys
@@ -248,7 +238,7 @@ class Fun(PluginCog):
     @bridge.bridge_command(name="uwuify", aliases=["uwu"], description="Uwuifies a given text.", description_localizations={"fr": "Uwuifie un texte qui a été donné."},
                            options=[discord.Option(name="text", description="The text to uwuify.", description_localizations={"fr": "Le texte à uwuifier."})])
     @commands.cooldown(1, 7, commands.BucketType.channel)
-    async def _uwu(self, ctx: bridge.BridgeContext, *, text: str = None):
+    async def _uwu(self, ctx: bridge.BridgeApplicationContext, *, text: str = None):
         if not text:
             raise MissingArgumentsError(ctx.command)
         
@@ -262,7 +252,7 @@ class Fun(PluginCog):
         
     # @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
     # @commands.cooldown(1, 180, commands.BucketType.channel)
-    # async def funni_button(self, ctx: bridge.BridgeContext):
+    # async def funni_button(self, ctx: bridge.BridgeApplicationContext):
     #     lang = await self.get_lang(ctx)
         
     #     actions_list = []

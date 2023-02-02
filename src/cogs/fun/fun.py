@@ -146,40 +146,6 @@ class Fun(PluginCog):
         previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label=previous_button_text)
         embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button))
         await embed_viewer.send_message(ctx)
-    
-    @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Gives the definition of a word on Urban Dictionary.",)
-    @discord.option(name="word", description="The word you want the definition of.")
-    async def urbdict_search(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
-        url = "https://api.urbandictionary.com/v0/" + (f"define?term={word}" if word else "random")
-        async with ClientSession() as session:
-            request = await session.get(url)
-            if request.status != 200: raise ServiceUnavailableError()
-            response = (await request.json(loads=loads))["list"]
-        if response == []:
-            raise commands.BadArgument
-        to_order = {d["thumbs_up"]: d for d in response} # TODO: Optimize this sorting algorithm with sorted()
-        order = list(to_order.keys())
-        order.sort()
-        definitions = [to_order[i] for i in order[::-1]]
-            
-        def clean_string(string: str):
-            return string.replace("[", "**").replace("]", "**").replace("\n\n", "\n")
-        embeds = []
-        for definition in definitions:
-            embed = discord.Embed(color=0x2faaee)
-            embed.set_author(name="Urban Dictionary", url=definition["permalink"],
-                             icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg")
-            _def = clean_string(definition["definition"])
-            example = clean_string(definition["example"])
-            embed.add_field(name=f"Definition of \"{definition['word']}\" (by {definition['author']})", value=_def if len(_def) <= 1024 else _def[:1021]+"...", inline=False)
-            embed.add_field(name="Example", value=example if len(example) <= 1024 else example[:1021]+"...", inline=False)
-            embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author) + f" | 👍 {definition['thumbs_up']} • 👎 {definition['thumbs_down']}")
-            embeds.append(embed)
-        
-        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label="Next Definition")
-        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
-        embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
-        await embed_viewer.send_message(ctx)
         
     @bridge.bridge_command(name="shiba", aliases=["shibe", "shibes", "shibas"], description="Shows cute lil' pics of shibes.",
                            description_localizations={"fr": "Affiche de mignonnes petites photos de shibas."})

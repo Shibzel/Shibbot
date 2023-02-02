@@ -4,11 +4,14 @@ from aiohttp import ClientSession
 from orjson import loads
 import aiogtrans
 import asyncio
+from aiowiki import Wiki
 
+from src import database
 from src.core import Shibbot
-from src.models.cog import PluginCog
-from src.errors import ServiceUnavailableError, MissingArgumentsError
+from src.models import PluginCog, EmbedViewer, CustomView
+from src.errors import ServiceUnavailableError, MissingArgumentsError, NotInteractionOwner
 from src.constants import LANGUAGES
+from src.utils import get_language
 
 from . import English, French
 
@@ -77,9 +80,83 @@ class Utilities(PluginCog):
             
         lang = await self.get_lang(ctx)
         embed = discord.Embed(color=0x4b8cf5)
-        embed.set_author(name=lang.TRANSLATE_TEXT_TITLE, icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png")
+        embed.set_author(name="Translate", icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png")
         embed.add_field(name=lang.TRANSLATE_TEXT_ORIGINAL, value=sentence, inline=False)
         embed.add_field(name=lang.TRANSLATE_TEXT_TRANSLATED, value=result, inline=False)
         embed.set_footer(text=lang.DEFAULT_FOOTER.format(user=ctx.author), icon_url=ctx.author.avatar)
 
         await ctx.respond(embed=embed)
+        
+    @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Gives the definition of a word on Urban Dictionary.",)
+    @discord.option(name="word", description="The word you want the definition of.")
+    async def urbdict_search(self, ctx: bridge.BridgeApplicationContext, *, word: str = None):
+        url = "https://api.urbandictionary.com/v0/" + (f"define?term={word}" if word else "random")
+        async with ClientSession() as session:
+            request = await session.get(url)
+            if request.status != 200: raise ServiceUnavailableError()
+            response = (await request.json(loads=loads))["list"]
+        if response == []:
+            raise commands.BadArgument
+        to_order = {d["thumbs_up"]: d for d in response} # TODO: Optimize this sorting algorithm with sorted()
+        order = list(to_order.keys())
+        order.sort()
+        definitions = [to_order[i] for i in order[::-1]]
+            
+        def clean_string(string: str):
+            return string.replace("[", "**").replace("]", "**").replace("\n\n", "\n")
+        embeds = []
+        for definition in definitions:
+            embed = discord.Embed(color=0x2faaee)
+            embed.set_author(name="Urban Dictionary", url=definition["permalink"],
+                             icon_url="https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2018-01-11/297387706245_85899a44216ce1604c93_512.jpg")
+            _def = clean_string(definition["definition"])
+            example = clean_string(definition["example"])
+            embed.add_field(name=f"Definition of \"{definition['word']}\" (by {definition['author']})", value=_def if len(_def) <= 1024 else _def[:1021]+"...", inline=False)
+            embed.add_field(name="Example", value=example if len(example) <= 1024 else example[:1021]+"...", inline=False)
+            embed.set_footer(icon_url=ctx.author.avatar, text=English.DEFAULT_FOOTER.format(user=ctx.author) + f" | 👍 {definition['thumbs_up']} • 👎 {definition['thumbs_down']}")
+            embeds.append(embed)
+        
+        next_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label="Next Definition")
+        previous_button = discord.ui.Button(style=discord.ButtonStyle.gray, label="Previous Definition")
+        embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
+        await embed_viewer.send_message(ctx)
+        
+    @bridge.bridge_command(name="wikipedia", aliases=["wiki"])
+    @commands.cooldown(1, 7, commands.BucketType.member)
+    async def search_on_wikipedia(self, ctx: bridge.BridgeApplicationContext, article: str = None):
+        lang_code = await database.get_language(ctx)
+        lang = get_language(self.languages, lang_code)
+        if not article:
+            raise MissingArgumentsError(ctx.command)
+
+        wiki = Wiki.wikipedia(lang_code)
+        try: propositions = await asyncio.wait_for(wiki.opensearch(article, limit=25), 5)
+        except: raise ServiceUnavailableError
+        if not propositions:
+            await wiki.close()
+            raise commands.BadArgument
+        embed = discord.Embed(description=lang.SEARCH_ON_WIKIPEDIA_DESCRIPTION, color=0xffffff)
+        embed.set_author(name="Wikipedia", icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRQPA8Qi7lg9kj1shVj4E4uhH6lblZKa03WOSf0Hqm_XCuQyrd3-wROXjx4qG6bol4kfA&usqp=CAU")
+        embed.set_footer(text=lang.DEFAULT_FOOTER.format(user=ctx.author), icon_url=ctx.author.avatar)
+
+        select = discord.ui.Select(placeholder=lang.SEARCH_ON_WIKIPEDIA_PLACEHOLDER, options=[discord.SelectOption(label=proposition.title) for proposition in propositions])
+        async def wiki_callback(interaction: discord.Interaction):
+            nonlocal embed
+            if interaction.user.id != ctx.author.id:
+                raise NotInteractionOwner(ctx.author, interaction.user)
+            
+            page = wiki.get_page(select.values[0])
+            embed.title = page.title
+            url = (await page.urls())[0]
+            embed.url = url
+            summary = await page.summary()
+            if summary == "": summary = lang.SEARCH_ON_WIKIPEDIA_EMPTY_SUMMARY.format(link=url)
+            embed.description = summary
+            await wiki.close()
+            await interaction.response.edit_message(embed=embed, view=None)
+        async def do_or_raise(*args):
+            try: await asyncio.wait_for(wiki_callback(*args), 5)
+            except: raise ServiceUnavailableError
+        select.callback = do_or_raise
+        view = self.bot.add_bot(CustomView(select))
+        await ctx.respond(embed=embed, view=view)

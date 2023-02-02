@@ -5,10 +5,10 @@ class English:
     SHOW_HELP_OPTION_HOME_LABEL = "Home"
     SHOW_HELP_TITLE = "__**Shibbot Help!**__"
     SHOW_HELP_DESCRIPTION = "**Hi 👋 ! I'm Shibbot**, a multi-purpose discord bot that can do stuff like help you with moderation, searches on wikipedia, send memes, and a lot of other things !"
-    SHOW_HELP_FIELD1_NAME = "Commands to get started :"
-    SHOW_HELP_FIELD1_VALUE = "- `plugins` : To enable or disable the bot's plugins (use it if it's the first time for the bot on a server).\n- `lang` : Changes the language.\n- `prefix` : To set a custom prefix on a server."
+    SHOW_HELP_FIELD1_NAME = "blabla"
+    SHOW_HELP_FIELD1_VALUE = "blabla"
     SHOW_HELP_FIELD2_NAME = "What's new in this version ?"
-    SHOW_HELP_FIELD2_VALUE = "To see the latest additions to the bot you can jump into [our github's releases]({github_link})."
+    SHOW_HELP_FIELD2_VALUE = "To see the latest additions to the bot you can jump into [our github's releases]({github_link}) !"
     SHOW_HELP_FIELD3_NAME = "Get help :"
     SHOW_HELP_FIELD3_VALUE = "The current prefixes are `{prefix}` and `/`. To get the list of my commands on one of my cogs, click on the bar bellow and select one of the options to get right in ⬇."
     SHOW_HELP_FOOTER = "Legend: [] required, <> optional"
@@ -26,7 +26,7 @@ class English:
 
     ENABLE_PLUGINS_PLACEHOLDER = "Click to enable plugins"
     ENABLE_PLUGIN_MENU_TITLE = "Plugins"
-    ENABLE_PLUGIN_MENU_DESCRIPTION = "Choose the plugins you want to enable for this server."
+    ENABLE_PLUGIN_MENU_DESCRIPTION = "A plugin is an enable or disable feature of Shibbot. Use the bar below and tick what you want to enable."
     ENABLE_PLUGIN_DONE_TITLE = "Done !"
     ENABLE_PLUGIN_DONE_DESCRIPTION = "The list of activated plugins has been updated."
 

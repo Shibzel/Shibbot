@@ -59,18 +59,22 @@ class Events(BaseCog):
             description = error_dict["NSFWChannelRequired"].format(channel=error.channel.mention)
         elif isinstance(error, commands.MissingPermissions):
             description = error_dict["MissingPermissions"].format(permissions=" & ".join(permission.replace("_", " ") for permission in error.missing_permissions))
-        elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure)):
+        elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure,)):
             return
         else:
             error_name = type(error).__name__ if not isinstance(error, discord.Forbidden) else commands.BotMissingPermissions.__name__
             if error_name in error_dict:
                 description = error_dict[error_name]
             else:
-                error_message = f"Unexpected error with command '{ctx.command.name}' "
-                if guild:= ctx.guild:
-                    error_message += f"on guild {guild.name} (ID: {guild.id})."
+                if isinstance(ctx, discord.Interaction):
+                    name = repr(ctx)
+                    author = ctx.user
                 else:
-                    error_message += f"with user {ctx.author} (ID: {ctx.author.id})."
+                    name = ctx.command.name
+                    author = ctx.author
+                error_message = f"Unexpected error with command '{name}' "
+                if guild:= ctx.guild: error_message += f"on guild {guild.name} (ID: {guild.id})."
+                else: error_message += f"with user {author} (ID: {author.id})."
                 logger.error(error_message, error)
                 description = error_dict["CommandError"].format(owner=self.bot.get_user(self.bot.owner_id))
 

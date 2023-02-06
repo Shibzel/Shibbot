@@ -34,7 +34,7 @@ Shibbot was the first project I *(\*Shibzel, the owner)* worked on to learn Pyth
 - [ ] Automod (dangerous links and profanity detection...)
 - [x] Show you beautiful photos of shibas, capybaras, cats and birds
 - [x] Show you memes collected on Reddit.
-- [ ] Offer you translation tools, articles on wikipedia and other utilities
+- [x] Offer you translation tools, articles on wikipedia and other utilities
 - [ ] Play music in the voice channel you're in (classic)
 - [x] Become sentient and threaten humanity
 - [x] Have more functionality thanks to the addition of extensions (external cogs).

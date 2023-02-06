@@ -4,11 +4,13 @@ from .language import get_language
 
 
 async def send(ctx: bridge.BridgeContext | commands.Context | discord.Interaction, *args, ephemeral: bool = False, **kwargs):
+    if ephemeral:
+        kwargs.update({"ephemeral": True})
     if isinstance(ctx, bridge.BridgeContext): method = ctx.respond
     elif isinstance(ctx, commands.Context): method = ctx.reply
     elif isinstance(ctx, discord.Interaction): 
         method = ctx.channel.send if not ephemeral else ctx.response.send_message
-    await method(*args, ephemeral=ephemeral, **kwargs)
+    await method(*args, **kwargs)
 
 def get_name_localization(obj, lang_code: str) -> str | None:
     obj_name = None

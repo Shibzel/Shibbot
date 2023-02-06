@@ -228,7 +228,10 @@ class BotsCommands(BaseCog):
                 raise NotInteractionOwner(ctx.author, interaction.user)
             
             async with database.AsyncDB(commit_on_exit=True) as db:
-                await db.bulk_enable_plugin(ctx.guild, {plugin.plugin_name: plugin.plugin_name in select.values for plugin in self.bot.plugins.values()})
+                await db.bulk_enable_plugin(ctx.guild, {
+                    plugin.plugin_name: (plugin.plugin_name in select.values)
+                    for plugin in self.bot.plugins.values()
+                    })
             embed = discord.Embed(title=lang.ENABLE_PLUGIN_DONE_TITLE, description=lang.ENABLE_PLUGIN_DONE_DESCRIPTION, color=discord.Color.dark_gold())
             for option in options:
                 option.default = option.value in select.values

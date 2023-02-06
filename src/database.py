@@ -129,9 +129,8 @@ class AsyncDB:
     async def bulk_enable_plugin(self, guild: discord.Guild, mapping: dict[str, bool]):
         async def _enable_plugin(plugin, enable):
             async with self.connection.execute(f"SELECT * FROM {plugin}_plugin WHERE guild_id=?", (guild.id,)) as cursor:
-                query = f"UPDATE {plugin}_plugin SET enabled=? WHERE guild_id=?" if await cursor.fetchone(
-                    ) else f"INSERT INTO {plugin}_plugin (guild_id, enabled) VALUES (?,?)"
-                cursor = await cursor.execute(query, (enable, guild.id,))
+                args = (f"UPDATE {plugin}_plugin SET enabled=? WHERE guild_id=?", (enable, guild.id,)) if await cursor.fetchone() else (f"INSERT INTO {plugin}_plugin (guild_id, enabled) VALUES (?,?)", (guild.id, enable,))
+                cursor = await cursor.execute(*args)
                 await cursor.close()
         await asyncio.gather(*[_enable_plugin(name, int(bool(enabled))) for name, enabled in mapping.items()])
             

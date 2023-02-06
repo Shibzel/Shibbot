@@ -7,7 +7,7 @@ import asyncio
 import os
 from time import perf_counter
 
-from . import database, utils
+from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications, auto_gc
 from .logging import Logger, PStyles
 from .console import Console
@@ -19,8 +19,8 @@ MAX_PROCESS_TIMES_LEN = 10000
 
 logger = Logger(__name__)
 
-def bot_get_prefix(bot, ctx):
-    return database.get_prefix(ctx)
+async def get_that_mf_prefix(amogus, ctx):
+    return await database.get_prefix(ctx)
 
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3.
@@ -83,7 +83,7 @@ class Shibbot(bridge.Bot):
         self.process_times = []
         self.invoked_commands = 0
 
-        super().__init__(command_prefix=bot_get_prefix,
+        super().__init__(command_prefix=get_that_mf_prefix,
                          owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
                          # Being mentionned by a bot is very annoying, that's why it's all set to False.
                          allowed_mentions=discord.AllowedMentions(everyone=False, users=True, roles=True, replied_user=False),

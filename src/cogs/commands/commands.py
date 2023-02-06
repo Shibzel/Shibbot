@@ -2,7 +2,6 @@ import discord
 from discord.ext import bridge, commands
 from platform import python_version
 import random
-import asyncio
 
 from src import __version__ as version, __github__ as github_link, database
 from src.core import Shibbot
@@ -26,8 +25,10 @@ class BotsCommands(BaseCog):
     @bridge.bridge_command(name="help", description="Shows help.", description_localizations={"fr": "Affiche de l'aide."})
     @commands.cooldown(1, 7, commands.BucketType.user)
     @commands.cooldown(1, 15, commands.BucketType.channel)
-    async def show_help(self, ctx: bridge.BridgeContext):
-        lang_code = await database.get_language(ctx)
+    async def show_help(self, ctx: bridge.BridgeApplicationContext):
+        async with database.AsyncDB() as db:
+            lang_code = await db.get_language(ctx.guild)
+            prefix = await db.get_prefix(ctx.guild)
         lang = get_language(self.languages, lang_code)
 
         TITLE = lang.SHOW_HELP_TITLE
@@ -53,11 +54,11 @@ class BotsCommands(BaseCog):
             embed = discord.Embed(title=TITLE, description=lang.SHOW_HELP_DESCRIPTION, color=discord.Color.dark_gold())
             embed.add_field(name=lang.SHOW_HELP_FIELD1_NAME, value=lang.SHOW_HELP_FIELD1_VALUE, inline=True)
             embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME, value=lang.SHOW_HELP_FIELD2_VALUE.format(github_link=github_link+"/releases/latest"), inline=True)
-            embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME, value=lang.SHOW_HELP_FIELD3_VALUE.format(prefix=await database.get_prefix(ctx)), inline=False)
+            embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME, value=lang.SHOW_HELP_FIELD3_VALUE.format(prefix=prefix), inline=False)
             embed.set_thumbnail(url=self.bot.user.avatar)
             embed.set_footer(text=FOOTER+random.choice(lang.SHOW_HELP_FOOTER_HOME))
 
-            view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, timeout=300, disable_on_timeout=True))
+            view = self.bot.add_bot(CustomView(select, bot_button, server_button, github_button, timeout=300))
             return embed
 
         async def callback(interaction: discord.Interaction):
@@ -89,7 +90,7 @@ class BotsCommands(BaseCog):
                     # Stringifying the command's options
                     value += f"• `{stringify_command_usage(command, lang_code)}` : {command_description if command_description else '...'}\n"
                 embed.add_field(name=lang.SHOW_HELP_COMMANDS_FIELD_NAME, value=value if value != "" else "...")
-                view = self.bot.add_bot(CustomView(select, timeout=300, disable_on_timeout=True))
+                view = self.bot.add_bot(CustomView(select, timeout=300))
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
 
@@ -99,7 +100,7 @@ class BotsCommands(BaseCog):
 
     @bridge.bridge_command(name="ping", description="Gets the bot's ping.", description_localizations={"fr": "Obtient le ping du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def ping(self, ctx: bridge.BridgeContext):
+    async def ping(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
         embed = discord.Embed(
             title="🏓 "+lang.PING_EMBED_TITLE,
@@ -113,7 +114,7 @@ class BotsCommands(BaseCog):
     @bridge.bridge_command(name="invite", aliases=["botinvite", "support"], description="Gets you the bot's invitation links.", 
                                                                             description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def get_invitations(self, ctx: bridge.BridgeContext):
+    async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
 
         embed = discord.Embed(
@@ -130,7 +131,7 @@ class BotsCommands(BaseCog):
     @bridge.bridge_command(name="botinfo", aliases=["about", "specs", "botspecs"], description="Gets informations about the bot.",
                                                                                    description_localizations={"fr" : "Obtiens des informartions sur le bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
-    async def get_infos(self, ctx: bridge.BridgeContext):
+    async def get_infos(self, ctx: bridge.BridgeApplicationContext):
         lang = await self.get_lang(ctx)
 
         embed = discord.Embed(color=discord.Color.dark_gold())
@@ -150,16 +151,17 @@ class BotsCommands(BaseCog):
                                                                        n_ram=round(specs.max_memory, 2),
                                                                        place=specs.location))
         uptime = self.bot.uptime
-        embed.add_field(name=lang.GET_INFOS_FIELD4_NAME, value=lang.GET_INFOS_FIELD4_DESCRIPTION.format(d=uptime.days, h=uptime.hours, m=uptime.minutes, s=uptime.seconds,
-                                                                                                        commands=self.bot.invoked_commands, processing_time=round(self.bot.avg_processing_time, 2),
-                                                                                                        members=max(len(guild.members) for guild in self.bot.guilds)))
+        embed.add_field(name=lang.GET_INFOS_FIELD4_NAME,
+                        value=lang.GET_INFOS_FIELD4_DESCRIPTION.format(d=uptime.days, h=uptime.hours, m=uptime.minutes, s=uptime.seconds,
+                                                                        commands=self.bot.invoked_commands, processing_time=round(self.bot.avg_processing_time, 2),
+                                                                        members=max(len(guild.members) for guild in self.bot.guilds)))
         embed.add_field(name=lang.GET_INFOS_FIELD3_NAME, value=lang.GET_INFOS_FIELD3_DESCRIPTION, inline=False)
 
         await ctx.respond(embed=embed)
 
     @bridge.bridge_command(name="tip", description="Tip the creator of the bot.", description_localizations={"fr": "Faites un don au créateur du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def gimme_money(self, ctx: bridge.BridgeContext):
+    async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
         # TODO: Complete this command.
         await ctx.respond("Command not available yet.")
       
@@ -169,21 +171,22 @@ class BotsCommands(BaseCog):
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
-    async def change_prefix(self, ctx: bridge.BridgeContext, prefix: str = None):
+    async def change_prefix(self, ctx: bridge.BridgeApplicationContext, prefix: str = None):
         if not prefix:
             raise MissingArgumentsError(ctx.command)
 
-        lang = await self.get_lang(ctx)
-        prefix = prefix.lower().split(" ")[0]
-        await database.change_prefix(self.bot, ctx.guild, prefix)
+        async with database.AsyncDB(commit_on_exit=True) as db:
+            lang = get_language(self.languages, await db.get_language(ctx.guild))
+            prefix = prefix.lower().split(" ")[0]
+            await db.change_prefix(self.bot, ctx.guild, prefix)
         embed = discord.Embed(title=lang.CHANGE_PREFIX_TITLE, description="✅ "+lang.CHANGE_PREFIX_DESCRIPTION.format(prefix=prefix), color=discord.Color.green())
         await ctx.respond(embed=embed)
 
-    @bridge.bridge_command(name="language", aliases=["lang"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
+    @bridge.bridge_command(name="lang", aliases=["language"], description="Changes the bot's language.", description_localizations={"fr": "Change le langage du bot."})
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
-    async def change_lang(self, ctx: bridge.BridgeContext):
+    async def change_lang(self, ctx: bridge.BridgeApplicationContext):
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
 
@@ -194,7 +197,8 @@ class BotsCommands(BaseCog):
                 raise NotInteractionOwner(ctx.author, interaction.user)
             
             set_language = select.values[0]
-            await database.change_language(self.bot, ctx.guild, set_language)
+            async with database.AsyncDB(commit_on_exit=True) as db:
+                await db.change_language(self.bot, ctx.guild, set_language)
             lang = get_language(self.languages, set_language)
             embed = discord.Embed(title=lang.CHANGE_LANG_DONE_TITLE,
                                   description=lang.CHANGE_LANG_DONE_DESCRIPTION.format(language_flag=LANGUAGES_FLAGS[set_language] if LANGUAGES_FLAGS.get(set_language) else "🏴",
@@ -202,7 +206,7 @@ class BotsCommands(BaseCog):
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
-        view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
+        view = self.bot.add_bot(CustomView(select))
         embed = discord.Embed(title=lang.CHANGE_LANG_MENU_TITLE, description=lang.CHANGE_LANG_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)
 
@@ -210,23 +214,27 @@ class BotsCommands(BaseCog):
     @bridge.has_permissions(administrator=True)
     @commands.cooldown(1, 7, commands.BucketType.guild)
     @bridge.guild_only()
-    async def enable_plugins(self, ctx: bridge.BridgeContext):
-        lang_code = await database.get_language(ctx)
-        lang = get_language(self.languages, lang_code)
+    async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
+        async with database.AsyncDB() as db:
+            lang_code = await db.get_language(ctx.guild)
+            lang = get_language(self.languages, lang_code)
 
-        options = [discord.SelectOption(label=plugin.get_name(lang_code), description=plugin.get_description(lang_code) if plugin.description else "...",
-                                                                emoji=plugin.emoji, default=await database.plugin_is_enabled(ctx, plugin.plugin_name), value=plugin.plugin_name) 
-                                                                for plugin in self.bot.plugins.values()]
+            options = [discord.SelectOption(label=plugin.get_name(lang_code), description=plugin.get_description(lang_code) if plugin.description else "...",
+                                                                    emoji=plugin.emoji, default=await db.plugin_is_enabled(ctx.guild, plugin.plugin_name), value=plugin.plugin_name) 
+                                                                    for plugin in self.bot.plugins.values()]
         select = discord.ui.Select(placeholder=lang.ENABLE_PLUGINS_PLACEHOLDER, min_values=0, max_values=len(options), options=options)
         async def callback(interaction: discord.Interaction):
             if interaction.user != ctx.author:
                 raise NotInteractionOwner(ctx.author, interaction.user)
             
-            await asyncio.gather(*[database.enable_plugin(ctx.guild, plugin.plugin_name, 1 if plugin.plugin_name in select.values else 0) for plugin in self.bot.plugins.values()])
+            async with database.AsyncDB(commit_on_exit=True) as db:
+                await db.bulk_enable_plugin(ctx.guild, {plugin.plugin_name: plugin.plugin_name in select.values for plugin in self.bot.plugins.values()})
             embed = discord.Embed(title=lang.ENABLE_PLUGIN_DONE_TITLE, description=lang.ENABLE_PLUGIN_DONE_DESCRIPTION, color=discord.Color.dark_gold())
+            for option in options:
+                option.default = option.value in select.values
             view.disable_all_items()
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback
-        view = self.bot.add_bot(CustomView(select, disable_on_timeout=True))
+        view = self.bot.add_bot(CustomView(select))
         embed = discord.Embed(title=lang.ENABLE_PLUGIN_MENU_TITLE, description=lang.ENABLE_PLUGIN_MENU_DESCRIPTION, color=discord.Color.dark_gold())
         await ctx.respond(embed=embed, view=view)

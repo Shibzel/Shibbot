@@ -3,7 +3,7 @@ from discord.ext import bridge, commands
 
 from .. import __version__
 from ..utils import fl, get_language
-from .. import database
+from ..database import AsyncDB
 from ..logging import Logger
 from ..errors import PluginDisabledError, DeprecatedBotError, PluginWithSameNameError
 
@@ -91,7 +91,8 @@ class PluginCog(BaseCog):
         self.bot.db.commit()
         
     async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
-        return await database.plugin_is_enabled(ctx, self.plugin_name, self.guild_only)
+        async with AsyncDB() as db:
+            return await db.plugin_is_enabled(ctx.guild, self.plugin_name, self.guild_only)
 
     async def cog_before_invoke(self, ctx: bridge.BridgeApplicationContext):
         if not await self.is_enabled(ctx):

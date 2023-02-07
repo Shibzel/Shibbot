@@ -1,7 +1,7 @@
 """Everything about the terminal and the actions that can be taken with it."""
 import gc
+import json
 from threading import Thread
-from json import dumps
 
 from .logging import Logger
 
@@ -54,11 +54,13 @@ class Console:
 
         while self.running:
             raw_command = input()
-            if raw_command == "": continue
+            if raw_command == "":
+                continue
+            
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
-            if command_name.lower() == "^c": exit()
             logger.log(f"Console input : '{raw_command}'")
+            
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)
@@ -111,7 +113,7 @@ class Console:
     @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        logger.log(f"Enabled cogs :\n{dumps({name: repr(cog) for name, cog in self.bot.cogs.items()}, indent=4)}")
+        logger.log(f"Enabled cogs :\n{json.dumps({name: repr(cog) for name, cog in self.bot.cogs.items()}, indent=4)}")
 
     @staticmethod
     def _apply_on_cog(method, method_name, cog_name):
@@ -149,7 +151,8 @@ class Console:
         else:
             enabled = enabled.lower() == "true"
             logger.set_debug_mode(enabled)
-            if enabled: logger.log(f"Setting debug mode for logging as '{enabled}'.")
+            if enabled:
+                logger.log(f"Setting debug mode for logging as '{enabled}'.")
 
     @command(aliases=["close"])
     def stop(self, *args):

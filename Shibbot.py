@@ -1,10 +1,10 @@
 import os
-from dotenv import load_dotenv
 import requests
-from orjson import loads
-from platform import python_version, python_version_tuple
+import orjson
+import random
 from shutil import copyfile
-from random import choice
+from platform import python_version, python_version_tuple
+from dotenv import load_dotenv
 
 from src import __version__ as version, __github__ as github
 from src.core import Shibbot, PterodactylShibbot
@@ -18,6 +18,7 @@ class Missing(Exception): pass
 class Syntax(Exception): pass
 
 def ascii_art():
+    """Shows a beautiful ascii art with a splash text."""
     splash_text = (PStyles.ERROR+"oUUuh scary error message"+PStyles.ENDC, PStyles.OKBLUE+"blue"+PStyles.ENDC, "goofy aah bot", " ", "a", "really cool ascii art huh?", "boTs havE riGhts ToO", "i love microplastics!", "microwaves be like: hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm *ding*", "https://media.tenor.com/eyvN-SrFzkwAAAAC/nomoreamogus-amogus.gif", "https://www.youtube.com/watch?v=ZE4yIP2V2uQ", "*ping*", "created in 2021", "go watch Blade Runner 2049", "discord.com:443", "Around the World, Around the World 🎶", "god I love listening to CloudNone", "open source!", "I'm in your walls.", "Work of Shibzel!", "I know your exact location.", "Why are you even reading this", "Singlethreaded!", "I'm a teapot", "https://media.tenor.com/3qdiScnHBrEAAAAC/chicken.gif", ".　　 。　 ඞ 。 . 　　•", "STOP POSTING ABOUT AMONG US, I'M TIRED OF SEEING IT! My friends on TikTok send me memes, on Discord it's fucking memes, i was in a server, right? and ALL of the channels are just Among Us stuff. I-I showed my Champion underwear to my girlfriend, and the logo i flipped it and i said \"Hey babe, when the underwear sus HAHA ding ding ding ding ding ding ding *takes breath* ding ding ding\" I FUCKING LOOKED AT A TRASH CAN, I SAID \"THAT'S A BIT SUSSY\", I LOOKED AT MY PENIS, I THINK OF THE ASTRONAUT'S HELMET, AND I GO \"PENIS, more like peenSUS\" *takes breath* AAAAAAAAAAAAAAA", "Wooo, memes!", "https://media.tenor.com/pohmzAEOBAcAAAPso/speed-wheelchair.mp4", "a vewy gud bot", "amaznig!!!!", "holy cow!", "shibe going to space :O", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Python Edition", "https://www.youtube.com/watch?v=JuEa6Hum0b4", "thanks for using shibbot!", github, "[put something here]", "computer compatible!", "random text!", "Water proof!", "69420 lines of code!", "https://media.tenor.com/GIYc9-gepHoAAAAd/shiba-inu.gif")
     print(f"""
             ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
@@ -32,22 +33,24 @@ def ascii_art():
 ⠀⠀⣰⣿⣿⠋⢀⣀⣠⡄⠀⣀⠑⢝⠿⢝⣫⣵⡞  |░░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░▀░░░|
 ⠀⢠⣿⣿⣯⣶⣿⣿⣿⡇⣠⡟⡘⠀⢦⢿⣿⠟   |░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░|
 ⠀⣾⣿⣿⣿⣿⠟⠁⣿⣿⡿⡡⠁⠀⠈⠋⠋     ---- • {PStyles.BOLD + f'Version {version}' + PStyles.ENDC} • ---------
-⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈       > {PStyles.ITALICIZED + choice(splash_text) + PStyles.ENDC}
+⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈       > {PStyles.ITALICIZED + random.choice(splash_text) + PStyles.ENDC}
 ~~""")
      
 def main():
+    """Main function. Do some checks and then starts the bot."""
     cls = Shibbot
     kwargs = {"debug": DEBUG,}
     logger = Logger(__name__)
     logger.start()
 
-    ### Doing some checks
     repo_name = github.replace("https://github.com/", "")
     try:
+        # Indicating Python version in debug logs
         logger.debug(f"Running on Python {python_version()}.")
         if not 7 < int(python_version_tuple()[1]) < 12 and int(python_version_tuple()[0]) != 3: # If SOMEHOW you managed to run this script on something else than Python 3.x
             logger.error(f"Shibbot is not intended to run on version {python_version()} of Python.")
 
+        # Verifies if the .env exists
         if not os.path.exists("./.env"):
             try:
                 copyfile("./.env.exemple", "./.env")
@@ -73,9 +76,9 @@ def main():
                 raise Syntax("Invalid Discord ids. Be sure that the ids are separated with spaces and intergers.")
         kwargs["instance_owners"] = instance_owners
 
-        # Version
+        # Code version
         request = requests.get(f"https://api.github.com/repos/{repo_name}/tags")
-        response = loads(request.text)
+        response = orjson.loads(request.text)
         if request.status_code == 200:
             last_version = response[0]["name"]
             if last_version == version:
@@ -121,7 +124,7 @@ def main():
             cls = PterodactylShibbot
             kwargs.update({"ptero_url": ptero_url, "ptero_token": ptero_token, "ptero_server_id": ptero_server_id,})
     except Exception as e:
-        logger.error("Eh, something went wrong :", e)
+        logger.error("Hemmm... something went wrong :", e)
         logger.end()
         return e
     else:
@@ -129,8 +132,9 @@ def main():
 
     # Starting the bot
     try:
+        # Instancing Shibbot or PterodactylShibbot with all the necessary kwargs
         shibbot = cls(**kwargs)
-        shibbot.run(token, command_input=CONSOLE)
+        shibbot.run(token, command_input=CONSOLE) # Running it
     except Exception as e:
         logger.error("Oops... Shibbot stopped ?", e)
 
@@ -139,4 +143,4 @@ def main():
 if __name__ == "__main__":
     ascii_art()
     main()
-    exit()
+    exit() # Exiting because some threads that cannot be terminated can still be running

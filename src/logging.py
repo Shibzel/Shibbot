@@ -52,6 +52,7 @@ class Logger:
     
     @staticmethod
     def _write(string):
+        """Adds text to the 'latest.log' file."""
         with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
             f.write(string+"\n")
     
@@ -162,7 +163,7 @@ class Logger:
             with gzip.open(out_file, "wb+") as gzip_file:
                 gzip_file.write(log_file.read())
         _logger.debug("Done.")
-        _logger._set_in_cache("closed", True)
+        _logger._set_in_cache(IS_CLOSED_KEY, True)
         
         
 _logger = Logger(__name__)

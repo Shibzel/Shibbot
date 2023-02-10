@@ -39,18 +39,18 @@ class BaseCog(Cog):
         self.is_hidden = hidden
         
         self._cached_cogs = None
-        self._when_fully_ready_called = False
+        self._when_ready_called = False
         if self.bot.is_alive:
-            self.bot.loop.create_task(self.when_fully_ready())
-            self._when_fully_ready_called = True
+            self.bot.loop.create_task(self.when_ready())
+            self._when_ready_called = True
 
     @Cog.listener("on_ready")
     async def _on_ready(self):
-        if not self._when_fully_ready_called:
-            await self.when_fully_ready()
-            self._when_fully_ready_called = True
+        if not self._when_ready_called:
+            await self.when_ready()
+            self._when_ready_called = True
             
-    async def when_fully_ready(self) -> None:
+    async def when_ready(self) -> None:
         """Similar to `on_connect`, this method is called when the cog is reloaded or when the bot is ready for the first time."""
         pass
     

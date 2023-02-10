@@ -298,7 +298,7 @@ class Shibbot(bridge.Bot):
     async def on_ready(self) -> None:
         if self.is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
-            logger.log(f"Setting bot invitation link as '{self.invite_bot_url}'.")
+            logger.log(f"Setting bot invitation link as ' {self.invite_bot_url} '.")
             
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])

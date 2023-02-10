@@ -7,7 +7,7 @@ class French(English):
     SHOW_HELP_OPTION_HOME_LABEL = "Accueil"
     SHOW_HELP_TITLE = "__**Aide Shibbot!**__"
     SHOW_HELP_DESCRIPTION = "**Salut 👋 ! Je suis Shibbot**, un bot multifonction qui peut par exemple vous aider avec la modération de votre serveur, faire des recherches sur wikipédia, poster des memes et pleins d'autres choses !"
-    SHOW_HELP_FIELD1_NAME = "blabla"
+    SHOW_HELP_FIELD1_NAME = "blabla" # TODO: Complete this field
     SHOW_HELP_FIELD1_VALUE = "blabla"
     SHOW_HELP_FIELD2_NAME = "Quoi de neuf dans cette version ?"
     SHOW_HELP_FIELD2_VALUE = "Pour voir les dernières fonctions ajoutées au bot vous pouvez aller dans [nos releases github]({github_link}) !"

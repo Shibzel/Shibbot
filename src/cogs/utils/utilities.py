@@ -55,19 +55,17 @@ class Utilities(PluginCog):
             raise MissingArgumentsError(ctx.command, error_case_msg=lang.SHORTEN_URL_WRONG_URL)
         await ctx.respond(content=result["shorturl"])
     
-    @bridge.bridge_command(name="translate", aliases=["trans"], description="Tranlates text.", description_localizations={"fr": "Traduit du texte."},
+    @discord.slash_command(name="translate", description="Tranlates text.", description_localizations={"fr": "Traduit du texte."},
                            options=[discord.Option(name="language", name_localizations={"fr": "langage"},
                                                    description="The language code (ex: 'fr', 'en').", description_localizations={"fr": "Le code de langage (ex: 'fr', 'en')."}),
                                     discord.Option(name="sentence", name_localizations={"fr": "phrase"},
                                                    description="The text to translate.", description_localizations={"fr": "Le texte à traduire."})])
     @commands.cooldown(1, 7, commands.BucketType.default)
-    async def translate_text(self, ctx: bridge.BridgeApplicationContext, language: str = None, *, sentence: str = None):
-        if not language or not sentence:
-            raise MissingArgumentsError(ctx.command)
-        if language not in LANGUAGES or language not in LANGUAGES.values():
+    async def slash_translate(self, ctx: discord.ApplicationContext, language: str = None, sentence: str = None):
+        if language not in LANGUAGES or language not in LANGUAGES.values(): # TODO: Finish this command
             lang = await self.get_lang(ctx)
             raise MissingArgumentsError(ctx.command, lang.TRANSLATE_TEXT_LANG_CODE_ERR)
-            
+        
         async with ctx.typing():
             try:
                 async with aiogtrans.GoogleTrans(target=language) as translator:
@@ -85,6 +83,15 @@ class Utilities(PluginCog):
         embed.set_footer(text=lang.DEFAULT_FOOTER.format(user=ctx.author), icon_url=ctx.author.avatar)
 
         await ctx.respond(embed=embed)
+        
+    @commands.command(name="translate", aliases=["trans"])
+    @commands.cooldown(1, 7, commands.BucketType.default)
+    async def prefixed_translate(self, ctx: commands.Context, language: str = None, *, sentence: str = None):
+        if not language or not sentence:
+            raise MissingArgumentsError(ctx.command)
+        if language not in LANGUAGES or language not in LANGUAGES.values():
+            lang = await self.get_lang(ctx)
+            raise MissingArgumentsError(ctx.command, lang.TRANSLATE_TEXT_LANG_CODE_ERR)
         
     @bridge.bridge_command(name="urbandict", aliases=["udict"], description="Gives the definition of a word on Urban Dictionary.",)
     @discord.option(name="word", description="The word you want the definition of.")
@@ -120,7 +127,10 @@ class Utilities(PluginCog):
         embed_viewer = self.bot.add_bot(EmbedViewer(embeds, next_button, previous_button, use_extremes=True))
         await embed_viewer.send_message(ctx)
         
-    @bridge.bridge_command(name="wikipedia", aliases=["wiki"]) # TODO: Add a description
+    @bridge.bridge_command(name="wikipedia", aliases=["wiki"],
+                           description="Searches an article on Wikipedia.", description_localizations={"fr": "Recherche un article sur Wikipédia."}, 
+                           options=[discord.Option(required=True, name="article", description="The name of your article.", 
+                                                   description_localizations={"fr": "Le nom de l'article."})])
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def search_on_wikipedia(self, ctx: bridge.BridgeApplicationContext, article: str = None):
         lang_code = await database.get_language(ctx)
@@ -148,8 +158,8 @@ class Utilities(PluginCog):
             embed.title = page.title
             url = (await page.urls())[0]
             embed.url = url
-            summary = await page.summary()
-            if summary == "": summary = lang.SEARCH_ON_WIKIPEDIA_EMPTY_SUMMARY.format(link=url) # TODO: Fetch the page text when the summary is empty
+            summary = await page.markdown() # TODO: This code doesn't work, fix it.
+            summary = summary if len(summary) > 4096 else summary[:4093]+"..."
             embed.description = summary
             await wiki.close()
             await interaction.response.edit_message(embed=embed, view=None)

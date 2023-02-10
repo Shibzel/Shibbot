@@ -5,7 +5,7 @@ class English:
     SHOW_HELP_OPTION_HOME_LABEL = "Home"
     SHOW_HELP_TITLE = "__**Shibbot Help!**__"
     SHOW_HELP_DESCRIPTION = "**Hi 👋 ! I'm Shibbot**, a multi-purpose discord bot that can do stuff like help you with moderation, searches on wikipedia, send memes, and a lot of other things !"
-    SHOW_HELP_FIELD1_NAME = "blabla"
+    SHOW_HELP_FIELD1_NAME = "blabla" # TODO: Complete this field
     SHOW_HELP_FIELD1_VALUE = "blabla"
     SHOW_HELP_FIELD2_NAME = "What's new in this version ?"
     SHOW_HELP_FIELD2_VALUE = "To see the latest additions to the bot you can jump into [our github's releases]({github_link}) !"

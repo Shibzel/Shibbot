@@ -38,7 +38,7 @@ class ChangeActivity(BaseCog):
             "Shiba Horizon 5", "Portel 2", "Genshit Impact", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️",
         ]
 
-    async def when_fully_ready(self):
+    async def when_ready(self):
         await async_sleep(10)
         logger.log(f"Updating status every {LOOP_TIME} sec.")
         self.change_activity.start()

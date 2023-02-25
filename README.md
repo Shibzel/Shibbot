@@ -3,7 +3,7 @@
 <div align="center">
 	<h1><b>Shibbot</b></h1>
 	<h3>A feature-rich and modular Discord bot written in Python.</h3>
-	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8 | 3.9 | 3.10 | 3.11-blue?style=for-the-badge" href="https://www.python.org/downloads">
+	<img alt="Python version" src="https://img.shields.io/badge/Python-3.8 | 3.9 | 3.10 | 3.11-blue?style=for-the-badge&logo=Python&logoColor=white" href="https://www.python.org/downloads">
     <img alt="Release" src="https://img.shields.io/github/v/release/Shibzel/Shibbot?include_prereleases&label=Latest%20Release&logo=github&sort=semver&style=for-the-badge&logoColor=white&color=red" href="https://github.com/Shibzel/Shibbot/releases/latest">
     <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/Shibzel/Shibbot?style=for-the-badge&color=orange">
     <img alt="Discord server" src="https://img.shields.io/discord/955507499778330625?color=5865F2&label=Server&logo=Discord&logoColor=white&style=for-the-badge" href="https://discord.gg/TZNWfJmPwj">

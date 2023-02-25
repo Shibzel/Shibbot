@@ -8,7 +8,7 @@ from traceback import format_exc
 from time import perf_counter
 
 from . import utils, database
-from .utils.hardware import Uptime, ServerSpecifications, auto_gc
+from .utils.hardware import Uptime, ServerSpecifications
 from .logging import Logger, PStyles
 from .console import Console
 from .constants import COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH, OPTIONAL_COGS, CORE_COGS
@@ -48,7 +48,6 @@ class Shibbot(bridge.Bot):
 
     def __init__(self, debug = False, instance_owners: list[int] = None,
                  use_optional_cogs: bool = True, extentions_path: str | None = None, 
-                 gc_clear: bool = False, gc_sleep: float = 60.0, gc_max_ram: float = 80.0,
                  *args, **kwargs):
         """Parameters
         ----------
@@ -72,7 +71,7 @@ class Shibbot(bridge.Bot):
         logger.log("Initializing Shibbot...")
         start_time = perf_counter()
         
-        self.debug_mode = debug
+        self.set_debug(debug)
         if self.debug_mode:
             logger.warn("Debug/beta mode is enabled.")
         self.extentions_path = extentions_path or EXTENSIONS_PATH
@@ -108,12 +107,7 @@ class Shibbot(bridge.Bot):
         self.console = Console(self)
 
         # Client that gets the specifications of the bot
-        self.specs = ServerSpecifications(bot=self)
-
-        # Runs gc if the program is going to run out of memory
-        if gc_clear:
-            logger.warn(f"Automatic garbage collector enabled. Running it every {gc_sleep} sec.")
-            self.loop.create_task(auto_gc(self.specs, gc_sleep, gc_max_ram))
+        self.specs = ServerSpecifications()
 
         # Synchronous clients for Sqlite3
         self.db = database.db()
@@ -255,6 +249,10 @@ class Shibbot(bridge.Bot):
                 await cog.handle_error(ctx, error)
                 break
         
+    def set_debug(self, debug: bool) -> None:
+        self.debug_mode = debug
+        logger.set_debug_mode(debug)
+        
     async def _perf_command(self, method, ctx) -> None:
         if not ctx.command:
             return
@@ -348,5 +346,5 @@ class PterodactylShibbot(Shibbot):
             Arguments that are directly passed into `.Shibbot`."""
         super().__init__(*args, **kwargs)
         logger.debug("Using the Pterodactyl API to get hardware usage.")
-        self.specs = ServerSpecifications(bot=self, using_ptero=True,
-                                                        ptero_url=ptero_url, ptero_token=ptero_token, ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)
+        self.specs = ServerSpecifications(using_ptero=True, ptero_url=ptero_url, ptero_token=ptero_token,
+                                          ptero_server_id=ptero_server_id, secs_looping=ptero_refresh)

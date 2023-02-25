@@ -1,0 +1,21 @@
+# Here's all the requirements to fulfil and basic settings for Shibbot
+
+[Settings]
+UseConsole = true
+DebugMode = false
+
+[Discord]
+Token = ""
+Owners = []
+
+[Lavalink]
+UseLavalink = false
+IP = "127.0.0.1"
+Port = 69420
+Password = ""
+
+[Pterodactyl]
+UsePterodactylAPI = false
+URL = "https://"
+ServerID = ""
+Token = "ptlc_"

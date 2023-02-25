@@ -1,8 +1,7 @@
-from gc import collect
+import psutil
+import asyncio
 from math import ceil
-from psutil import cpu_count, cpu_percent, virtual_memory
 from aiohttp import ClientSession
-from asyncio import sleep as async_sleep, AbstractEventLoop
 from datetime import datetime
 from orjson import loads
 
@@ -16,13 +15,8 @@ class Uptime:
         now = datetime.utcnow()
         self._delta = now - init_time
         hours, remainder = divmod(int(self._delta.total_seconds()), 3600)
-        days, hours = divmod(hours, 24)
-        minutes, seconds = divmod(remainder, 60)
-
-        self.seconds = seconds
-        self.minutes = minutes
-        self.hours = hours
-        self.days = days
+        self.days, self.hours = divmod(hours, 24)
+        self.minutes, self.seconds = divmod(remainder, 60)
 
     def __repr__(self) -> str:
         return f"<{__name__}.{type(self).__name__} delta={self._delta}>"
@@ -33,9 +27,8 @@ class Uptime:
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, bot, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
-        self.bot = bot
-        self._loop: AbstractEventLoop = bot.loop
+    def __init__(self, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
+        self.loop = asyncio.get_event_loop()
         self.using_pterodactyl = using_ptero
         self._panel_url = ptero_url
         self._token = ptero_token
@@ -50,25 +43,25 @@ class ServerSpecifications:
 
     @property
     def max_memory(self):
-        return virtual_memory().total/1_000_000 if not self.using_pterodactyl else self._max_memory
+        return psutil.virtual_memory().total/1_000_000 if not self.using_pterodactyl else self._max_memory
 
     @property
     def memory_usage(self):
-        return virtual_memory().used/1_000_000 if not self.using_pterodactyl else self._memory_usage
+        return psutil.virtual_memory().used/1_000_000 if not self.using_pterodactyl else self._memory_usage
 
     @property
     def cpu_percentage(self):
-        return cpu_percent() if not self.using_pterodactyl else self._cpu_usage_percent/self._max_cpu_percent*100
+        return psutil.cpu_percent() if not self.using_pterodactyl else self._cpu_usage_percent/self._max_cpu_percent*100
 
     @property
     def threads(self):
-        return cpu_count(logical=True) if not self.using_pterodactyl else self._threads
+        return psutil.cpu_count(logical=True) if not self.using_pterodactyl else self._threads
     
     def start(self):
         if self.using_pterodactyl:
             logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
-            self._loop.create_task(self._get_specs_loop())
-        self._loop.create_task(self._get_location())
+            self.loop.create_task(self._get_specs_loop())
+        self.loop.create_task(self._get_location())
 
     async def close(self):
         self.looping = False
@@ -111,7 +104,7 @@ class ServerSpecifications:
                     if show_error:
                         logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
                         show_error = False
-                await async_sleep(sleep)
+                await asyncio.sleep(sleep)
 
     async def _get_location(self):
         async with ClientSession() as session:
@@ -125,12 +118,4 @@ class ServerSpecifications:
                     logger.debug(f"Got location '{self.location}'.")
                     got_response = True
                 except:
-                    await async_sleep(40)
-            
-async def auto_gc(specs: ServerSpecifications, _sleep: int = 60, max_percentage: float = 80.0):
-    while True:
-        await async_sleep(_sleep)
-        percentage = specs.memory_usage/specs.max_memory*100
-        if percentage > max_percentage:
-            logger.warn(f"Running GC, memory usage exceeding {specs.max_memory/100*max_percentage:.2f}MB (using {specs.memory_usage:.2f} out of {specs.max_memory:.2f}MB, {percentage:.2f}%).")
-            collect()
+                    await asyncio.sleep(40)

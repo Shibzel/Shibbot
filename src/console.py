@@ -150,7 +150,7 @@ class Console:
             logger.log(f"Debug for logging is set as '{logger.is_enabled()}'. Type 'debug true/false' to enable or disable it.")
         else:
             enabled = enabled.lower() == "true"
-            logger.set_debug_mode(enabled)
+            self.bot.set_debug(enabled)
             if enabled:
                 logger.log(f"Setting debug mode for logging as '{enabled}'.")
 

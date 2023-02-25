@@ -1,5 +1,6 @@
 # For this project
 **.sqlite3
+config.toml
 ideas.txt
 cache/*
 logs/*

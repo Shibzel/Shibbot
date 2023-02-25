@@ -40,12 +40,12 @@ class Logger:
     ----------
     file_name: str
         The name of the file this instance is in."""
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str = None):
         """Parameters
         ----------
         file_name: str
             The name of the file you're in."""
-        self.file_name = file_name
+        self.file_name = file_name or "unspecified-dir"
         
     @staticmethod
     def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")

@@ -43,11 +43,11 @@ class ServerSpecifications:
 
     @property
     def max_memory(self):
-        return psutil.virtual_memory().total/1_000_000 if not self.using_pterodactyl else self._max_memory
+        return psutil.virtual_memory().total/1024e3 if not self.using_pterodactyl else self._max_memory
 
     @property
     def memory_usage(self):
-        return psutil.virtual_memory().used/1_000_000 if not self.using_pterodactyl else self._memory_usage
+        return psutil.virtual_memory().used/1024e3 if not self.using_pterodactyl else self._memory_usage
 
     @property
     def cpu_percentage(self):

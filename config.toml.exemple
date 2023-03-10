@@ -1,11 +1,14 @@
-# Here's all the requirements to fulfil and basic settings for Shibbot
-
 [Settings]
 UseConsole = true
 DebugMode = false
+# If you want a better disponibility of ressources by caching them 
+# (uses more ram and storage)
+UseCache = false
 
 [Discord]
 Token = ""
+# Some commands require to be "owner", so the bot must know your 
+# discord id to grant you access
 Owners = []
 
 [Lavalink]

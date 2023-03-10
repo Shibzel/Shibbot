@@ -71,7 +71,8 @@ class Console:
                 except Exception:
                     logger.error("Something went wrong in the console.", e)
             else:
-                logger.error(f"Unknown command '{command_name}'. Try 'help' to see te full list of console commands.")
+                logger.error(f"Unknown command '{command_name}'."
+                             " Try 'help' to see te full list of console commands.")
 
     def start(self) -> None:
         """Starts the input thread."""
@@ -90,7 +91,8 @@ class Console:
         elif commands.get(command_name):
             logger.log(self.strinify_command(command_name))
         else:
-            logger.error(f"Unknown command '{command_name}'. Try 'help' again but without arguments to see te full list of console commands.")
+            logger.error(f"Unknown command '{command_name}'."
+                         " Try 'help' again but without arguments to see te full list of console commands.")
         
     @command()
     def ping(self, *args):
@@ -107,8 +109,11 @@ class Console:
     def stats(self, *args):
         """Shows some stats."""
         ut = self.bot.uptime
-        logger.log(f"Statistics :\nPing: {round(self.bot.latency*1000, 2)}ms\nUptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\nInvoked commands : {self.bot.invoked_commands}\n" + \
-            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\nBiggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
+        logger.log(f"Statistics :\nPing: {round(self.bot.latency*1000, 2)}ms\n"
+                   f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
+                   f"Invoked commands : {self.bot.invoked_commands}\n" + \
+                   f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
+                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
 
     @command()
     def cogs(self, *args):
@@ -141,28 +146,42 @@ class Console:
     @command()
     def gc(self, *args):
         """Runs the garbage collector."""
-        gc.collect()
-        logger.log("Done running GC !")
+        items = gc.collect()
+        logger.log(f"Done running GC ! Collected {items} items.")
         
     @command()
     def debug(self, enabled: str = None, *args):
         if not enabled:
-            logger.log(f"Debug for logging is set as '{logger.is_enabled()}'. Type 'debug true/false' to enable or disable it.")
+            logger.log(f"Debugging is set as '{logger.debugging}'."
+                       " Type 'debug true/false' to enable or disable it.")
         else:
             enabled = enabled.lower() == "true"
             self.bot.set_debug(enabled)
-            if enabled:
-                logger.log(f"Setting debug mode for logging as '{enabled}'.")
+            
+    @command(aliases=["log", "logging"])
+    def logs(self, enabled: str = None, *args):
+        if not enabled:
+            logger.log(f"Logging is set as '{logger.enabled}'."
+                       " Type 'logs true/false' to enable or disable it.")
+        else:
+            logger.log("Are you sure you wanna stop the console thread ? (Y/N) :")
+            response = input()
+            if response.lower() in ("y", ""):
+                enabled = enabled.lower() == "true"
+                logger.enable() if enabled else logger.disable()
+            
+    @command()
+    def disable(self, *args):
+        self.running = False
+        logger.log("Stopping console thread. Goodbye !")
 
     @command(aliases=["close"])
     def stop(self, *args):
         """Stops the bot."""
-        logger.log("Are you sure ? (Y/N) :")
+        logger.log("Are you sure you wanna stop the bot ? (Y/N) :")
         response = input()
         if response.lower() in ("y", ""):
             self.forcestop()
-        else:
-            logger.log("Aborted.")
 
     @command(aliases=["adios"])
     def forcestop(self, *args):

@@ -21,6 +21,14 @@ IS_DEBUGGING_KEY = "debug"
 if not os.path.exists(LOGGER_CACHE_FILE_PATH):
     dump({}, LOGGER_CACHE_FILE_PATH)
 
+def load_cache():
+    return load(LOGGER_CACHE_FILE_PATH)
+
+def dump_cache():
+    dump(cache, LOGGER_CACHE_FILE_PATH)
+
+cache = load_cache()
+
 class PStyles:
     ENDC = "\033[00m"
     WARNING = "\033[93m"
@@ -47,6 +55,14 @@ class Logger:
             The name of the file you're in."""
         self.file_name = file_name or "unspecified-dir"
         
+    @property
+    def enabled(*args):
+        return cache.get(IS_ENABLED_KEY, False)
+    
+    @property
+    def debugging(*args):
+        return cache.get(IS_DEBUGGING_KEY, False)
+        
     @staticmethod
     def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")
     
@@ -58,7 +74,7 @@ class Logger:
     
     @staticmethod    
     def _print(*args, **kwargs):
-        if _logger.is_enabled():
+        if cache.get(IS_ENABLED_KEY):
             print(*args, **kwargs)
 
     def log(self, string: str, color: str | None = None) -> None:
@@ -66,14 +82,14 @@ class Logger:
         string = f"[{self.formated_time()} INFO @{self.file_name}] {string}"
         self._print((color or "") + string + PStyles.ENDC)
         self._write(string)
-
+    
     def debug(self, string: str) -> None:
         """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
         Use for debugging or unimportant things."""
+        if not cache.get(IS_DEBUGGING_KEY):
+            return
         string = f"[{self.formated_time()} DEBUG @{self.file_name}] {string}"
-        logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if IS_DEBUGGING_KEY in logger_cache and logger_cache[IS_DEBUGGING_KEY]:
-            self._print(PStyles.QUIET + string + PStyles.ENDC)
+        self._print(PStyles.QUIET + string + PStyles.ENDC)
         self._write(string)
 
     def warn(self, string: str) -> None:
@@ -97,33 +113,22 @@ class Logger:
         self._write(string+f"\n{error_string}" if error_string else "")
     
     @staticmethod
-    def _set_in_cache(key, value):
-        logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        logger_cache[key] = value
-        dump(logger_cache, LOGGER_CACHE_FILE_PATH)
-        
-    @staticmethod
-    def is_enabled() -> bool:
-        logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if IS_ENABLED_KEY not in logger_cache:
-            logger_cache[IS_ENABLED_KEY] = True
-            dump(logger_cache, LOGGER_CACHE_FILE_PATH)
-        return logger_cache[IS_ENABLED_KEY]
-    
-    @staticmethod
     def enable() -> None:
-        _logger.debug("Logging enabled. Hi, how have you been since ?")
-        _logger._set_in_cache(IS_ENABLED_KEY, True)
+        cache[IS_ENABLED_KEY] = True
+        dump_cache()
+        _logger.log("Logging enabled. Hi, how have you been since ?")
 
     @staticmethod
     def disable() -> None:
-        _logger.debug("Logging disabled, messages will no longer appear on the console.")
-        _logger._set_in_cache(IS_ENABLED_KEY, False)
+        cache[IS_ENABLED_KEY] = False
+        dump_cache()
+        _logger.log("Logging disabled, messages will no longer appear on the console.")
     
     @staticmethod
-    def set_debug_mode(boolean: bool) -> None:
-        _logger.debug(f"Setting debug mode for logging as '{boolean}'.")
-        _logger._set_in_cache(IS_DEBUGGING_KEY, boolean)
+    def set_debug(boolean: bool) -> None:
+        cache[IS_DEBUGGING_KEY] = boolean
+        dump_cache()
+        _logger.log(f"Setting debug mode for logging as '{boolean}'.")
     
     @staticmethod
     def start() -> None:
@@ -132,13 +137,14 @@ class Logger:
         if IS_CLOSED_KEY in logger_cache and not logger_cache[IS_CLOSED_KEY]:
             _logger.debug(f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
             _logger._close()
-        _logger._set_in_cache(IS_CLOSED_KEY, False)
+        global cache
+        cache[IS_CLOSED_KEY] = False
         if os.path.exists(LATEST_LOGS_FILE_PATH):
             os.remove(LATEST_LOGS_FILE_PATH)
-        _logger.debug(f"~~ Starting logging.")
+        _logger.debug("~~ Starting logging.")
 
     @staticmethod
-    def end() -> None: 
+    def end() -> None:
         """To be put at the end of the program."""
         _logger.debug("~~ Program ended correctly.")
         _logger._close()
@@ -163,7 +169,7 @@ class Logger:
             with gzip.open(out_file, "wb+") as gzip_file:
                 gzip_file.write(log_file.read())
         _logger.debug("Done.")
-        _logger._set_in_cache(IS_CLOSED_KEY, True)
-        
-        
+        cache[IS_CLOSED_KEY] = True
+        dump_cache()
+
 _logger = Logger(__name__)

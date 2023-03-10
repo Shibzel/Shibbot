@@ -27,7 +27,8 @@ class Uptime:
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""
 
-    def __init__(self, using_ptero: bool = False, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
+    def __init__(self, using_ptero: bool = False, ptero_url: str = None,
+                 ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
         self.loop = asyncio.get_event_loop()
         self.using_pterodactyl = using_ptero
         self._panel_url = ptero_url

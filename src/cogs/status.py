@@ -1,4 +1,4 @@
-from asyncio import sleep as async_sleep
+import asyncio
 from random import choice
 from discord import Game, Activity, ActivityType, Status
 from discord.ext import tasks
@@ -39,7 +39,7 @@ class ChangeActivity(BaseCog):
         ]
 
     async def when_ready(self):
-        await async_sleep(10)
+        await asyncio.sleep(10)
         logger.log(f"Updating status every {LOOP_TIME} sec.")
         self.change_activity.start()
 

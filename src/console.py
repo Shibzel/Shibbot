@@ -1,8 +1,9 @@
 """Everything about the terminal and the actions that can be taken with it."""
 import gc
-import json
 from threading import Thread
+from sqlite3 import ProgrammingError
 
+from . import __version__
 from .logging import Logger
 
 
@@ -59,17 +60,17 @@ class Console:
             
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
-            logger.log(f"Console input : '{raw_command}'")
+            logger.debug(f"Console input : '{raw_command}'")
             
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)
-                except ConsoleInterruption as e:
-                    raise e
-                except TypeError as e:
-                    logger.error(f"Missing arguments.", e)
-                except Exception:
-                    logger.error("Something went wrong in the console.", e)
+                except ConsoleInterruption as err:
+                    raise err
+                except TypeError as err:
+                    logger.error(f"Missing arguments.", err)
+                except Exception as err:
+                    logger.error("Something went wrong in the console.", err)
             else:
                 logger.error(f"Unknown command '{command_name}'."
                              " Try 'help' to see te full list of console commands.")
@@ -109,24 +110,38 @@ class Console:
     def stats(self, *args):
         """Shows some stats."""
         ut = self.bot.uptime
-        logger.log(f"Statistics :\nPing: {round(self.bot.latency*1000, 2)}ms\n"
-                   f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
-                   f"Invoked commands : {self.bot.invoked_commands}\n" + \
-                   f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
-                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")        
+        logger.log("Statistics :\n"
+            f"Version of Shibbot : v{__version__}\n"
+            f"Ping: {round(self.bot.latency*1000, 2)}ms\n"
+            f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
+            f"Invoked commands : {self.bot.invoked_commands}\n"
+            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
+            f"Users : {len(self.bot.users)}\n"
+            f"Guilds : {len(self.bot.guilds)}\n"
+            f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members"
+        )        
 
     @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
-        logger.log(f"Enabled cogs :\n{json.dumps({name: repr(cog) for name, cog in self.bot.cogs.items()}, indent=4)}")
+        cogs: dict = self.bot.cogs
+        logger.log(f"Enabled cogs ({len(cogs)}) :\n" + \
+                   "\n".join(f"'{k}' ({', '.join(str(base) for base in type(cog).__bases__)}) located at '{type(cog).__module__}'."
+                             f" Author: {cog.author if getattr(cog, 'author', None) else 'builtin or unspecified'}." 
+                                for k, cog in cogs.items()))
 
-    @staticmethod
-    def _apply_on_cog(method, method_name, cog_name):
+    def _apply_on_cog(self, method, method_name, cog_name):
+        def task():
+            try:
+                method(cog_name)
+                logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
+            except Exception as err:
+                logger.error(f"Could not {method_name} '{cog_name}' cog.", err)
         try:
-            method(cog_name)
-            logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
-        except Exception as e:
-            logger.error(f"Could not {method_name} '{cog_name}' cog.", e)
+            task()
+        except ProgrammingError:
+            async def coro(): task()
+            self.bot.loop.create_task(coro())
     
     @command()
     def load(self, cog_name, *args):
@@ -164,16 +179,15 @@ class Console:
             logger.log(f"Logging is set as '{logger.enabled}'."
                        " Type 'logs true/false' to enable or disable it.")
         else:
-            logger.log("Are you sure you wanna stop the console thread ? (Y/N) :")
-            response = input()
-            if response.lower() in ("y", ""):
-                enabled = enabled.lower() == "true"
-                logger.enable() if enabled else logger.disable()
+            logger.enable() if enabled.lower() == "true" else logger.disable()
             
     @command()
     def disable(self, *args):
-        self.running = False
-        logger.log("Stopping console thread. Goodbye !")
+        logger.log("Are you sure you wanna stop the console thread ? (Y/N) :")
+        response = input()
+        if response.lower() in ("y", ""):
+            self.running = False
+            logger.log("Stopping console thread. Goodbye !")
 
     @command(aliases=["close"])
     def stop(self, *args):

@@ -1,4 +1,5 @@
-from asyncio import gather
+import asyncio
+import os
 from aiohttp import ClientSession
 from orjson import loads, dumps
 
@@ -21,6 +22,30 @@ async def json_from_urls(urls: list, *args, **kwargs) -> list[JsonObject]:
     """Asynchronous way to get the json content from an API."""
     try:
         async with ClientSession(*args, **kwargs) as session:
-            return [await response.json(loads=loads) for response in await gather(*[session.get(url) for url in urls])]
-    except Exception:
+            return [await response.json(loads=loads) 
+                    for response in await asyncio.gather(*[session.get(url) for url in urls])]
+    except Exception:  # TODO: Change this general exception
         raise ServiceUnavailableError()
+    
+class StorageCacheHandler:
+    def __init__(self, bot, fp: str):
+        self.bot = bot
+        self.path = fp
+        
+    @property
+    def caching(self) -> bool:
+        return self.bot.caching
+        
+    def store(self, obj: JsonObject = {}, convert: type = None) -> None:
+        if self.caching:
+            if convert:
+                obj = convert(obj)
+            dump(obj, self.path)
+    
+    def get(self, default: JsonObject = None, convert: type = None) -> JsonObject:
+        if os.path.exists(self.path):
+            if obj:= load(self.path):
+                if convert:
+                    obj = convert(obj)
+                return obj
+        return default

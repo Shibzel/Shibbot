@@ -5,10 +5,7 @@ from aiohttp import ClientSession
 from datetime import datetime
 from orjson import loads
 
-from ..logging import Logger
-
-
-logger = Logger(__name__)
+from ..logging import Logger; logger = Logger(__name__)
 
 class Uptime:
     def __init__(self, init_time: float):
@@ -40,7 +37,7 @@ class ServerSpecifications:
                         "Authorization": f"Bearer {self._token}"}
         self.looping = True
         self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
-        self.location: str | None = "None"
+        self.location: str = "None"
 
     @property
     def max_memory(self):

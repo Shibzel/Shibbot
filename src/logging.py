@@ -41,6 +41,37 @@ class PStyles:
     UNDERLINE = "\033[4m"
     ITALICIZED = "\033[3m"
 
+def _print(*args, **kwargs):
+    if cache.get(IS_ENABLED_KEY):
+        print(*args, **kwargs)
+
+def _close():
+    # Compressing log file.
+    extension = LOG_EXTENSION + ".gz"
+    raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
+    if os.path.exists(raw_name+extension):
+        n = 1
+        while True:
+            out_file = f"{raw_name}+{n}"
+            if not os.path.exists(out_file+extension):
+                break
+            n += 1
+    else:
+        out_file = raw_name
+    out_file += extension
+    _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
+    with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
+        with gzip.open(out_file, "wb+") as gzip_file:
+            gzip_file.write(log_file.read())
+    _logger.debug("Done.")
+    cache[IS_CLOSED_KEY] = True
+    dump_cache()
+
+def _write(string):
+    """Adds text to the 'latest.log' file."""
+    with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
+        f.write(string+"\n")
+
 class Logger:
     """A logging class designed for Shibbot.
     
@@ -64,24 +95,13 @@ class Logger:
         return cache.get(IS_DEBUGGING_KEY, False)
         
     @staticmethod
-    def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")
-    
-    @staticmethod
-    def _write(string):
-        """Adds text to the 'latest.log' file."""
-        with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
-            f.write(string+"\n")
-    
-    @staticmethod    
-    def _print(*args, **kwargs):
-        if cache.get(IS_ENABLED_KEY):
-            print(*args, **kwargs)
+    def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")[:13]
 
     def log(self, string: str, color: str | None = None) -> None:
         """Classic method of logging. Can take a 'color' argument which is a string containing an ANSI escape sequence."""
         string = f"[{self.formated_time()} INFO @{self.file_name}] {string}"
-        self._print((color or "") + string + PStyles.ENDC)
-        self._write(string)
+        _print((color or "") + string + PStyles.ENDC)
+        _write(string)
     
     def debug(self, string: str) -> None:
         """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
@@ -89,14 +109,14 @@ class Logger:
         if not cache.get(IS_DEBUGGING_KEY):
             return
         string = f"[{self.formated_time()} DEBUG @{self.file_name}] {string}"
-        self._print(PStyles.QUIET + string + PStyles.ENDC)
-        self._write(string)
+        _print(PStyles.QUIET + string + PStyles.ENDC)
+        _write(string)
 
     def warn(self, string: str) -> None:
         """Warns the user about something."""
         string = f"[{self.formated_time()} WARN @{self.file_name}] {string}"
-        self._print(PStyles.WARNING + string + PStyles.ENDC)
-        self._write(string)
+        _print(PStyles.WARNING + string + PStyles.ENDC)
+        _write(string)
 
     def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
         """Prints the string in bold, bright red to indicate an error to consider.
@@ -107,10 +127,10 @@ class Logger:
             error_string = f"-> {''.join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3))}".replace("\n\n", "")
         elif isinstance(error_or_traceback, str):
             error_string = error_or_traceback
-        self._print(PStyles.ERROR + string + PStyles.ENDC)
+        _print(PStyles.ERROR + string + PStyles.ENDC)
         if error_string:
-            self._print(error_string)
-        self._write(string+f"\n{error_string}" if error_string else "")
+            _print(error_string)
+        _write(string+f"\n{error_string}" if error_string else "")
     
     @staticmethod
     def enable() -> None:
@@ -136,7 +156,7 @@ class Logger:
         logger_cache = load(LOGGER_CACHE_FILE_PATH)
         if IS_CLOSED_KEY in logger_cache and not logger_cache[IS_CLOSED_KEY]:
             _logger.debug(f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
-            _logger._close()
+            _close()
         global cache
         cache[IS_CLOSED_KEY] = False
         if os.path.exists(LATEST_LOGS_FILE_PATH):
@@ -147,29 +167,6 @@ class Logger:
     def end() -> None:
         """To be put at the end of the program."""
         _logger.debug("~~ Program ended correctly.")
-        _logger._close()
-
-    @staticmethod
-    def _close():
-        # Compressing log file.
-        extension = LOG_EXTENSION + ".gz"
-        raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
-        if os.path.exists(raw_name+extension):
-            n = 1
-            while True:
-                out_file = f"{raw_name}+{n}"
-                if not os.path.exists(out_file+extension):
-                    break
-                n += 1
-        else:
-            out_file = raw_name
-        out_file += extension
-        _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
-        with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-            with gzip.open(out_file, "wb+") as gzip_file:
-                gzip_file.write(log_file.read())
-        _logger.debug("Done.")
-        cache[IS_CLOSED_KEY] = True
-        dump_cache()
+        _close()
 
 _logger = Logger(__name__)

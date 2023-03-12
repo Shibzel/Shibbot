@@ -9,7 +9,7 @@ from discord.ext import bridge
 
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications
-from .logging import Logger, PStyles
+from .logging import Logger, PStyles; logger = Logger(__name__)
 from .console import Console
 from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
                         OPTIONAL_COGS, CORE_COGS)
@@ -17,8 +17,6 @@ from .models import PluginCog
 
 
 MAX_PROCESS_TIMES_LEN = 10000
-
-logger = Logger(__name__)
 
 async def get_that_mf_prefix(amogus, ctx):
     return await database.get_prefix(ctx)
@@ -73,8 +71,11 @@ class Shibbot(bridge.Bot):
 
         self.set_debug(debug)
         if self.debug_mode:
-            logger.warn("Debug/beta mode is enabled.")
+            logger.warn("Debug/beta mode enabled.")
         self.caching = caching
+        if self.caching:
+            logger.warn("Caching enabled. Note that this option offers higher disponibility"
+                        " for some ressources but can increase the RAM and disk usage.")
         self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.instance_owners = None
         self.project_owner = None

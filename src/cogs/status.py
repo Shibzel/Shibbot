@@ -40,7 +40,7 @@ class ChangeActivity(BaseCog):
 
     async def when_ready(self):
         await asyncio.sleep(10)
-        logger.log(f"Updating status every {LOOP_TIME} sec.")
+        logger.debug(f"Updating status every {LOOP_TIME} sec.")
         self.change_activity.start()
 
     @tasks.loop(seconds=LOOP_TIME)

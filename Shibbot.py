@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 
 from src import __version__ as version, __github__ as github
 from src.core import Shibbot, PterodactylShibbot
-from src.logging import Logger, PStyles
+from src.logging import Logger, PStyles; logger = Logger(__name__)
 
 
 CONFIG_FILE_PATH = "./config.toml"
@@ -25,18 +25,18 @@ class Syntax(Exception):
 def ascii_art():
     """Shows a beautiful ascii art with a splash text."""
     splash_text = (PStyles.ERROR+"oUUuh scary red message"+PStyles.ENDC, PStyles.OKBLUE+"blue"+PStyles.ENDC,
-                   "goofy aah bot", "E", "a", "really cool ascii art huh?", "boTs havE riGhts ToO", "i love microplastics!",
+                   "goofy aah bot", "E", "a", "really cool ascii art huh?", "boTs havE riGhts ToO",
                    "microwaves be like: hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm *ding*",
-                   "https://media.tenor.com/eyvN-SrFzkwAAAAC/nomoreamogus-amogus.gif", "https://www.youtube.com/watch?v=ZE4yIP2V2uQ",
-                   "*ping*", "created in 2021", "go watch Blade Runner 2049", "discord.com:443", "Around the World, Around the World 🎶",
+                    github, "ඞ", "i got a gun in my rari", "Python Edition", "i'm fucking retarded",
+                   "https://www.youtube.com/watch?v=ZE4yIP2V2uQ","Around the World, Around the World 🎶",
+                   "*ping*", "created in 2021", "go watch Blade Runner 2049", "discord.com:443", "computer compatible!",
                    "god I love listening to CloudNone", "open source!", "I'm in your walls.", "Work of Shibzel!",
-                   "I know your exact location.", "Why are you even reading this", "Singlethreaded!", "I'm a teapot",
-                   "https://media.tenor.com/3qdiScnHBrEAAAAC/chicken.gif", "Water proof!",
-                   ".　　 。　 ඞ 。 . 　　•", "STOP POSTING ABOUT AMONG US, I'M TIRED OF SEEING IT! My friends on TikTok send me memes, on Discord it's fucking memes, i was in a server, right? and ALL of the channels are just Among Us stuff. I-I showed my Champion underwear to my girlfriend, and the logo i flipped it and i said \"Hey babe, when the underwear sus HAHA ding ding ding ding ding ding ding *takes breath* ding ding ding\" I FUCKING LOOKED AT A TRASH CAN, I SAID \"THAT'S A BIT SUSSY\", I LOOKED AT MY PENIS, I THINK OF THE ASTRONAUT'S HELMET, AND I GO \"PENIS, more like peenSUS\" *takes breath* AAAAAAAAAAAAAAA",
-                   "Wooo, memes!", "https://media.tenor.com/pohmzAEOBAcAAAPso/speed-wheelchair.mp4", "a vewy gud bot", "amaznig!!!!",
-                   "holy cow!", "shibe going to space :O", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Python Edition",
-                   "https://www.youtube.com/watch?v=JuEa6Hum0b4", "thanks for using shibbot!", github, "[put something here]",
-                   "computer compatible!", "random text!", "69420 lines of code!", "https://media.tenor.com/GIYc9-gepHoAAAAd/shiba-inu.gif")
+                   "I know your exact location.", "Why are you even reading this", "Singlethreaded!", "Water proof!",
+                   ".　　 。　 ඞ 。 . 　　•", "i love microplastics!", "random text!", "69420 lines of code!"
+                   "STOP POSTING ABOUT AMONG US, I'M TIRED OF SEEING IT! My friends on TikTok send me memes, on Discord it's fucking memes, i was in a server, right? and ALL of the channels are just Among Us stuff. I-I showed my Champion underwear to my girlfriend, and the logo i flipped it and i said \"Hey babe, when the underwear sus HAHA ding ding ding ding ding ding ding *takes breath* ding ding ding\" I FUCKING LOOKED AT A TRASH CAN, I SAID \"THAT'S A BIT SUSSY\", I LOOKED AT MY PENIS, I THINK OF THE ASTRONAUT'S HELMET, AND I GO \"PENIS, more like peenSUS\" *takes breath* AAAAAAAAAAAAAAA",
+                   "Wooo, memes!", "a vewy gud bot",  "amaznig!!!!", "text", "random splash text, go !"
+                   "holy cow!", "shibe going to space :O", "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                   "https://www.youtube.com/watch?v=JuEa6Hum0b4", "thanks for using shibbot!", "[put something here]",)
     print(f"""
             ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣀⣤⠀⣤⡄⡤⣤⢤⣀⡀
@@ -56,7 +56,6 @@ def ascii_art():
 def main():
     """Main function. Do some checks and then starts the bot."""
     cls = Shibbot
-    logger = Logger(__name__)
     logger.start()
 
     repo_name = github.replace("https://github.com/", "")

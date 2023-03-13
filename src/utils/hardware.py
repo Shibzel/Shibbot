@@ -7,6 +7,7 @@ from orjson import loads
 
 from ..logging import Logger; logger = Logger(__name__)
 
+
 class Uptime:
     def __init__(self, init_time: float):
         now = datetime.utcnow()

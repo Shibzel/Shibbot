@@ -139,6 +139,16 @@ class Logger:
         """To be put at the end of the program."""
         _logger.debug("~~ Program ended correctly.")
         _close()
+        
+def cleanup(folder_fp: str, max_files: str):
+    files = os.listdir(folder_fp)
+    if len(files) <= max_files:
+        return 0
+    sorted_by_date = sorted(files, key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
+    items = len(files) - max_files
+    for fichier in sorted_by_date[:items]:
+        os.remove(os.path.join(folder_fp, fichier))
+    return items
 
 def _close():
     # Compressing log file.
@@ -161,16 +171,9 @@ def _close():
     _logger.debug("Done compressing.")
     cache[IS_CLOSED_KEY] = True
     dump_cache()
-    _cleanup()
+    _logger.debug(f"Cleaning up logs (maximum: {MAX_LOG_FILES}).")
+    if items:= cleanup(LOGS_PATH, MAX_LOG_FILES):
+        _logger.debug(f"Deleted {items} log file(s).")
     
-def _cleanup():
-    log_files = os.listdir(LOGS_PATH)
-    if len(log_files) > MAX_LOG_FILES:
-        _logger.debug(f"Cleaning up logs (maximum: {MAX_LOG_FILES}).")
-        sorted_by_date = sorted(log_files, key=lambda x: os.path.getmtime(os.path.join(LOGS_PATH, x)))
-        to_delete = len(log_files) - MAX_LOG_FILES
-        for fichier in sorted_by_date[:to_delete]:
-            os.remove(os.path.join(LOGS_PATH, fichier))
-        _logger.debug(f"Deleted {to_delete} log file(s).")
 
 _logger = Logger(__name__)

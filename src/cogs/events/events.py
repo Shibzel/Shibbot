@@ -9,10 +9,10 @@ from src.logging import Logger
 from src.models import BaseCog, CustomView
 from src.errors import NotInteractionOwner, PluginDisabledError, MissingArgumentsError
 
-from . import French, English
+from . import French, English, __name__ as cog_module_name
 
 
-logger = Logger(__name__)
+logger = Logger(cog_module_name)
 
 class Events(BaseCog):
     def __init__(self, bot):

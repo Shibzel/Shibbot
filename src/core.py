@@ -27,6 +27,8 @@ class Shibbot(bridge.Bot):
     ----------
     debug_mode: `bool`
         Whatever the bot is in debug mode or not.
+    caching: `bool`
+        Whatever the caching is enabled or not.
     extention_path: `str`
         Where the extentions are located.
     init_time: `datetime.datetime`
@@ -35,10 +37,6 @@ class Shibbot(bridge.Bot):
         Whaterver the bot is alive or not. None if the bot never connected to Discord.
     languages: `list`
         The list of languages that the bot supports.
-    reddit: `.utils.reddit.Reddit`
-        The reddit client. Can be None.
-    repidapi_token: `str`
-        The Rapid API token for some commands. Can be None.
     process_times: `list`
         A list of times it took for the commands to execute (in sec).
     invoked_commands: `int`
@@ -53,16 +51,12 @@ class Shibbot(bridge.Bot):
             Whatever the bot is in debug mode or not.
         instance_owners: List[`int`]
             The ids of the owner(s) of this bot instance.
+        caching: `bool`
+            Whatever the caching is enabled or not.
         use_optional_cogs: `bool`
             Whatever you want to load the optional builtin cogs.
         extention_path: `str`
             Where the extentions are located.
-        gc_clear: `bool`
-            If the automatic garbage collector must be enabled.
-        gc_time: `float`
-            The time in seconds to wait before the auto gc checks if it must run.
-        gc_max_ram: `float`
-            The maximum percentage of ram to exceed.
         args: `tuple` & kwargs: dict[`str`, `object`]
             Arguments that are directly passed into `bridge.Bot`.
         """
@@ -284,7 +278,7 @@ class Shibbot(bridge.Bot):
 
         on_guild = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
         logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}."
-                     f"Took {result*1000:.2f}ms.")
+                     f" Took {result*1000:.2f}ms.")
     async def invoke(self, ctx):
         await self._perf_command(super().invoke, ctx)
     async def invoke_application_command(self, ctx):
@@ -314,7 +308,7 @@ class Shibbot(bridge.Bot):
     async def on_ready(self) -> None:
         if self.is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
-            logger.log(f"Setting bot invitation link as ' {self.invite_bot_url} '.")
+            logger.log(f"Setting bot invitation link as {PStyles.UNDERLINE}{self.invite_bot_url}{PStyles.ENDC}.")
 
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])

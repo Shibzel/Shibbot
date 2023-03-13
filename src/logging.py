@@ -9,8 +9,10 @@ import gzip
 from src import __version__
 from src.constants import LOGS_PATH, CACHE_PATH
 from src.utils.json import load, dump
+from src.utils.re import remove_ansi_escape_sequences
 
 
+MAX_LOG_FILES = 10
 LOG_EXTENSION = ".log"
 LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger_cache.json"
 LATEST_LOGS_FILE_PATH = LOGS_PATH + "/latest" + LOG_EXTENSION
@@ -41,36 +43,12 @@ class PStyles:
     UNDERLINE = "\033[4m"
     ITALICIZED = "\033[3m"
 
-def _print(*args, **kwargs):
-    if cache.get(IS_ENABLED_KEY):
-        print(*args, **kwargs)
-
-def _close():
-    # Compressing log file.
-    extension = LOG_EXTENSION + ".gz"
-    raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
-    if os.path.exists(raw_name+extension):
-        n = 1
-        while True:
-            out_file = f"{raw_name}+{n}"
-            if not os.path.exists(out_file+extension):
-                break
-            n += 1
-    else:
-        out_file = raw_name
-    out_file += extension
-    _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
-    with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-        with gzip.open(out_file, "wb+") as gzip_file:
-            gzip_file.write(log_file.read())
-    _logger.debug("Done.")
-    cache[IS_CLOSED_KEY] = True
-    dump_cache()
-
-def _write(string):
+def log(string, **kwargs):
     """Adds text to the 'latest.log' file."""
-    with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
-        f.write(string+"\n")
+    if cache.get(IS_ENABLED_KEY):
+        print(string, **kwargs)
+    with open(LATEST_LOGS_FILE_PATH, "a+") as f:
+        f.write(remove_ansi_escape_sequences(string)+"\n")
 
 class Logger:
     """A logging class designed for Shibbot.
@@ -99,38 +77,31 @@ class Logger:
 
     def log(self, string: str, color: str | None = None) -> None:
         """Classic method of logging. Can take a 'color' argument which is a string containing an ANSI escape sequence."""
-        string = f"[{self.formated_time()} INFO @{self.file_name}] {string}"
-        _print((color or "") + string + PStyles.ENDC)
-        _write(string)
+        log(f"{(color or '')}[{self.formated_time()} INFO @{self.file_name}] {string}{PStyles.ENDC}")
     
     def debug(self, string: str) -> None:
         """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
         Use for debugging or unimportant things."""
         if not cache.get(IS_DEBUGGING_KEY):
             return
-        string = f"[{self.formated_time()} DEBUG @{self.file_name}] {string}"
-        _print(PStyles.QUIET + string + PStyles.ENDC)
-        _write(string)
+        log(f"{PStyles.QUIET}[{self.formated_time()} DEBUG @{self.file_name}] {string}{PStyles.ENDC}")
 
     def warn(self, string: str) -> None:
         """Warns the user about something."""
-        string = f"[{self.formated_time()} WARN @{self.file_name}] {string}"
-        _print(PStyles.WARNING + string + PStyles.ENDC)
-        _write(string)
+        log(f"{PStyles.WARNING}[{self.formated_time()} WARN @{self.file_name}] {string}{PStyles.ENDC}")
 
     def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
         """Prints the string in bold, bright red to indicate an error to consider.
         Can accept a traceback or an error that has been raised in order to format it."""
-        string = f"[{self.formated_time()} ERROR @{self.file_name}] {string}"
+        string = f"{PStyles.ERROR}[{self.formated_time()} ERROR @{self.file_name}] {string}{PStyles.ENDC}"
         error_string = None
         if isinstance(error_or_traceback, Exception):
             error_string = f"-> {''.join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3))}".replace("\n\n", "")
         elif isinstance(error_or_traceback, str):
             error_string = error_or_traceback
-        _print(PStyles.ERROR + string + PStyles.ENDC)
+        log(string)
         if error_string:
-            _print(error_string)
-        _write(string+f"\n{error_string}" if error_string else "")
+            log(error_string)
     
     @staticmethod
     def enable() -> None:
@@ -168,5 +139,38 @@ class Logger:
         """To be put at the end of the program."""
         _logger.debug("~~ Program ended correctly.")
         _close()
+
+def _close():
+    # Compressing log file.
+    extension = LOG_EXTENSION + ".gz"
+    raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
+    if os.path.exists(raw_name+extension):
+        n = 1
+        while True:
+            out_file = f"{raw_name}+{n}"
+            if not os.path.exists(out_file+extension):
+                break
+            n += 1
+    else:
+        out_file = raw_name
+    out_file += extension
+    _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
+    with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
+        with gzip.open(out_file, "wb+") as gzip_file:
+            gzip_file.write(log_file.read())
+    _logger.debug("Done compressing.")
+    cache[IS_CLOSED_KEY] = True
+    dump_cache()
+    _cleanup()
+    
+def _cleanup():
+    log_files = os.listdir(LOGS_PATH)
+    if len(log_files) > MAX_LOG_FILES:
+        _logger.debug(f"Cleaning up logs (maximum: {MAX_LOG_FILES}).")
+        sorted_by_date = sorted(log_files, key=lambda x: os.path.getmtime(os.path.join(LOGS_PATH, x)))
+        to_delete = len(log_files) - MAX_LOG_FILES
+        for fichier in sorted_by_date[:to_delete]:
+            os.remove(os.path.join(LOGS_PATH, fichier))
+        _logger.debug(f"Deleted {to_delete} log file(s).")
 
 _logger = Logger(__name__)

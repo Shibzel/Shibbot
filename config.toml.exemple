@@ -11,11 +11,11 @@ Token = ""
 # discord id to grant you access
 Owners = []
 
-[Lavalink]
-UseLavalink = false
-IP = "127.0.0.1"
-Port = 69420
-Password = ""
+#[Lavalink]
+#UseLavalink = false
+#IP = "127.0.0.1"
+#Port = 69420
+#Password = ""
 
 [Pterodactyl]
 UsePterodactylAPI = false

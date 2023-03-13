@@ -78,7 +78,7 @@ def main():
                 raise Missing(f"Please fulfill the requirements inside of the {CONFIG_FILE_PATH} file.")
         # Loading config
         with open(CONFIG_FILE_PATH, "rb") as toml_file:
-            config: dict = toml.load(toml_file)
+            config: dict[str, dict | object] = toml.load(toml_file)
         settings = config["Settings"]
         
         # Setting up debug mode
@@ -125,16 +125,16 @@ def main():
             logger.error("Couldn't verify if the bot is up to date.")
 
         # Lavalink
-        lavalink = config["Lavalink"]
-        if lavalink["UseLavalink"]:
-            if lavalink["IP"] in ("", "127.0.0.1"):
-                raise Missing("Missing Lavalink server url/IP."
-                              " Self host your own Lavalink server or get a free one on the internet.")
-            ll_port = lavalink["Port"]
-            if isinstance(ll_port, int):
-                raise Syntax("The Lavalink port isn't valid.")
-            if lavalink["Password"] == "":
-                raise Missing("Missing Lavalink password.")
+        # lavalink = config["Lavalink"]
+        # if lavalink["UseLavalink"]:
+        #     if lavalink["IP"] in ("", "127.0.0.1"):
+        #         raise Missing("Missing Lavalink server url/IP."
+        #                       " Self host your own Lavalink server or get a free one on the internet.")
+        #     ll_port = lavalink["Port"]
+        #     if isinstance(ll_port, int):
+        #         raise Syntax("The Lavalink port isn't valid.")
+        #     if lavalink["Password"] == "":
+        #         raise Missing("Missing Lavalink password.")
 
         # Pterodactyl (for the hardware stats, optional)
         pterodactyl = config["Pterodactyl"]

@@ -11,24 +11,29 @@ except ModuleNotFoundError:
 
 from src import __version__ as version, __github__ as github
 from src.core import Shibbot, PterodactylShibbot
-from src.logging import Logger, PStyles; logger = Logger(__name__)
+from src.logging import Logger, PStyles
+logger = Logger(__name__)
 
 
 CONFIG_FILE_PATH = "./config.toml"
 CONFIG_FP_EXEMPLE = CONFIG_FILE_PATH + ".exemple"
 
+
 class Missing(Exception):
     """Raised when something is missing."""
+
+
 class Syntax(Exception):
     """Raised when there is a syntax problem."""
+
 
 def ascii_art():
     """Shows a beautiful ascii art with a splash text."""
     splash_text = (PStyles.ERROR+"oUUuh scary red message"+PStyles.ENDC, PStyles.OKBLUE+"blue"+PStyles.ENDC,
                    "goofy aah bot", "E", "a", "really cool ascii art huh?", "boTs havE riGhts ToO",
                    "microwaves be like: hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm *ding*",
-                    github, "ඞ", "i got a gun in my rari", "Python Edition", "i'm fucking retarded",
-                   "https://www.youtube.com/watch?v=ZE4yIP2V2uQ","Around the World, Around the World 🎶",
+                   github, "ඞ", "i got a gun in my rari", "Python Edition", "i'm fucking retarded",
+                   "https://www.youtube.com/watch?v=ZE4yIP2V2uQ", "Around the World, Around the World 🎶",
                    "*ping*", "created in 2021", "go watch Blade Runner 2049", "discord.com:443", "computer compatible!",
                    "god I love listening to CloudNone", "open source!", "I'm in your walls.", "Work of Shibzel!",
                    "I know your exact location.", "Why are you even reading this", "Singlethreaded!", "Water proof!",
@@ -53,6 +58,7 @@ def ascii_art():
 ⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈       > {PStyles.ITALICIZED + random.choice(splash_text) + PStyles.ENDC}
 ~~""")
 
+
 def main():
     """Main function. Do some checks and then starts the bot."""
     cls = Shibbot
@@ -64,7 +70,8 @@ def main():
         logger.debug(f"Running on Python {python_version()}.")
         if not 7 < int(python_version_tuple()[1]) < 12 and int(python_version_tuple()[0]) != 3:
             # If SOMEHOW you managed to run this script on something else than Python 3.x
-            logger.error(f"Shibbot is not intended to run on version {python_version()} of Python.")
+            logger.error(
+                f"Shibbot is not intended to run on version {python_version()} of Python.")
 
         # Verifies if the config file exists
         if not path.exists(CONFIG_FILE_PATH):
@@ -75,17 +82,18 @@ def main():
                               " To fix this you can re-download the code and try to run it again : "
                               f"https://github.com/{repo_name}/releases/") from exc
             else:
-                raise Missing(f"Please fulfill the requirements inside of the {CONFIG_FILE_PATH} file.")
+                raise Missing(
+                    f"Please fulfill the requirements inside of the {CONFIG_FILE_PATH} file.")
         # Loading config
         with open(CONFIG_FILE_PATH, "rb") as toml_file:
             config: dict[str, dict | object] = toml.load(toml_file)
         settings = config["Settings"]
-        
+
         # Setting up debug mode
         debug = settings.get("DebugMode", False)
         caching = settings.get("UseCache", False)
         console = settings.get("UseConsole", True)
-        kwargs = {"debug": debug, "caching": caching}  
+        kwargs = {"debug": debug, "caching": caching}
 
         # Discord
         discord = config["Discord"]
@@ -107,12 +115,14 @@ def main():
         kwargs["instance_owners"] = instance_owners
 
         # Code version
-        request = requests.get(f"https://api.github.com/repos/{repo_name}/tags", timeout=5)
+        request = requests.get(
+            f"https://api.github.com/repos/{repo_name}/tags", timeout=5)
         response = orjson.loads(request.text)
         if request.status_code == 200:
             last_version = response[0]["name"]
             if last_version == version:
-                logger.log("You're currently using the lastest version, thank you !")
+                logger.log(
+                    "You're currently using the lastest version, thank you !")
             else:
                 for release in response:
                     if release["name"] == version:
@@ -120,7 +130,8 @@ def main():
                                     " Download the latest one here : https://github.com/{repo_name}/releases/")
                         break
                 else:
-                    logger.warn("You're currently using a wip/unlisted version.")
+                    logger.warn(
+                        "You're currently using a wip/unlisted version.")
         else:
             logger.error("Couldn't verify if the bot is up to date.")
 
@@ -143,19 +154,21 @@ def main():
             if ptero_url in ("", "https://"):
                 raise Missing("Missing pterodactyl ptero_url.")
             if ptero_url.endswith("/"):
-                raise Syntax("Your pterodactyl ptero_url mustn't end with '/'.")
+                raise Syntax(
+                    "Your pterodactyl ptero_url mustn't end with '/'.")
             ptero_token = pterodactyl["Token"]
             if ptero_token in ("", "ptlc_"):
-                raise Missing(f"Missing pterodactyl token. You can it here : {ptero_url}account/api/")
+                raise Missing(
+                    f"Missing pterodactyl token. You can it here : {ptero_url}account/api/")
             ptero_server_id = pterodactyl["ServerID"]
             if ptero_server_id == "":
                 raise Missing("Missing pterodactyl server ID."
                               f" The ID is at the end of the server's link in the panel : {ptero_url}server/"
-                            + PStyles.UNDERLINE + "1IdHere" + PStyles.ENDC)
+                              + PStyles.UNDERLINE + "1IdHere" + PStyles.ENDC)
             cls = PterodactylShibbot
             kwargs.update({"ptero_url": ptero_url,
                            "ptero_token": ptero_token,
-                           "ptero_server_id": ptero_server_id,})
+                           "ptero_server_id": ptero_server_id, })
     except Exception as err:
         logger.error("Hemmm... something went wrong :", err)
         logger.end()
@@ -167,13 +180,14 @@ def main():
     try:
         # Instancing Shibbot or PterodactylShibbot with all the necessary kwargs
         shibbot = cls(**kwargs)
-        shibbot.run(token, command_input=console) # Running it
+        shibbot.run(token, command_input=console)  # Running it
     except Exception as err:
         logger.error("Oops... Shibbot stopped ?", err)
 
     logger.end()
 
+
 if __name__ == "__main__":
     ascii_art()
     main()
-    exit() # Exiting because some threads that cannot be terminated can still be running
+    exit()  # Exiting because some threads that cannot be terminated can still be running

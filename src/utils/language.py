@@ -24,6 +24,7 @@ def get_language(_dict: dict, lang_code: str) -> list:
     else:
         return list(_dict)[0] if len(_dict) else None
 
+
 async def factory_language(ctx: bridge.BridgeApplicationContext, languages_dict: dict):
     """Get the language from the database with the context and return the corresponding value using the `.get_language` function.
 

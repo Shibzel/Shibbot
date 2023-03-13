@@ -21,21 +21,30 @@ class ChangeActivity(BaseCog):
         self.bot: Shibbot = bot
         super().__init__(hidden=True)
 
-        self.bot_statutes = [f"version v{version}", "/help", "{latency}ms", "{guilds} servers", "{users} users", __github__]
+        self.bot_statutes = [f"version v{version}", "/help", "{latency}ms", "{guilds} servers",
+                             "{users} users", __github__]
         self.watching_statutes = [
-            "after the guy who stole my milk", "you.", "submissions on Reddit", "the end of the world", "ur mama", "inside your soul",
-            "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo", "JESSE, WE NEED TO COOK JESSE",
-            "doesn't dwayne johnson kinda look like the rock ???", "Mandela Catalogue", "Sr Pelo", "having an existential crisis",
-            "(Mg, Fe)₇Si₈O₂₂(OH)₂", "a mongo on a fork", "at the end of the day it's not that funny is it",
+            "after the guy who stole my milk", "you.", "submissions on Reddit",
+            "the end of the world", "ur mama", "inside your soul",
+            "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo",
+            "JESSE, WE NEED TO COOK JESSE",
+            "doesn't dwayne johnson kinda look like the rock ???", "Mandela Catalogue",
+            "Sr Pelo", "having an existential crisis",
+            "(Mg, Fe)₇Si₈O₂₂(OH)₂", "a mongo on a fork",
+            "at the end of the day it's not that funny is it",
         ]
         self.listening_statutes = [
-            "Jetpack Joyride Main Theme", "Kahoot Lobby Music", "Never Gonna Give You Up", "wenomechainsama", "Bad Computer",
-            "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple", "skrr shtibi shtipi dob dop yes yes jes shtip",
+            "Jetpack Joyride Main Theme", "Kahoot Lobby Music", "Never Gonna Give You Up",
+            "wenomechainsama", "Bad Computer",
+            "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple",
+            "skrr shtibi shtipi dob dop yes yes jes shtip",
             "Petit Biscuit (my beloved)",
         ]
         self.game_statutes = [
-            "Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ", "ROBLOSS", "Cyberpunk 2069", "Minecwaft",
-            "Shiba Horizon 5", "Portel 2", "Genshit Impact", "I'll have 2 number 9", "AMONGOS", "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️",
+            "Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ",
+            "ROBLOSS", "Cyberpunk 2069", "Minecwaft",
+            "Shiba Horizon 5", "Portel 2", "Genshit Impact", "I'll have 2 number 9", "AMONGOS",
+            "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️",
         ]
 
     async def when_ready(self):
@@ -50,9 +59,10 @@ class ChangeActivity(BaseCog):
         latency = int(self.bot.latency * 1000)
 
         if choice((True, False)):
-            activity = Activity(type=ActivityType.watching, name=choice(self.bot_statutes).format(latency=latency,
-                                                                                                  guilds=len(self.bot.guilds),
-                                                                                                  users=len(self.bot.users)))
+            activity = Activity(type=ActivityType.watching,
+                                name=choice(self.bot_statutes).format(latency=latency,
+                                                                    guilds=len(self.bot.guilds),
+                                                                    users=len(self.bot.users)))
         else:
             activity = choice(
                 (Activity(type=ActivityType.watching, name=choice(self.watching_statutes)),

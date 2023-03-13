@@ -9,17 +9,23 @@ from discord.ext import bridge
 
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications
-from .logging import Logger, PStyles; logger = Logger(__name__)
-from .console import Console
+from .logging import Logger, PStyles
+from .models import PluginCog
 from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
                         OPTIONAL_COGS, CORE_COGS)
-from .models import PluginCog
+from .console import Console
+
+
+logger = Logger(__name__)
 
 
 MAX_PROCESS_TIMES_LEN = 10000
 
+
 async def get_that_mf_prefix(amogus, ctx):
     return await database.get_prefix(ctx)
+
+
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3.
     
@@ -81,30 +87,31 @@ class Shibbot(bridge.Bot):
         self.invite_bot_url = None
 
         super().__init__(command_prefix=get_that_mf_prefix,
-                         owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
+                         owner_ids=[SHIBZEL_ID] if instance_owners in (
+                             None, []) else instance_owners,
                          # Being mentionned by a bot is very annoying, that's why it's all set to False.
                          allowed_mentions=discord.AllowedMentions(
-                            everyone=False,
-                            users=True,
-                            roles=True,
-                            replied_user=False),
+                             everyone=False,
+                             users=True,
+                             roles=True,
+                             replied_user=False),
                          intents=discord.Intents(
-                            bans=True,
-                            dm_messages=True, # Waterver we want the bot to respond to dms or not
-                            emojis=True,          
-                            guild_messages=True,
-                            guild_reactions=False, # Not needed yet
-                            guilds=True,
-                            invites=False,
-                            members=True,
-                            message_content=True,
-                            presences=True,
-                            voice_states=False),
+                             bans=True,
+                             dm_messages=True,  # Waterver we want the bot to respond to dms or not
+                             emojis=True,
+                             guild_messages=True,
+                             guild_reactions=False,  # Not needed yet
+                             guilds=True,
+                             invites=False,
+                             members=True,
+                             message_content=True,
+                             presences=True,
+                             voice_states=False),
                          case_insensitive=True,
                          activity=discord.Streaming(
-                            name="connecting...",
-                            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                                if use_optional_cogs else None,
+                             name="connecting...",
+                             url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                         if use_optional_cogs else None,
                          *args, **kwargs)
         super().remove_command("help")
 
@@ -118,7 +125,8 @@ class Shibbot(bridge.Bot):
         self.db = database.db()
         self.cursor = self.db.cursor()
         # Creating default guild table
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
         self.db.commit()
 
         # Loading all extensions and cogs
@@ -128,8 +136,9 @@ class Shibbot(bridge.Bot):
         builtin_path = utils.convert_to_import_path(COGS_PATH)
         builtins_cogs = [f"{builtin_path}.{cog}" for cog in CORE_COGS]
         if use_optional_cogs:
-            builtins_cogs.extend(f"{builtin_path}.{cog}" for cog in OPTIONAL_COGS)
-        for cog in builtins_cogs: 
+            builtins_cogs.extend(
+                f"{builtin_path}.{cog}" for cog in OPTIONAL_COGS)
+        for cog in builtins_cogs:
             self.load_extension(cog)
         # Extensions
         extension_path = utils.convert_to_import_path(self.extentions_path)
@@ -146,13 +155,14 @@ class Shibbot(bridge.Bot):
                 continue
             except ImportError as exc:
                 logger.error(f"Couldn't import the necessary modules for the extension '{cog}'."
-                            " See if there is a requirements.txt inside the folder "
-                            "and then install the dependencies.", exc)
+                             " See if there is a requirements.txt inside the folder "
+                             "and then install the dependencies.", exc)
             except Exception as err:
                 logger.error(f"Couldn't load cog '{cog}'.", err)
 
         if not os.path.exists("./burgir.jpg"):
-            logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.log(
+                "File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages"
@@ -187,9 +197,9 @@ class Shibbot(bridge.Bot):
         -------
         `float`: The average in ms.
         """
-        if length_processing_times:= len(self.process_times): # Returns True if the length != 0
+        if length_processing_times := len(self.process_times):  # Returns True if the length != 0
             return sum(self.process_times)/length_processing_times*1000
-        return 0 # The list is empty
+        return 0  # The list is empty
 
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Loads extensions and cogs optionally and runs the bot.
@@ -201,10 +211,10 @@ class Shibbot(bridge.Bot):
         """
         if command_input:
             self.console.start()
-        self.specs.start()     
+        self.specs.start()
         logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
         super().run(token, *args, **kwargs)
-    
+
     async def close(self, error: Exception = None) -> None:
         """Closes the bot.
 
@@ -248,9 +258,11 @@ class Shibbot(bridge.Bot):
         `TypeError`: `language` isn't an str object.
         """
         if not isinstance(language, str):
-            raise TypeError(f"'language' must be an 'str' object and not '{type(language).__name__}'")
+            raise TypeError(
+                f"'language' must be an 'str' object and not '{type(language).__name__}'")
         if language not in self.languages:
-            logger.debug(f"Adding '{language}' language code in the language list.")
+            logger.debug(
+                f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
 
     async def handle_command_error(self, ctx, error):
@@ -258,7 +270,7 @@ class Shibbot(bridge.Bot):
             if type(cog).__name__ == "Events":  # Bad way to do this.
                 await cog.handle_error(ctx, error)
                 break
-    
+
     def set_debug(self, debug: bool) -> None:
         self.debug_mode = debug
         logger.set_debug(debug)
@@ -279,8 +291,10 @@ class Shibbot(bridge.Bot):
         on_guild = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
         logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}."
                      f" Took {result*1000:.2f}ms.")
+
     async def invoke(self, ctx):
         await self._perf_command(super().invoke, ctx)
+
     async def invoke_application_command(self, ctx):
         await self._perf_command(super().invoke_application_command, ctx)
 
@@ -290,13 +304,16 @@ class Shibbot(bridge.Bot):
             method(*args, **kwargs)
         except AttributeError:
             method(*args, **kwargs)
+
     def load_extension(self, name: str, *args, **kwargs):
         logger.debug(f"Initializing cog '{name}'.")
         self._on_cog(super().load_extension, name, *args, **kwargs)
+
     def unload_extension(self, name: str, *args, **kwargs):
         logger.debug(f"Unloading cog '{name}'.")
         self._on_cog(super().unload_extension, name, *args, **kwargs)
-    def reload_extension(self, name: str, *args, **kwargs): 
+
+    def reload_extension(self, name: str, *args, **kwargs):
         logger.debug(f"Reloading cog '{name}'.")
         self._on_cog(super().reload_extension, name, *args, **kwargs)
 
@@ -308,16 +325,18 @@ class Shibbot(bridge.Bot):
     async def on_ready(self) -> None:
         if self.is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
-            logger.log(f"Setting bot invitation link as {PStyles.UNDERLINE}{self.invite_bot_url}{PStyles.ENDC}.")
+            logger.log(
+                f"Setting bot invitation link as {PStyles.UNDERLINE}{self.invite_bot_url}{PStyles.ENDC}.")
 
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             logger.log("The following users are the owners of this instance : {0}.".format(
-                            ", ".join(f"'{user}'" for user in self.instance_owners)))
+                ", ".join(f"'{user}'" for user in self.instance_owners)))
         elif self.is_alive is False:
             await self.on_resumed()
         self.is_alive = True
-        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
+        logger.log(
+            f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
 
     async def on_resumed(self) -> None:
         self.is_alive = True
@@ -338,9 +357,11 @@ class Shibbot(bridge.Bot):
 
     async def on_guild_remove(self, guild: discord.Guild) -> None:
         logger.debug(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
-    
+
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
-        logger.error(f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
+        logger.error(
+            f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
+
 
 class PterodactylShibbot(Shibbot):
     """A subclass of `Shibbot` using the Pterodactyl API for hardware usage."""

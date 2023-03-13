@@ -14,6 +14,7 @@ from . import French, English, __name__ as cog_module_name
 
 logger = Logger(cog_module_name)
 
+
 class Events(BaseCog):
     def __init__(self, bot):
         self.bot: Shibbot = bot
@@ -31,8 +32,9 @@ class Events(BaseCog):
 
     async def handle_error(self, ctx: bridge.BridgeContext, error):
         logger.debug(f"Handling error : {type(error).__name__}: {str(error)}")
-        if isinstance(error, commands.CommandOnCooldown) and self.user_on_cooldown(ctx.command.name, ctx.author.id):
-            return
+        if isinstance(error, commands.CommandOnCooldown):
+            if self.user_on_cooldown(ctx.command.name, ctx.author.id):
+                return
 
         lang_code = await database.get_language(ctx)
         lang = get_language(self.languages, lang_code)
@@ -44,42 +46,57 @@ class Events(BaseCog):
             cooldown = error.cooldown.get_retry_after()
             time = error.cooldown.per
             ephemeral = True
-            self.bot.loop.create_task(self.add_user_cooldown(cooldown, ctx.command.name, ctx.author.id))
-            description = error_dict["CommandOnCooldown"].format(n_secs=round(cooldown, 2))
+            self.bot.loop.create_task(self.add_user_cooldown(
+                cooldown, ctx.command.name, ctx.author.id))
+            description = error_dict["CommandOnCooldown"].format(
+                n_secs=round(cooldown, 2))
         elif isinstance(error, NotInteractionOwner):
-            content = error_dict["NotInteractionOwner"].format(user_interacting=error.user_interacting.mention, interaction_owner=error.interaction_owner.mention)
+            content = error_dict["NotInteractionOwner"].format(
+                user_interacting=error.user_interacting.mention,
+                interaction_owner=error.interaction_owner.mention)
             return await send(ctx, content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
-            return await send(ctx, content=error_dict["PluginDisabledError"].format(plugin=error.plugin_name), ephemeral=True)
+            return await send(ctx, content=error_dict["PluginDisabledError"].format(
+                plugin=error.plugin_name), ephemeral=True)
         elif isinstance(error, MissingArgumentsError):
-            description = error_dict["MissingArgumentsError"].format(command_usage=stringify_command_usage(error.command, lang_code))
-            if message:= error.error_case_msg:
+            description = error_dict["MissingArgumentsError"].format(
+                command_usage=stringify_command_usage(error.command, lang_code))
+            if message := error.error_case_msg:
                 description += f" {message}"
         elif isinstance(error, commands.NSFWChannelRequired):
-            description = error_dict["NSFWChannelRequired"].format(channel=error.channel.mention)
+            description = error_dict["NSFWChannelRequired"].format(
+                channel=error.channel.mention)
         elif isinstance(error, commands.MissingPermissions):
-            description = error_dict["MissingPermissions"].format(permissions=" & ".join(permission.replace("_", " ") for permission in error.missing_permissions))
+            description = error_dict["MissingPermissions"].format(permissions=" & ".join(
+                permission.replace("_", " ") for permission in error.missing_permissions))
         elif isinstance(error, (commands.CommandNotFound, commands.CheckFailure,)):
             return
         else:
-            error_name = type(error).__name__ if not isinstance(error, discord.Forbidden) else commands.BotMissingPermissions.__name__
+            error_name = type(error).__name__ if not isinstance(
+                error, discord.Forbidden) else commands.BotMissingPermissions.__name__
             if error_name in error_dict:
                 description = error_dict[error_name]
             else:
-                if isinstance(ctx, discord.Interaction): # TODO: Make the code more reliable that "this"
+                # TODO: Make the code more reliable that "this"
+                if isinstance(ctx, discord.Interaction):
                     name = repr(ctx)
                     author = ctx.user
                 else:
                     name = ctx.command.name
                     author = ctx.author
                 error_message = f"Unexpected error with command '{name}' "
-                if guild:= ctx.guild: error_message += f"on guild {guild.name} (ID: {guild.id})."
-                else: error_message += f"with user {author} (ID: {author.id})."
+                if guild := ctx.guild:
+                    error_message += f"on guild {guild.name} (ID: {guild.id})."
+                else:
+                    error_message += f"with user {author} (ID: {author.id})."
                 logger.error(error_message, error)
-                description = error_dict["CommandError"].format(owner=self.bot.get_user(self.bot.owner_id))
+                description = error_dict["CommandError"].format(
+                    owner=self.bot.get_user(self.bot.owner_id))
 
         if not ephemeral:
-            dismiss_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")
+            dismiss_button = discord.ui.Button(
+                style=discord.ButtonStyle.danger, label=lang.DISSMISS_BUTTON, emoji="✖")
+
             async def delete_message(interaction: discord.Interaction):
                 try:
                     await interaction.message.delete()
@@ -87,13 +104,19 @@ class Events(BaseCog):
                 except (discord.Forbidden, discord.NotFound, AttributeError):
                     pass
             dismiss_button.callback = delete_message
-            view = self.bot.add_bot(CustomView(dismiss_button, disable_on_timeout=True))
+            view = self.bot.add_bot(CustomView(
+                dismiss_button, disable_on_timeout=True))
         else:
             view = None
 
-        embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE, description="🔶 "+description, color=discord.Color.red())
+        embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE,
+                              description="🔶 "+description, color=discord.Color.red())
         await send(ctx, embed=embed, view=view, delete_after=time, ephemeral=ephemeral)
+
     @discord.Cog.listener()
-    async def on_application_command_error(self, ctx, error): await self.handle_error(ctx, error)
+    async def on_application_command_error(
+        self, ctx, error): await self.handle_error(ctx, error)
+
     @discord.Cog.listener()
-    async def on_command_error(self, ctx, error): await self.handle_error(ctx, error)
+    async def on_command_error(
+        self, ctx, error): await self.handle_error(ctx, error)

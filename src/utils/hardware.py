@@ -5,7 +5,10 @@ from aiohttp import ClientSession
 from datetime import datetime
 from orjson import loads
 
-from ..logging import Logger; logger = Logger(__name__)
+from ..logging import Logger
+
+
+logger = Logger(__name__)
 
 
 class Uptime:
@@ -18,9 +21,11 @@ class Uptime:
 
     def __repr__(self) -> str:
         return f"<{__name__}.{type(self).__name__} delta={self._delta}>"
-    
+
     def __str__(self) -> str:
-        return f"{__name__}.{type(self).__name__}(days={self.days}, hours={self.hours}, minutes={self.minutes}, seconds={self.seconds})"
+        return f"{__name__}.{type(self).__name__}(days={self.days}, hours={self.hours}," + \
+               f" minutes={self.minutes}, seconds={self.seconds})"
+
 
 class ServerSpecifications:
     """This dumbass dev forgot to add a documentation."""
@@ -34,8 +39,8 @@ class ServerSpecifications:
         self._server_id = ptero_server_id
         self.secs_looping = secs_looping
         self._headers = {"Accept": "application/json",
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {self._token}"}
+                         "Content-Type": "application/json",
+                         "Authorization": f"Bearer {self._token}"}
         self.looping = True
         self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
         self.location: str = "None"
@@ -55,10 +60,11 @@ class ServerSpecifications:
     @property
     def threads(self):
         return psutil.cpu_count(logical=True) if not self.using_pterodactyl else self._threads
-    
+
     def start(self):
         if self.using_pterodactyl:
-            logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
+            logger.debug(
+                "Beginning to retrieve server hardware usage on the Pterodactyl API.")
             self.loop.create_task(self._get_specs_loop())
         self.loop.create_task(self._get_location())
 
@@ -86,22 +92,26 @@ class ServerSpecifications:
                 limits = await self._get_limits()
                 self._max_memory = limits["memory"]  # In MB.
                 self._max_cpu_percent = limits["cpu"]
-                self._threads = limits["threads"] if limits["threads"] else ceil(self._max_cpu_percent/100)
+                self._threads = limits["threads"] if limits["threads"] else ceil(
+                    self._max_cpu_percent/100)
                 show_error = True
             except Exception as e:
                 if show_error:
-                    logger.error("Failed to obtain the bot's hardware limits on Pterodactyl.", e)
+                    logger.error(
+                        "Failed to obtain the bot's hardware limits on Pterodactyl.", e)
                     show_error = False
             for _ in range(int(300/self.secs_looping)):
                 sleep = self.secs_looping
                 try:
                     current = await self._get_current()
-                    self._memory_usage = current["memory_bytes"]/1_000_000 # Bytes -> MB
+                    # Bytes -> MB
+                    self._memory_usage = current["memory_bytes"]/1_000_000
                     self._cpu_usage_percent = current["cpu_absolute"]
                     show_error = True
                 except Exception as e:
                     if show_error:
-                        logger.error("Failed to obtain the bot's hardware usage on Pterodactyl.", e)
+                        logger.error(
+                            "Failed to obtain the bot's hardware usage on Pterodactyl.", e)
                         show_error = False
                 await asyncio.sleep(sleep)
 

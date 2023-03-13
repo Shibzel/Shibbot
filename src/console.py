@@ -9,13 +9,18 @@ from .logging import Logger
 
 logger = Logger(__name__)
 
+
 class ConsoleInterruption(Exception):
     """Raised when the bot is stopping because of an user interaction."""
+
     def __init__(self, message=None):
         super().__init__(message or "Shibbot was asked to stop by the console.")
 
+
 commands = {}
 without_aliases = []
+
+
 def command(name: str = None, aliases: list = None):
     """A decorator indicating that this function is a console command."""
     def pred(foo):
@@ -26,6 +31,7 @@ def command(name: str = None, aliases: list = None):
             commands[n] = foo
         return foo
     return pred
+
 
 class Console:
     """Console object for Shibbot.
@@ -39,6 +45,7 @@ class Console:
     thread: threading.Thread
         The thread object.
     """
+
     def __init__(self, bot):
         """Parameters:
         ----------
@@ -48,7 +55,7 @@ class Console:
         self.running = True
 
         self.thread = Thread(target=self.main, name="ConsoleThread")
-             
+
     def main(self):
         """The code running inside the thread."""
         logger.log("Console commands available. Type 'help'.")
@@ -57,11 +64,11 @@ class Console:
             raw_command = input()
             if raw_command == "":
                 continue
-            
+
             list_command = raw_command.split(" ")
             command_name, command_args = list_command[0], list_command[1:]
             logger.debug(f"Console input : '{raw_command}'")
-            
+
             if commands.get(command_name):
                 try:
                     commands[command_name](self, *command_args)
@@ -94,7 +101,7 @@ class Console:
         else:
             logger.error(f"Unknown command '{command_name}'."
                          " Try 'help' again but without arguments to see te full list of console commands.")
-        
+
     @command()
     def ping(self, *args):
         """Returns the ping of the bot."""
@@ -104,31 +111,32 @@ class Console:
     def uptime(self, *args):
         """Shows the uptime."""
         uptime = self.bot.uptime
-        logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours, {uptime.minutes} min and {uptime.seconds} sec.")
+        logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours,"
+                   f" {uptime.minutes} min and {uptime.seconds} sec.")
 
     @command()
     def stats(self, *args):
         """Shows some stats."""
         ut = self.bot.uptime
         logger.log("Statistics :\n"
-            f"Version of Shibbot : v{__version__}\n"
-            f"Ping: {round(self.bot.latency*1000, 2)}ms\n"
-            f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
-            f"Invoked commands : {self.bot.invoked_commands}\n"
-            f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
-            f"Users : {len(self.bot.users)}\n"
-            f"Guilds : {len(self.bot.guilds)}\n"
-            f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members"
-        )        
+                   f"Version of Shibbot : v{__version__}\n"
+                   f"Ping: {round(self.bot.latency*1000, 2)}ms\n"
+                   f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
+                   f"Invoked commands : {self.bot.invoked_commands}\n"
+                   f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
+                   f"Users : {len(self.bot.users)}\n"
+                   f"Guilds : {len(self.bot.guilds)}\n"
+                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members"
+                   )
 
     @command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
         cogs: dict = self.bot.cogs
-        logger.log(f"Enabled cogs ({len(cogs)}) :\n" + \
+        logger.log(f"Enabled cogs ({len(cogs)}) :\n" +
                    "\n".join(f"'{k}' ({', '.join(str(base) for base in type(cog).__bases__)}) located at '{type(cog).__module__}'."
-                             f" Author: {cog.author if getattr(cog, 'author', None) else 'builtin or unspecified'}." 
-                                for k, cog in cogs.items()))
+                             f" Author: {cog.author if getattr(cog, 'author', None) else 'builtin or unspecified'}."
+                             for k, cog in cogs.items()))
 
     def _apply_on_cog(self, method, method_name, cog_name):
         def task():
@@ -142,7 +150,7 @@ class Console:
         except ProgrammingError:
             async def coro(): task()
             self.bot.loop.create_task(coro())
-    
+
     @command()
     def load(self, cog_name, *args):
         """Loads a cog. Args: 'cog_name' (needed)."""
@@ -163,7 +171,7 @@ class Console:
         """Runs the garbage collector."""
         items = gc.collect()
         logger.log(f"Done running GC ! Collected {items} items.")
-        
+
     @command()
     def debug(self, enabled: str = None, *args):
         if not enabled:
@@ -172,7 +180,7 @@ class Console:
         else:
             enabled = enabled.lower() == "true"
             self.bot.set_debug(enabled)
-            
+
     @command(aliases=["log", "logging"])
     def logs(self, enabled: str = None, *args):
         if not enabled:
@@ -180,7 +188,7 @@ class Console:
                        " Type 'logs true/false' to enable or disable it.")
         else:
             logger.enable() if enabled.lower() == "true" else logger.disable()
-            
+
     @command()
     def disable(self, *args):
         logger.log("Are you sure you wanna stop the console thread ? (Y/N) :")

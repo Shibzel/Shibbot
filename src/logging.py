@@ -23,13 +23,17 @@ IS_DEBUGGING_KEY = "debug"
 if not os.path.exists(LOGGER_CACHE_FILE_PATH):
     dump({}, LOGGER_CACHE_FILE_PATH)
 
+
 def load_cache():
     return load(LOGGER_CACHE_FILE_PATH)
+
 
 def dump_cache():
     dump(cache, LOGGER_CACHE_FILE_PATH)
 
+
 cache = load_cache()
+
 
 class PStyles:
     ENDC = "\033[00m"
@@ -43,12 +47,14 @@ class PStyles:
     UNDERLINE = "\033[4m"
     ITALICIZED = "\033[3m"
 
+
 def log(string, **kwargs):
     """Adds text to the 'latest.log' file."""
-    if cache.get(IS_ENABLED_KEY):
+    if cache.get(IS_ENABLED_KEY, True):
         print(string, **kwargs)
     with open(LATEST_LOGS_FILE_PATH, "a+") as f:
         f.write(remove_ansi_escape_sequences(string)+"\n")
+
 
 class Logger:
     """A logging class designed for Shibbot.
@@ -57,28 +63,30 @@ class Logger:
     ----------
     file_name: str
         The name of the file this instance is in."""
+
     def __init__(self, file_name: str = None):
         """Parameters
         ----------
         file_name: str
             The name of the file you're in."""
         self.file_name = file_name or "unspecified-dir"
-        
+
     @property
     def enabled(*args):
         return cache.get(IS_ENABLED_KEY, False)
-    
+
     @property
     def debugging(*args):
         return cache.get(IS_DEBUGGING_KEY, False)
-        
+
     @staticmethod
-    def formated_time() -> str: return datetime.now().strftime("%H:%M:%S.%f")[:13]
+    def formated_time(
+    ) -> str: return datetime.now().strftime("%H:%M:%S.%f")[:13]
 
     def log(self, string: str, color: str | None = None) -> None:
         """Classic method of logging. Can take a 'color' argument which is a string containing an ANSI escape sequence."""
         log(f"{(color or '')}[{self.formated_time()} INFO @{self.file_name}] {string}{PStyles.ENDC}")
-    
+
     def debug(self, string: str) -> None:
         """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
         Use for debugging or unimportant things."""
@@ -102,7 +110,7 @@ class Logger:
         log(string)
         if error_string:
             log(error_string)
-    
+
     @staticmethod
     def enable() -> None:
         cache[IS_ENABLED_KEY] = True
@@ -113,20 +121,22 @@ class Logger:
     def disable() -> None:
         cache[IS_ENABLED_KEY] = False
         dump_cache()
-        _logger.log("Logging disabled, messages will no longer appear on the console.")
-    
+        _logger.log(
+            "Logging disabled, messages will no longer appear on the console.")
+
     @staticmethod
     def set_debug(boolean: bool) -> None:
         cache[IS_DEBUGGING_KEY] = boolean
         dump_cache()
         _logger.log(f"Setting debug mode for logging as '{boolean}'.")
-    
+
     @staticmethod
     def start() -> None:
         """To be put at the beginning of the program."""
         logger_cache = load(LOGGER_CACHE_FILE_PATH)
         if IS_CLOSED_KEY in logger_cache and not logger_cache[IS_CLOSED_KEY]:
-            _logger.debug(f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
+            _logger.debug(
+                f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
             _close()
         global cache
         cache[IS_CLOSED_KEY] = False
@@ -139,16 +149,19 @@ class Logger:
         """To be put at the end of the program."""
         _logger.debug("~~ Program ended correctly.")
         _close()
-        
+
+
 def cleanup(folder_fp: str, max_files: str):
     files = os.listdir(folder_fp)
     if len(files) <= max_files:
         return 0
-    sorted_by_date = sorted(files, key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
+    sorted_by_date = sorted(
+        files, key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
     items = len(files) - max_files
     for fichier in sorted_by_date[:items]:
         os.remove(os.path.join(folder_fp, fichier))
     return items
+
 
 def _close():
     # Compressing log file.
@@ -172,8 +185,8 @@ def _close():
     cache[IS_CLOSED_KEY] = True
     dump_cache()
     _logger.debug(f"Cleaning up logs (maximum: {MAX_LOG_FILES}).")
-    if items:= cleanup(LOGS_PATH, MAX_LOG_FILES):
+    if items := cleanup(LOGS_PATH, MAX_LOG_FILES):
         _logger.debug(f"Deleted {items} log file(s).")
-    
+
 
 _logger = Logger(__name__)

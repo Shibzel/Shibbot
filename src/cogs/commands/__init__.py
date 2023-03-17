@@ -1,4 +1,4 @@
-from .lang import French, English
+from .lang import French, English, Shibberish
 from .commands import BotsCommands
 
 

@@ -10,7 +10,7 @@ from src.utils import get_description_localization, stringify_command_usage, get
 from src.constants import SERVER_INVITATION_LINK, LANGUAGES_FLAGS, LANGUAGES
 from src.errors import NotInteractionOwner, MissingArgumentsError
 
-from . import English, French
+from . import English, French, Shibberish
 
 
 class BotsCommands(BaseCog):
@@ -20,7 +20,7 @@ class BotsCommands(BaseCog):
             name={"en": "Info & Config", "fr": "Infos & Config"},
             description={"en": "Everything about the bot.",
                          "fr": "Tout ce qui concerne le bot."},
-            languages={"en": English, "fr": French}, emoji="⚙️"
+            languages={"en": English, "fr": French, "shibberish": Shibberish}, emoji="⚙️"
         )
 
     @bridge.bridge_command(name="help", description="Shows help.",

@@ -4,6 +4,7 @@ DEFAULT_LANGUAGE = "en"
 DATABASE_FILE_PATH = "./database.sqlite3"
 LOGS_PATH = "./logs"
 CACHE_PATH = "./cache"
+TEMPORARY_CACHE_PATH = CACHE_PATH + "/temp"
 
 COGS_PATH = "./src/cogs"
 EXTENSIONS_PATH = "./extensions"
@@ -11,17 +12,101 @@ CORE_COGS = ("commands", "events",)
 OPTIONAL_COGS = (
     "owner",
     "status",
-    #"mod",
-    #"automod",
+    "mod",
+    "automod",
     "fun",
     "utils",
-    #"music",
+    # "music",
     "misc",
 )
 BUILTIN_COGS = CORE_COGS + OPTIONAL_COGS
 
-LANGUAGES = {'af': 'afrikaans', 'sq': 'albanian', 'am': 'amharic', 'ar': 'arabic', 'hy': 'armenian', 'az': 'azerbaijani', 'eu': 'basque', 'be': 'belarusian', 'bn': 'bengali', 'bs': 'bosnian', 'bg': 'bulgarian', 'ca': 'catalan', 'ceb': 'cebuano', 'ny': 'chichewa', 'zh-CN': 'chinese (simplified)', 'zh-TW': 'chinese (traditional)', 'co': 'corsican', 'hr': 'croatian', 'cs': 'czech', 'da': 'danish', 'nl': 'dutch', 'en': 'english', 'eo': 'esperanto', 'et': 'estonian', 'tl': 'filipino', 'fi': 'finnish', 'fr': 'french', 'fy': 'frisian', 'gl': 'galician', 'ka': 'georgian', 'de': 'german', 'el': 'greek', 'gu': 'gujarati', 'ht': 'haitian creole', 'ha': 'hausa', 'haw': 'hawaiian', 'iw': 'hebrew', 'hi': 'hindi', 'hmn': 'hmong', 'hu': 'hungarian', 'is': 'icelandic', 'ig': 'igbo', 'id': 'indonesian', 'ga': 'irish', 'it': 'italian', 'ja': 'japanese', 'jw': 'javanese', 'kn': 'kannada', 'kk': 'kazakh', 'km': 'khmer', 'rw': 'kinyarwanda', 'ko': 'korean', 'ku': 'kurdish', 'ky': 'kyrgyz', 'lo': 'lao', 'la': 'latin', 'lv': 'latvian', 'lt': 'lithuanian', 'lb': 'luxembourgish', 'mk': 'macedonian', 'mg': 'malagasy', 'ms': 'malay', 'ml': 'malayalam', 'mt': 'maltese', 'mi': 'maori', 'mr': 'marathi', 'mn': 'mongolian', 'my': 'myanmar', 'ne': 'nepali', 'no': 'norwegian', 'or': 'odia', 'ps': 'pashto', 'fa': 'persian', 'pl': 'polish', 'pt': 'portuguese', 'pa': 'punjabi', 'ro': 'romanian', 'ru': 'russian', 'sm': 'samoan', 'gd': 'scots gaelic', 'sr': 'serbian', 'st': 'sesotho', 'sn': 'shona', 'sd': 'sindhi', 'si': 'sinhala', 'sk': 'slovak', 'sl': 'slovenian', 'so': 'somali', 'es': 'spanish', 'su': 'sundanese', 'sw': 'swahili', 'sv': 'swedish', 'tg': 'tajik', 'ta': 'tamil', 'tt': 'tatar', 'te': 'telugu', 'th': 'thai', 'tr': 'turkish', 'tk': 'turkmen', 'uk': 'ukrainian', 'ur': 'urdu', 'ug': 'uyghur', 'uz': 'uzbek', 'vi': 'vietnamese', 'cy': 'welsh', 'xh': 'xhosa', 'yi': 'yiddish', 'yo': 'yoruba', 'zu': 'zulu'}
-LANGUAGES_FLAGS = {"en": "🇬🇧", "fr": "🇫🇷",}
+LANGUAGES = {
+    "shibberish": "Shibberish", # Similar to "LolCat"
+    "fr": "French",
+    "en": "English",
+    "es": "Spanish",
+    "de": "German",
+    "pt": "Portuguese",
+    "zh": "Chinese",
+    "ko": "Korean",
+    "ja": "Japanese",
+    "ar": "Arabic",
+    "ru": "Russian",
+    "it": "Italian",
+    "nl": "Dutch",
+    "tr": "Turkish",
+    "sv": "Swedish",
+    "pl": "Polish",
+    "ro": "Romanian",
+    "uk": "Ukrainian",
+    "cs": "Czech",
+    "hu": "Hungarian",
+    "fi": "Finnish",
+    "no": "Norwegian",
+    "da": "Danish",
+    "hi": "Hindi",
+    "th": "Thai",
+    "vi": "Vietnamese",
+    "id": "Indonesian",
+    "ms": "Malay",
+    "tl": "Tagalog",
+    "fa": "Persian",
+    "he": "Hebrew",
+    "el": "Greek",
+    "bg": "Bulgarian",
+    "sr": "Serbian",
+    "hr": "Croatian",
+    "sk": "Slovak",
+    "sl": "Slovenian",
+    "et": "Estonian",
+    "lv": "Latvian",
+    "lt": "Lithuanian",
+    # "language code": "language name",
+}
+LANGUAGES_FLAGS = {
+    "shibberish": "💬",
+    "fr": "🇫🇷",
+    "en": "🇬🇧",
+    "es": "🇪🇸",
+    "de": "🇩🇪",
+    "pt": "🇵🇹",
+    "zh": "🇨🇳",
+    "ko": "🇰🇷",
+    "ja": "🇯🇵",
+    "ar": "🇸🇦",
+    "ru": "🇷🇺",
+    "it": "🇮🇹",
+    "nl": "🇳🇱",
+    "tr": "🇹🇷",
+    "sv": "🇸🇪",
+    "pl": "🇵🇱",
+    "ro": "🇷🇴",
+    "uk": "🇺🇦",
+    "cs": "🇨🇿",
+    "hu": "🇭🇺",
+    "fi": "🇫🇮",
+    "no": "🇳🇴",
+    "da": "🇩🇰",
+    "hi": "🇮🇳",
+    "th": "🇹🇭",
+    "vi": "🇻🇳",
+    "id": "🇮🇩",
+    "ms": "🇲🇾",
+    "tl": "🇵🇭",
+    "fa": "🇮🇷",
+    "he": "🇮🇱",
+    "el": "🇬🇷",
+    "bg": "🇧🇬",
+    "sr": "🇷🇸",
+    "hr": "🇭🇷",
+    "sk": "🇸🇰",
+    "sl": "🇸🇮",
+    "et": "🇪🇪",
+    "lv": "🇱🇻",
+    "lt": "🇱🇹",
+    # "language code": "flag emoji",
+}
 
 SHIBZEL_ID = 380044496370532353
 SERVER_INVITATION_LINK = "https://discord.gg/TZNWfJmPwj"

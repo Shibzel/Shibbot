@@ -67,11 +67,13 @@ def main():
     repo_name = github.replace("https://github.com/", "")
     try:
         # Indicating Python version in debug logs
-        logger.debug(f"Running on Python {python_version()}.")
-        if not 7 < int(python_version_tuple()[1]) < 12 and int(python_version_tuple()[0]) != 3:
+        py_ver_string = python_version()
+        py_ver_tuple = python_version_tuple()
+        logger.debug(f"Running on Python {py_ver_string}.")
+        if not 7 < int(py_ver_tuple[1]) < 12 and int(py_ver_tuple[0]) != 3:
             # If SOMEHOW you managed to run this script on something else than Python 3.x
             logger.error(
-                f"Shibbot is not intended to run on version {python_version()} of Python.")
+                f"Shibbot is not intended to run on version {py_ver_string} of Python.")
 
         # Verifies if the config file exists
         if not path.exists(CONFIG_FILE_PATH):

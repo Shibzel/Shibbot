@@ -1,11 +1,12 @@
 """Shibbot's base."""
 import os
+import random
 import asyncio
 from datetime import datetime, timedelta
 from traceback import format_exc
 from time import perf_counter
 import discord
-from discord.ext import bridge
+from discord.ext import bridge, commands
 
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications
@@ -87,8 +88,9 @@ class Shibbot(bridge.Bot):
         self.invite_bot_url = None
 
         super().__init__(command_prefix=get_that_mf_prefix,
-                         owner_ids=[SHIBZEL_ID] if instance_owners in (
-                             None, []) else instance_owners,
+                         owner_ids=[SHIBZEL_ID] 
+                            if instance_owners in (None, []) 
+                            else instance_owners,
                          # Being mentionned by a bot is very annoying, that's why it's all set to False.
                          allowed_mentions=discord.AllowedMentions(
                              everyone=False,
@@ -111,7 +113,7 @@ class Shibbot(bridge.Bot):
                          activity=discord.Streaming(
                              name="connecting...",
                              url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                         if use_optional_cogs else None,
+                                if use_optional_cogs else None,
                          *args, **kwargs)
         super().remove_command("help")
 
@@ -125,8 +127,9 @@ class Shibbot(bridge.Bot):
         self.db = database.db()
         self.cursor = self.db.cursor()
         # Creating default guild table
-        self.cursor.execute(
-            "CREATE TABLE IF NOT EXISTS guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)")
+        query = "CREATE TABLE IF NOT EXISTS " + \
+                "guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)"
+        self.cursor.execute(query)
         self.db.commit()
 
         # Loading all extensions and cogs
@@ -161,8 +164,7 @@ class Shibbot(bridge.Bot):
                 logger.error(f"Couldn't load cog '{cog}'.", err)
 
         if not os.path.exists("./burgir.jpg"):
-            logger.log(
-                "File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages"
@@ -177,7 +179,14 @@ class Shibbot(bridge.Bot):
         -------
         dict[`str`, `.models.PluginCog`]
         """
-        return {cog.plugin_name: cog for cog in self.cogs.values() if isinstance(cog, PluginCog)}
+        return {cog.plugin_name: cog
+                for cog in self.cogs.values()
+                if isinstance(cog, PluginCog)}
+        
+    @property
+    def cogs(self) -> dict[str, discord.Cog]:
+        """A read-only sorted mapping of cog name to cog."""
+        return dict(sorted(super().cogs.items()))
 
     @property
     def uptime(self) -> Uptime:
@@ -212,7 +221,9 @@ class Shibbot(bridge.Bot):
         if command_input:
             self.console.start()
         self.specs.start()
-        logger.log("Connecting... wait a few seconds.", PStyles.OKBLUE)
+        connect_message = ("Connecting... wait a few seconds." 
+                        if random.randint(0, 99) else "Lodin cheeseburgers...")
+        logger.log(connect_message, PStyles.OKBLUE)
         super().run(token, *args, **kwargs)
 
     async def close(self, error: Exception = None) -> None:
@@ -261,8 +272,7 @@ class Shibbot(bridge.Bot):
             raise TypeError(
                 f"'language' must be an 'str' object and not '{type(language).__name__}'")
         if language not in self.languages:
-            logger.debug(
-                f"Adding '{language}' language code in the language list.")
+            logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
 
     async def handle_command_error(self, ctx, error):
@@ -275,7 +285,7 @@ class Shibbot(bridge.Bot):
         self.debug_mode = debug
         logger.set_debug(debug)
 
-    async def _perf_command(self, method, ctx) -> None:
+    async def _perf_command(self, method, ctx: discord.SlashCommand | commands.Context) -> None:
         if not ctx.command:
             return
 
@@ -285,17 +295,19 @@ class Shibbot(bridge.Bot):
 
         self.process_times.append(result)
         if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
-            self.process_times = self.process_times[1:]
+            del self.process_times[1:]
         self.invoked_commands += 1
 
-        on_guild = f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" if ctx.guild else ""
-        logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id}) is running the command '{ctx.command}'{on_guild}."
+        on_guild = (f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" 
+                        if ctx.guild else "")
+        logger.debug(f"User '{ctx.author}' (ID: {ctx.author.id})"
+                     f" is running the command '{ctx.command}'{on_guild}."
                      f" Took {result*1000:.2f}ms.")
 
-    async def invoke(self, ctx):
+    async def invoke(self, ctx: commands.Context):
         await self._perf_command(super().invoke, ctx)
 
-    async def invoke_application_command(self, ctx):
+    async def invoke_application_command(self, ctx: discord.ApplicationContext):
         await self._perf_command(super().invoke_application_command, ctx)
 
     def _on_cog(self, method, *args, **kwargs) -> None:
@@ -319,24 +331,26 @@ class Shibbot(bridge.Bot):
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content:
-            if before.created_at.timestamp() >= (datetime.utcnow()-timedelta(minutes=5)).timestamp():
+            five_minutes_ago = (datetime.utcnow()-timedelta(minutes=5)).timestamp()
+            if before.created_at.timestamp() >= five_minutes_ago:
                 await self.process_commands(after)
 
     async def on_ready(self) -> None:
         if self.is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
-            logger.log(
-                f"Setting bot invitation link as {PStyles.UNDERLINE}{self.invite_bot_url}{PStyles.ENDC}.")
+            underlined_link = PStyles.UNDERLINE + self.invite_bot_url + PStyles.ENDC
+            logger.log(f"Setting bot invitation link as {underlined_link}.")
 
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
-            self.instance_owners = await asyncio.gather(*[self.get_or_fetch_user(_id) for _id in self.owner_ids])
-            logger.log("The following users are the owners of this instance : {0}.".format(
-                ", ".join(f"'{user}'" for user in self.instance_owners)))
+            self.instance_owners = await asyncio.gather(
+                *[self.get_or_fetch_user(_id) for _id in self.owner_ids])
+            users = ", ".join(f"'{user}'" for user in self.instance_owners)
+            logger.log(f"The following users are the owners of this instance : {users}.")
         elif self.is_alive is False:
             await self.on_resumed()
         self.is_alive = True
-        logger.log(
-            f"Ready. Connected as '{self.user}' (ID : {self.user.id}).", PStyles.OKGREEN)
+        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).",
+                   PStyles.OKGREEN)
 
     async def on_resumed(self) -> None:
         self.is_alive = True
@@ -359,8 +373,8 @@ class Shibbot(bridge.Bot):
         logger.debug(f"Left guild '{guild.name}' (ID: {guild.id}). Goodbye.")
 
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
-        logger.error(
-            f"Ignoring exception in {event_method}: \n{PStyles.ENDC}-> {format_exc()}")
+        logger.error(f"Ignoring exception in {event_method}: \n"
+                     f"{PStyles.ENDC}-> {format_exc()}")
 
 
 class PterodactylShibbot(Shibbot):

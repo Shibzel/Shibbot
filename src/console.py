@@ -1,11 +1,12 @@
 """Everything about the terminal and the actions that can be taken with it."""
 import gc
+import os
 from threading import Thread
 from sqlite3 import ProgrammingError
 
 from . import __version__
 from .logging import Logger
-
+from .constants import CACHE_PATH, TEMPORARY_CACHE_PATH
 
 logger = Logger(__name__)
 
@@ -21,7 +22,7 @@ commands = {}
 without_aliases = []
 
 
-def command(name: str = None, aliases: list = None):
+def console_command(name: str = None, aliases: list = None):
     """A decorator indicating that this function is a console command."""
     def pred(foo):
         nonlocal name
@@ -87,34 +88,35 @@ class Console:
         self.thread.start()
 
     @staticmethod
-    def strinify_command(command_name):
+    def strinify_console_command(command_name):
         _command = commands[command_name]
         return f"{command_name}: {_command.__doc__ if _command.__doc__ else 'No description provided.'}"
 
-    @command()
+    @console_command()
     def help(self, command_name: str | None = None, *args):
         """Shows all console commands. Args: 'command_name' (optional)."""
         if not command_name:
             logger.log(f"Available commands : {', '.join(without_aliases)}.")
         elif commands.get(command_name):
-            logger.log(self.strinify_command(command_name))
+            logger.log(self.strinify_console_command(command_name))
         else:
             logger.error(f"Unknown command '{command_name}'."
-                         " Try 'help' again but without arguments to see te full list of console commands.")
+                         " Try 'help' again but without arguments to see the"
+                         " full list of console commands.")
 
-    @command()
+    @console_command()
     def ping(self, *args):
         """Returns the ping of the bot."""
         logger.log(f"Ping: {round(self.bot.latency*1000, 2)}ms.")
 
-    @command()
+    @console_command()
     def uptime(self, *args):
         """Shows the uptime."""
         uptime = self.bot.uptime
         logger.log(f"Up for : {uptime.days} days, {uptime.hours} hours,"
                    f" {uptime.minutes} min and {uptime.seconds} sec.")
 
-    @command()
+    @console_command()
     def stats(self, *args):
         """Shows some stats."""
         ut = self.bot.uptime
@@ -126,70 +128,80 @@ class Console:
                    f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
                    f"Users : {len(self.bot.users)}\n"
                    f"Guilds : {len(self.bot.guilds)}\n"
-                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members"
-                   )
+                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")
 
-    @command()
+    @console_command()
     def cogs(self, *args):
         """Shows all the enabled cogs."""
         cogs: dict = self.bot.cogs
-        logger.log(f"Enabled cogs ({len(cogs)}) :\n" +
-                   "\n".join(f"'{k}' ({', '.join(str(base) for base in type(cog).__bases__)}) located at '{type(cog).__module__}'."
-                             f" Author: {cog.author if getattr(cog, 'author', None) else 'builtin or unspecified'}."
-                             for k, cog in cogs.items()))
+        text = f"Enabled cogs ({len(cogs)}) :\n"
+        for k, cog in cogs.items():
+            cog_type = type(cog)
+            bases = ", ".join(base.__name__ for base in cog_type.__bases__)
+            text += f"'{k}' ({bases}) located at '{cog_type.__module__}'."
+            if author:= getattr(cog, "author", None):
+                text += f" Author: {author}."
+            text += "\n"
+        logger.log(text)
 
     def _apply_on_cog(self, method, method_name, cog_name):
         def task():
             try:
                 method(cog_name)
                 logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
+            except ProgrammingError as exc:
+                raise exc
             except Exception as err:
                 logger.error(f"Could not {method_name} '{cog_name}' cog.", err)
         try:
             task()
-        except ProgrammingError:
-            async def coro(): task()
-            self.bot.loop.create_task(coro())
+            return
+        except ProgrammingError as err:
+            logger.error("Oops, an error occured with Sqlite."
+                            f" {method_name.title()}ing asynchronously instead.", err)
+        async def coro(): task()
+        logger.log("The action on this cog is planned, it can take some time if the bot is busy.")
+        self.bot.loop.create_task(coro())
 
-    @command()
+    @console_command()
     def load(self, cog_name, *args):
         """Loads a cog. Args: 'cog_name' (needed)."""
         self._apply_on_cog(self.bot.load_extension, "load", cog_name)
 
-    @command()
+    @console_command()
     def unload(self, cog_name, *args):
         """Unloads a cog. Args: 'cog_name' (needed)."""
         self._apply_on_cog(self.bot.unload_extension, "unload", cog_name)
 
-    @command()
+    @console_command()
     def reload(self, cog_name, *args):
         """Reloads a cog. Args: 'cog_name' (needed)."""
         self._apply_on_cog(self.bot.reload_extension, "reload", cog_name)
 
-    @command()
+    @console_command()
     def gc(self, *args):
         """Runs the garbage collector."""
         items = gc.collect()
-        logger.log(f"Done running GC ! Collected {items} items.")
+        logger.log(f"Done running GC ! Collected {items} items.")            
 
-    @command()
+    @console_command()
     def debug(self, enabled: str = None, *args):
-        if not enabled:
+        if not enabled.lower() in ("true", "false"):
             logger.log(f"Debugging is set as '{logger.debugging}'."
                        " Type 'debug true/false' to enable or disable it.")
         else:
             enabled = enabled.lower() == "true"
             self.bot.set_debug(enabled)
 
-    @command(aliases=["log", "logging"])
+    @console_command(aliases=["log", "logging"])
     def logs(self, enabled: str = None, *args):
-        if not enabled:
+        if not enabled.lower() in ("true", "false"):
             logger.log(f"Logging is set as '{logger.enabled}'."
                        " Type 'logs true/false' to enable or disable it.")
         else:
             logger.enable() if enabled.lower() == "true" else logger.disable()
 
-    @command()
+    @console_command()
     def disable(self, *args):
         logger.log("Are you sure you wanna stop the console thread ? (Y/N) :")
         response = input()
@@ -197,7 +209,7 @@ class Console:
             self.running = False
             logger.log("Stopping console thread. Goodbye !")
 
-    @command(aliases=["close"])
+    @console_command(aliases=["close"])
     def stop(self, *args):
         """Stops the bot."""
         logger.log("Are you sure you wanna stop the bot ? (Y/N) :")
@@ -205,7 +217,7 @@ class Console:
         if response.lower() in ("y", ""):
             self.forcestop()
 
-    @command(aliases=["adios"])
+    @console_command(aliases=["adios"])
     def forcestop(self, *args):
         """Stops the bot without asking if the user is sure."""
         logger.log("Stopping Shibbot...")

@@ -53,7 +53,8 @@ def log(string, **kwargs):
     if cache.get(IS_ENABLED_KEY, True):
         print(string, **kwargs)
     with open(LATEST_LOGS_FILE_PATH, "a+") as f:
-        f.write(remove_ansi_escape_sequences(string)+"\n")
+        cleaned_string = remove_ansi_escape_sequences(string)
+        f.write(cleaned_string+"\n")
 
 
 class Logger:
@@ -84,11 +85,13 @@ class Logger:
     ) -> str: return datetime.now().strftime("%H:%M:%S.%f")[:13]
 
     def log(self, string: str, color: str | None = None) -> None:
-        """Classic method of logging. Can take a 'color' argument which is a string containing an ANSI escape sequence."""
+        """Classic method of logging.
+        Can take a 'color' argument which is a string containing an ANSI escape sequence."""
         log(f"{(color or '')}[{self.formated_time()} INFO @{self.file_name}] {string}{PStyles.ENDC}")
 
     def debug(self, string: str) -> None:
-        """Prints the string if debug mode is enabled and writes to the log file whether debug is enabled or not.
+        """Prints the string if debug mode is enabled and writes to the log file whether
+        debug is enabled or not.
         Use for debugging or unimportant things."""
         if not cache.get(IS_DEBUGGING_KEY):
             return
@@ -104,7 +107,9 @@ class Logger:
         string = f"{PStyles.ERROR}[{self.formated_time()} ERROR @{self.file_name}] {string}{PStyles.ENDC}"
         error_string = None
         if isinstance(error_or_traceback, Exception):
-            error_string = f"-> {''.join(format_exception(type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3))}".replace("\n\n", "")
+            formated_err_lines = format_exception(
+                type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3)
+            error_string = f"-> {''.join(formated_err_lines)}".replace("\n\n", "\n")
         elif isinstance(error_or_traceback, str):
             error_string = error_or_traceback
         log(string)
@@ -155,8 +160,8 @@ def cleanup(folder_fp: str, max_files: str):
     files = os.listdir(folder_fp)
     if len(files) <= max_files:
         return 0
-    sorted_by_date = sorted(
-        files, key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
+    sorted_by_date = sorted(files,
+                            key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
     items = len(files) - max_files
     for fichier in sorted_by_date[:items]:
         os.remove(os.path.join(folder_fp, fichier))
@@ -166,17 +171,12 @@ def cleanup(folder_fp: str, max_files: str):
 def _close():
     # Compressing log file.
     extension = LOG_EXTENSION + ".gz"
-    raw_name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
-    if os.path.exists(raw_name+extension):
-        n = 1
-        while True:
-            out_file = f"{raw_name}+{n}"
-            if not os.path.exists(out_file+extension):
-                break
-            n += 1
-    else:
-        out_file = raw_name
-    out_file += extension
+    raw_name = name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
+    n = 1
+    while os.path.exists(name+extension):
+        name = f"{raw_name}+{n}"
+        n += 1
+    out_file = name + extension
     _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
     with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
         with gzip.open(out_file, "wb+") as gzip_file:

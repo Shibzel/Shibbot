@@ -91,13 +91,14 @@ class BaseCog(Cog):
 
 class PluginCog(BaseCog):
     def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):
+        logger.debug(f"Creating '{plugin_name}_plugin' table in database.")
+        query = ("CREATE TABLE IF NOT EXISTS "
+                f"{plugin_name}_plugin(guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
+        self.bot.cursor.execute(query)
+        self.bot.db.commit()
         self.plugin_name = plugin_name
         self.guild_only = guild_only
         super().__init__(*args, **kwargs)
-        logger.debug(f"Creating '{plugin_name}_plugin' table in database.")
-        self.bot.cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {plugin_name}_plugin (guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
-        self.bot.db.commit()
 
     async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
         async with AsyncDB() as db:

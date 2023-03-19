@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from traceback import format_exc
 from time import perf_counter
 import discord
-from discord.ext import bridge, commands
+from discord.ext import bridge, commands as cmmds
 
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications
@@ -84,7 +84,8 @@ class Shibbot(bridge.Bot):
         self.is_alive = None
         self.languages = []
         self.process_times = []
-        self.invoked_commands = 0
+        self.commands_invoked = 0
+        self.slash_commands_invoked = 0
         self.invite_bot_url = None
 
         super().__init__(command_prefix=get_that_mf_prefix,
@@ -164,11 +165,11 @@ class Shibbot(bridge.Bot):
                 logger.error(f"Couldn't load cog '{cog}'.", err)
 
         if not os.path.exists("./burgir.jpg"):
-            logger.log("File 'burgir.jpg' is missing, why did you delete it ???")
+            logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages"
-                   f" and {len(self.plugins)} plugins for {len(self.cogs)} cogs."
+                   f", {len(self.commands)} commands for {len(self.cogs)} cogs ({len(self.plugins)} plugins)."
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
 
     @property
@@ -209,6 +210,22 @@ class Shibbot(bridge.Bot):
         if length_processing_times := len(self.process_times):  # Returns True if the length != 0
             return sum(self.process_times)/length_processing_times*1000
         return 0  # The list is empty
+    
+    @property
+    def invoked_commands(self) -> int:
+        return self.commands_invoked + self.slash_commands_invoked
+    
+    @property
+    def commands(self, hidden: bool = False) -> set:
+        if not hidden:
+            return super().commands
+        cogs = self.cogs.values()
+        _commands = []
+        for cog in cogs:
+            if getattr(cog, "hidden", True):
+                continue
+            _commands.extend(cog.get_commands())
+        return set(_commands)
 
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         """Loads extensions and cogs optionally and runs the bot.
@@ -274,6 +291,7 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
+            self.languages.sort()
 
     async def handle_command_error(self, ctx, error):
         for cog in self.cogs.values():
@@ -285,8 +303,9 @@ class Shibbot(bridge.Bot):
         self.debug_mode = debug
         logger.set_debug(debug)
 
-    async def _perf_command(self, method, ctx: discord.SlashCommand | commands.Context) -> None:
+    async def _perf_command(self, method, ctx: discord.SlashCommand | cmmds.Context) -> None:
         if not ctx.command:
+            # I don't remember what this does but i'm pretty sure it's important
             return
 
         start_time = perf_counter()
@@ -296,7 +315,6 @@ class Shibbot(bridge.Bot):
         self.process_times.append(result)
         if len(self.process_times) > MAX_PROCESS_TIMES_LEN:
             del self.process_times[1:]
-        self.invoked_commands += 1
 
         on_guild = (f" on guild '{ctx.guild}' (ID: {ctx.guild.id})" 
                         if ctx.guild else "")
@@ -304,11 +322,13 @@ class Shibbot(bridge.Bot):
                      f" is running the command '{ctx.command}'{on_guild}."
                      f" Took {result*1000:.2f}ms.")
 
-    async def invoke(self, ctx: commands.Context):
+    async def invoke(self, ctx: cmmds.Context):
         await self._perf_command(super().invoke, ctx)
+        self.commands_invoked += 1
 
     async def invoke_application_command(self, ctx: discord.ApplicationContext):
         await self._perf_command(super().invoke_application_command, ctx)
+        self.slash_commands_invoked += 1
 
     def _on_cog(self, method, *args, **kwargs) -> None:
         """Fixes a bug beacause using methods like loading must run twice."""
@@ -339,7 +359,7 @@ class Shibbot(bridge.Bot):
         if self.is_alive is None:
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
             underlined_link = PStyles.UNDERLINE + self.invite_bot_url + PStyles.ENDC
-            logger.log(f"Setting bot invitation link as {underlined_link}.")
+            logger.log(f"Setting bot invitation link as {underlined_link}")
 
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(

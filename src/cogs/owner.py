@@ -3,9 +3,8 @@ from discord.ext import commands
 import traceback
 
 from src.core import Shibbot
-from src.logging import Logger
-from src.constants import CACHE_PATH
-
+from src.logging import Logger, LATEST_LOGS_FILE_PATH
+from src.constants import TEMPORARY_CACHE_PATH
 
 logger = Logger(__name__)
 
@@ -13,7 +12,7 @@ def setup(bot):
     bot.add_cog(OwnerCommands(bot))
 
 def create_log_file(error):
-    path = CACHE_PATH+"/latest_error.log"
+    path = TEMPORARY_CACHE_PATH+"/latest_error.log"
     with open(path, "w+") as f:
         f.write("".join(traceback.format_exception(type(error), error, error.__traceback__)))
     return path
@@ -58,3 +57,8 @@ class OwnerCommands(commands.Cog):
     async def owner(self, ctx: commands.Context):
         if ctx.author == self.bot.project_owner:
             await ctx.send(f"Hey {self.bot.project_owner.mention}, I know you ! You wrote my code !")
+            
+    @commands.command()
+    @commands.is_owner()
+    async def logs(self, ctx: commands.Context):
+        await ctx.send(file=discord.File(fp=LATEST_LOGS_FILE_PATH))

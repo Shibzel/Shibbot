@@ -169,7 +169,7 @@ class Shibbot(bridge.Bot):
             # Really ?! Why ???
 
         logger.log(f"Finished initialization : {len(self.languages)} languages"
-                   f", {len(self.commands)} commands for {len(self.cogs)} cogs ({len(self.plugins)} plugins)."
+                   f", {len(self.get_commands())} commands for {len(self.cogs)} cogs ({len(self.plugins)} plugins)."
                    f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
 
     @property
@@ -215,8 +215,7 @@ class Shibbot(bridge.Bot):
     def invoked_commands(self) -> int:
         return self.commands_invoked + self.slash_commands_invoked
     
-    @property
-    def commands(self, hidden: bool = False) -> set:
+    def get_commands(self, hidden: bool = False) -> set:
         if not hidden:
             return super().commands
         cogs = self.cogs.values()
@@ -226,42 +225,6 @@ class Shibbot(bridge.Bot):
                 continue
             _commands.extend(cog.get_commands())
         return set(_commands)
-
-    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
-        """Loads extensions and cogs optionally and runs the bot.
-
-        Parameters
-        ----------
-        command_input: `bool`
-            Accept command input from the user. Defaults to False.
-        """
-        if command_input:
-            self.console.start()
-        self.specs.start()
-        connect_message = ("Connecting... wait a few seconds." 
-                        if random.randint(0, 99) else "Lodin cheeseburgers...")
-        logger.log(connect_message, PStyles.OKBLUE)
-        super().run(token, *args, **kwargs)
-
-    async def close(self, error: Exception = None) -> None:
-        """Closes the bot.
-
-        Parameters
-        ----------
-        error: `Exception`
-            The error which caused the bot to stop.
-
-        Raises
-        ------
-        `Exception`: Reraised error, if there is one.
-        """
-        logger.error("Shibbot is being stopped, goodbye !", error)
-        await self.specs.close()
-        await super().close()
-        self.loop.close()
-        self.db.close()
-        if error:
-            raise error
 
     def add_bot(self, cls: object) -> object:
         """Adds the bot to the class if it has the attribute `bot`. 
@@ -395,6 +358,42 @@ class Shibbot(bridge.Bot):
     async def on_error(self, event_method: str, *args, **kwargs) -> None:
         logger.error(f"Ignoring exception in {event_method}: \n"
                      f"{PStyles.ENDC}-> {format_exc()}")
+
+    def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
+        """Loads extensions and cogs optionally and runs the bot.
+
+        Parameters
+        ----------
+        command_input: `bool`
+            Accept command input from the user. Defaults to False.
+        """
+        if command_input:
+            self.console.start()
+        self.specs.start()
+        connect_message = ("Connecting... wait a few seconds." 
+                        if random.randint(0, 99) else "Lodin cheeseburgers...")
+        logger.log(connect_message, PStyles.OKBLUE)
+        super().run(token, *args, **kwargs)
+
+    async def close(self, error: Exception = None) -> None:
+        """Closes the bot.
+
+        Parameters
+        ----------
+        error: `Exception`
+            The error which caused the bot to stop.
+
+        Raises
+        ------
+        `Exception`: Reraised error, if there is one.
+        """
+        logger.error("Shibbot is being stopped, goodbye !", error)
+        await self.specs.close()
+        await super().close()
+        self.loop.close()
+        self.db.close()
+        if error:
+            raise error
 
 
 class PterodactylShibbot(Shibbot):

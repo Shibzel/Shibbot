@@ -10,7 +10,7 @@ COGS_PATH = "./src/cogs"
 EXTENSIONS_PATH = "./extensions"
 CORE_COGS = ("commands", "events",)
 OPTIONAL_COGS = (
-    "owner",
+    "admin",
     "status",
     # "mod",
     # "automod",

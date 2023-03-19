@@ -1,5 +1,5 @@
 import asyncio
-from random import choice
+import random
 from discord import Game, Activity, ActivityType, Status
 from discord.ext import tasks
 
@@ -21,30 +21,25 @@ class ChangeActivity(BaseCog):
         self.bot: Shibbot = bot
         super().__init__(hidden=True)
 
-        self.bot_statutes = [f"version v{version}", "/help", "{latency}ms", "{guilds} servers",
-                             "{users} users", __github__]
+        self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users"]
         self.watching_statutes = [
             "after the guy who stole my milk", "you.", "submissions on Reddit",
-            "the end of the world", "ur mama", "inside your soul",
+            "the end of the world", "ur mama", "inside your soul", "(Mg, Fe)₇Si₈O₂₂(OH)₂",
             "Breaking Bed", "hentai", "your brain cells go", "boTs hAve riGhtS tOo",
-            "JESSE, WE NEED TO COOK JESSE",
+            "JESSE, WE NEED TO COOK JESSE", "Sr Pelo", "having an existential crisis",
             "doesn't dwayne johnson kinda look like the rock ???", "Mandela Catalogue",
-            "Sr Pelo", "having an existential crisis",
-            "(Mg, Fe)₇Si₈O₂₂(OH)₂", "a mongo on a fork",
-            "at the end of the day it's not that funny is it",
+            "at the end of the day it's not that funny is it", "a mongo on a fork",
         ]
         self.listening_statutes = [
             "Jetpack Joyride Main Theme", "Kahoot Lobby Music", "Never Gonna Give You Up",
-            "wenomechainsama", "Bad Computer",
-            "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS", "Bad Apple",
-            "skrr shtibi shtipi dob dop yes yes jes shtip",
-            "Petit Biscuit (my beloved)",
+            "wenomechainsama", "Bad Computer", "🗿", "EEEAAAOOO", "ShibASMR", "A SOUNGUS AMONGUS",
+            "Bad Apple", "skrr shtibi shtipi dob dop yes yes jes shtip", "Petit Biscuit (my beloved)",
         ]
         self.game_statutes = [
             "Sea of Shibbs", "Five Nights at Doggo's", "Fortinaiti ila Babaji ?", "Amogus ඞ",
-            "ROBLOSS", "Cyberpunk 2069", "Minecwaft",
+            "ROBLOSS", "Cyberpunk 2069", "Minecwaft", "OneShot", "🤸🦽🏌️", "Endacopia",
             "Shiba Horizon 5", "Portel 2", "Genshit Impact", "I'll have 2 number 9", "AMONGOS",
-            "Celeste", "Endacopia", "OneShot", "🤸🦽🏌️",
+            "Celeste",
         ]
 
     async def when_ready(self):
@@ -57,18 +52,22 @@ class ChangeActivity(BaseCog):
         if self.bot.latency == float('inf'):
             return # Avoiding OverflowError
         latency = int(self.bot.latency * 1000)
-
-        if choice((True, False)):
+        
+        name = "/help • {}"
+        if random.randint(0, 3): # 1/4 chance
             activity = Activity(type=ActivityType.watching,
-                                name=choice(self.bot_statutes).format(latency=latency,
-                                                                    guilds=len(self.bot.guilds),
-                                                                    users=len(self.bot.users)))
+                                name=name.format(random.choice(self.bot_statutes).format(
+                                    latency=latency,
+                                    guilds=len(self.bot.guilds),
+                                    users=len(self.bot.users))))
         else:
-            activity = choice(
-                (Activity(type=ActivityType.watching, name=choice(self.watching_statutes)),
-                 Activity(type=ActivityType.listening, name=choice(self.listening_statutes)),
-                 Game(name=choice(self.game_statutes)))
+            activity = random.choice(
+                (Activity(type=ActivityType.watching,
+                          name=(random.choice(self.watching_statutes))),
+                 Activity(type=ActivityType.listening,
+                          name=random.choice(self.listening_statutes)),
+                 Game(name=random.choice(self.game_statutes)))
             )
-
+            
         status = Status.online if latency < 300 else Status.idle
         await self.bot.change_presence(status=status, activity=activity)

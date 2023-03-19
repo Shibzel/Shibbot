@@ -12,8 +12,8 @@ CORE_COGS = ("commands", "events",)
 OPTIONAL_COGS = (
     "owner",
     "status",
-    "mod",
-    "automod",
+    # "mod",
+    # "automod",
     "fun",
     "utils",
     # "music",

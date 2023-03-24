@@ -4,15 +4,25 @@ from .language import get_language
 
 
 async def send(ctx: discord.ApplicationContext | commands.Context | discord.Interaction,
-               *args, ephemeral: bool = False, **kwargs):
+               *args, view: discord.ui.View = None, ephemeral: bool = False, **kwargs):
+    result = None
     if isinstance(ctx, discord.ApplicationContext):
-        await ctx.respond(*args, ephemeral=ephemeral, **kwargs)
-    elif isinstance(ctx, commands.Context):
-        method = ctx.author.send if ephemeral else ctx.reply
-        await method(*args, **kwargs)
+        result = await ctx.respond(*args, ephemeral=ephemeral, view=view, **kwargs)
     elif isinstance(ctx, discord.Interaction):
-        method = ctx.user.send if ephemeral else ctx.channel.send
-        await method(*args, **kwargs)
+        result = await ctx.response.send_message(*args, ephemeral=ephemeral, view=view, **kwargs)
+    elif isinstance(ctx, commands.Context):
+        if ephemeral:
+            method = ctx.author.send
+            if guild:= ctx.guild:
+                button = discord.ui.Button(label=f"{guild} (ID: {guild.id})", disabled=True)
+                if view:
+                    view.add_item(button)
+                else:
+                    view = discord.ui.View(button)
+        else:
+            method = ctx.reply
+        result = await method(*args, view=view, **kwargs)
+    return result
 
 
 def get_name_localization(obj, lang_code: str) -> str | None:

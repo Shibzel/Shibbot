@@ -56,8 +56,8 @@ class SelfLocation:
                     self.city = json_result["city"]
                     self.continent = json_result["continentCode"]
                     
-                    logger.debug(f"Got location '{self}'.")
                     got_response = self.got_response = True
+                    logger.debug(f"Got location '{self}'.")
                 except:
                     if not persist:
                         break

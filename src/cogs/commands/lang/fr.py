@@ -7,12 +7,12 @@ class French(English):
     SHOW_HELP_OPTION_HOME_LABEL = "Accueil"
     SHOW_HELP_TITLE = "__**Aide Shibbot!**__"
     SHOW_HELP_DESCRIPTION = "**Salut 👋 ! Je suis Shibbot**, un bot multifonction qui peut par exemple vous aider avec la modération de votre serveur, faire des recherches sur wikipédia, poster des memes et pleins d'autres choses !"
-    SHOW_HELP_FIELD1_NAME = "blabla" # TODO: Complete this field
-    SHOW_HELP_FIELD1_VALUE = "blabla"
+    # SHOW_HELP_FIELD1_NAME = "blabla"
+    # SHOW_HELP_FIELD1_VALUE = "blabla"
     SHOW_HELP_FIELD2_NAME = "Quoi de neuf dans cette version ?"
     SHOW_HELP_FIELD2_VALUE = "Pour voir les dernières fonctions ajoutées au bot vous pouvez aller dans [nos releases github]({github_link}) !"
     SHOW_HELP_FIELD3_NAME = "Obtenir de l'aide :"
-    SHOW_HELP_FIELD3_VALUE = "Les préfixes actuels sont `{prefix}` et `/`. Pour accéder à la liste de commandes appartenant à l'un de mes cogs, cliquez sur la barre ci-dessous et choisissez l'une des options pour vous y rendre ⬇."
+    SHOW_HELP_FIELD3_VALUE = "Le préfix est `{prefix}`. Pour accéder à la liste de commandes appartenant à l'un de mes cogs, cliquez sur la barre ci-dessous et choisissez l'une des options pour vous y rendre ⬇."
     SHOW_HELP_FOOTER = "Légende: [] requis, <> optionel"
     SHOW_HELP_FOOTER_HOME = ("Conseil: Si l'application ne répond pas, réinvoquez la commande.",)
     SHOW_HELP_COMMANDS_FIELD_NAME = "Commandes :"

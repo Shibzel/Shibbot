@@ -7,12 +7,12 @@ class Shibberish(English):
     SHOW_HELP_OPTION_HOME_LABEL = "hoom"
     SHOW_HELP_TITLE = "__**shibebot help!**__"
     SHOW_HELP_DESCRIPTION = "**hemlo 👋 ! i'm shibebot**, such multipurpose Discord botto, many skillz, can help much with modz, search much on wikipedias, send many memes, and much other wow things!"
-    SHOW_HELP_FIELD1_NAME = "blabla" # TODO: Complete this field
-    SHOW_HELP_FIELD1_VALUE = "blabla"
+    # SHOW_HELP_FIELD1_NAME = "blabla"
+    # SHOW_HELP_FIELD1_VALUE = "blabla"
     SHOW_HELP_FIELD2_NAME = "new stuff in dis version?"
     SHOW_HELP_FIELD2_VALUE = "wow! much new things added to shibebot! check them out on [our github's releases]({github_link}])!"
     SHOW_HELP_FIELD3_NAME = "need help :"
-    SHOW_HELP_FIELD3_VALUE = "prefixes are `{prefix}` and `/`!!! to see what I can do, click on da bar bellow and choose one of da options to much excite ⬇️"
+    SHOW_HELP_FIELD3_VALUE = "prefix iz `{prefix}`!!! to see what I can do, click on da bar bellow and choose one of da options to much excite ⬇️"
     SHOW_HELP_FOOTER = "things: [] need, <> not need"
     #SHOW_HELP_FOOTER_HOME = ()
     SHOW_HELP_COMMANDS_FIELD_NAME = "commandz :"

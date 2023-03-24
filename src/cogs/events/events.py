@@ -66,8 +66,16 @@ class Events(BaseCog):
                 interaction_owner=error.interaction_owner.mention)
             return await send(ctx, content=content, ephemeral=True)
         elif isinstance(error, PluginDisabledError):
-            return await send(ctx, content=error_dict["PluginDisabledError"].format(
-                plugin=error.plugin_name), ephemeral=True)
+            plugin_name = error.plugin_name
+            for cog in self.bot.plugins.values():
+                if cog.plugin_name == plugin_name:
+                    plugin_name = cog.get_name(lang_code)
+                    if emoji:= cog.emoji:
+                        plugin_name = f"{emoji} {plugin_name}"
+                    break
+            return await send(ctx,
+                              content=error_dict["PluginDisabledError"].format(plugin=plugin_name),
+                              ephemeral=True)
         elif isinstance(error, MissingArgumentsError):
             description = error_dict["MissingArgumentsError"].format(
                 command_usage=stringify_command_usage(error.command, lang_code))

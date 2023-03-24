@@ -42,12 +42,12 @@ class BotsCommands(BaseCog):
                                         emoji="🏡", value="home", default=True)]
         cogs: list[BaseCog] = []
         for cog in list(self.bot.cogs.values()):
-            if isinstance(cog, BaseCog) and not cog.is_hidden:
+            if isinstance(cog, BaseCog) and not cog.is_hidden and cog.get_commands():
                 cogs.append(cog)
-                options.append(discord.SelectOption(label=cog.get_name(lang_code),
-                                                    description=cog.get_description(
-                                                        lang_code),
-                                                    emoji=cog.emoji, value=str(id(cog))))
+                options.append(
+                    discord.SelectOption(label=cog.get_name(lang_code),
+                                         description=cog.get_description(lang_code),
+                                         emoji=cog.emoji, value=str(id(cog))))
         select = discord.ui.Select(options=options)
 
         bot_button = discord.ui.Button(label=lang.GET_INVITATIONS_INVITE_BOT_BUTTON,
@@ -61,12 +61,11 @@ class BotsCommands(BaseCog):
             nonlocal view
             embed = discord.Embed(title=TITLE, description=lang.SHOW_HELP_DESCRIPTION,
                                   color=discord.Color.dark_gold())
-            embed.add_field(name=lang.SHOW_HELP_FIELD1_NAME, value=lang.SHOW_HELP_FIELD1_VALUE,
-                            inline=True)
+            # embed.add_field(name=lang.SHOW_HELP_FIELD1_NAME, value=lang.SHOW_HELP_FIELD1_VALUE,
+            #                 inline=True)
             embed.add_field(name=lang.SHOW_HELP_FIELD2_NAME,
                             value=lang.SHOW_HELP_FIELD2_VALUE.format(
-                                github_link=github_link+"/releases/latest"),
-                            inline=True)
+                                github_link=github_link+"/releases/latest"))
             embed.add_field(name=lang.SHOW_HELP_FIELD3_NAME,
                             value=lang.SHOW_HELP_FIELD3_VALUE.format(
                                 prefix=prefix),
@@ -102,16 +101,13 @@ class BotsCommands(BaseCog):
                 embed.set_footer(text=FOOTER+lang.SHOW_HELP_FOOTER)
                 value = ""
                 for command in cog.get_commands():
-                    if not command.parent and not command.description:
-                        continue
                     # Getting the command's description
                     command_description = get_description_localization(
                         command, lang_code)
                     # Stringifying the command's options
                     value += f"• `{stringify_command_usage(command, lang_code)}` :" + \
                              f" {command_description if command_description else '...'}\n"
-                embed.add_field(name=lang.SHOW_HELP_COMMANDS_FIELD_NAME,
-                                value=value if value != "" else "...")
+                embed.add_field(name=lang.SHOW_HELP_COMMANDS_FIELD_NAME, value=value)
                 view = self.bot.add_bot(CustomView(select, timeout=300))
             await interaction.response.edit_message(embed=embed, view=view)
         select.callback = callback

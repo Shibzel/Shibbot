@@ -153,7 +153,7 @@ class Shibbot(bridge.Bot):
 
         logger.log(f"Finished initialization : {len(self.languages)} languages"
                    f", {len(self.get_commands())} commands for {len(self.cogs)} cogs ({len(self.plugins)} plugins)."
-                   f" Took {(perf_counter()-start_time)*1000:.2f} ms.")
+                   f" Took {(perf_counter()-start_time)*1000:.2f} ms.", PStyles.OKCYAN)
 
     @property
     def plugins(self) -> dict[str, PluginCog]:
@@ -319,7 +319,7 @@ class Shibbot(bridge.Bot):
         elif self.is_alive is False:
             await self.on_resumed()
         self.is_alive = True
-        logger.log(f"Ready. Connected as '{self.user}' (ID : {self.user.id}).",
+        logger.log(f"☁ Ready. Connected as '{self.user}' (ID : {self.user.id}).",
                    PStyles.OKGREEN)
 
     async def on_resumed(self) -> None:
@@ -357,7 +357,7 @@ class Shibbot(bridge.Bot):
         if command_input:
             self.console.start()
         self.specs.start()
-        connect_message = ("Connecting... wait a few seconds." 
+        connect_message = ("🚀 Connecting... wait a few seconds." 
                         if random.randint(0, 99) else "Lodin cheeseburgers...")
         logger.log(connect_message, PStyles.OKBLUE)
         super().run(token, *args, **kwargs)
@@ -374,7 +374,7 @@ class Shibbot(bridge.Bot):
         ------
         `Exception`: Reraised error, if there is one.
         """
-        logger.error("Shibbot is being stopped, goodbye !", error)
+        logger.error("👋 Shibbot is being stopped, goodbye !", error)
         await self.specs.close()
         await super().close()
         self.loop.close()

@@ -52,7 +52,7 @@ def log(string, **kwargs):
     """Adds text to the 'latest.log' file."""
     if cache.get(IS_ENABLED_KEY, True):
         print(string, **kwargs)
-    with open(LATEST_LOGS_FILE_PATH, "a+") as f:
+    with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
         clean_string = remove_ansi_escape_sequences(string)
         f.write(clean_string+"\n")
 

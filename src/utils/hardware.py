@@ -23,50 +23,110 @@ class Uptime:
         return f"<{__name__}.{type(self).__name__} delta={self._delta}>"
 
     def __str__(self) -> str:
-        return f"{__name__}.{type(self).__name__}(days={self.days}, hours={self.hours}," + \
-               f" minutes={self.minutes}, seconds={self.seconds})"
+        return f"{self.days}d, {self.hours}h, {self.minutes}m and {self.seconds}s"
+
+
+class SelfLocation:
+    def __init__(self):
+        self.country = None
+        self.city = None
+        self.continent = None
+        self.got_response = False
+    
+    def __str__(self) -> str:
+        return (f"{self.city}, {self.country} ({self.continent})"
+                if self.got_response else "N/A")
+    
+    def __await__(self):
+        async def coro():
+            await self.update()
+            return self
+        return coro().__await__()
+    
+    async def update(self, persist: bool = True):
+        async with ClientSession() as session:
+            logger.debug("Trying to get the location of the machine.")
+            got_response = False
+            while got_response is False:
+                try:
+                    result = await session.get("http://ip-api.com/json/?fields=continentCode,country,city")
+                    json_result = await result.json(loads=loads)
+                    
+                    self.country = json_result["country"]
+                    self.city = json_result["city"]
+                    self.continent = json_result["continentCode"]
+                    
+                    logger.debug(f"Got location '{self}'.")
+                    got_response = self.got_response = True
+                except:
+                    if not persist:
+                        break
+                    await asyncio.sleep(40)
 
 
 class ServerSpecifications:
-    """This dumbass dev forgot to add a documentation."""
+    def __init__(self, loop = asyncio.get_event_loop()):
+        self.loop = loop
+        self.location = SelfLocation()
+        
+        self._max_memory = None
+        self._memory_usage = None
+        self._threads = None
+        
+    @property
+    def max_memory(self):
+        return self._max_memory or psutil.virtual_memory().total/1024e3
 
-    def __init__(self, using_ptero: bool = False, ptero_url: str = None,
-                 ptero_token: str = None, ptero_server_id: str = None, secs_looping: float = 15.0,):
-        self.loop = asyncio.get_event_loop()
-        self.using_pterodactyl = using_ptero
+    @property
+    def memory_usage(self):
+        return self._memory_usage or psutil.virtual_memory().used/1024e3
+    
+    @property
+    def memory_percentage(self):
+        if self._max_memory and self._memory_usage:
+            return self._memory_usage/self._max_memory*100
+        return psutil.virtual_memory().percent
+
+    @property
+    def cpu_percentage(self):
+        return psutil.cpu_percent()
+
+    @property
+    def threads(self):
+        return self._threads or psutil.cpu_count(logical=True)
+
+    def start(self):
+        self.loop.create_task(self.location.update())
+        
+    def stop(self):
+        pass  # Does nothing, to override.
+
+
+class PteroContainerSpecifications(ServerSpecifications):
+    def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None,
+                 secs_looping: float = 15.0,):
+        super().__init__()
         self._panel_url = ptero_url
         self._token = ptero_token
         self._server_id = ptero_server_id
         self.secs_looping = secs_looping
-        self._headers = {"Accept": "application/json",
-                         "Content-Type": "application/json",
-                         "Authorization": f"Bearer {self._token}"}
-        self.looping = True
-        self._max_memory = self._memory_usage = self._cpu_usage_percent = self._max_cpu_percent = self._threads = 1
-        self.location: str = "None"
-
-    @property
-    def max_memory(self):
-        return psutil.virtual_memory().total/1024e3 if not self.using_pterodactyl else self._max_memory
-
-    @property
-    def memory_usage(self):
-        return psutil.virtual_memory().used/1024e3 if not self.using_pterodactyl else self._memory_usage
-
+        self._headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._token}"
+        }
+        self.looping = False
+        
+        self._cpu_usage_percent = .0
+        self._max_cpu_percent = 100.
+    
     @property
     def cpu_percentage(self):
-        return psutil.cpu_percent() if not self.using_pterodactyl else self._cpu_usage_percent/self._max_cpu_percent*100
-
-    @property
-    def threads(self):
-        return psutil.cpu_count(logical=True) if not self.using_pterodactyl else self._threads
+        return self._cpu_usage_percent/self._max_cpu_percent*100
 
     def start(self):
-        if self.using_pterodactyl:
-            logger.debug(
-                "Beginning to retrieve server hardware usage on the Pterodactyl API.")
-            self.loop.create_task(self._get_specs_loop())
-        self.loop.create_task(self._get_location())
+        self.loop.create_task(self.update_loop())
+        super().start()
 
     async def close(self):
         self.looping = False
@@ -76,55 +136,51 @@ class ServerSpecifications:
             response = await session.get(url)
             result = (await response.json(loads=loads))
             if response.status != 200:
-                raise Exception(result)
+                raise Exception(result)  # TODO: Generic exception, raise a more pertinent one.
             return result
 
-    async def _get_current(self):
-        return (await self._request(f"{self._panel_url}/api/client/servers/{self._server_id}/resources"))["attributes"]["resources"]
-
-    async def _get_limits(self):
-        return (await self._request(f"{self._panel_url}/api/client/servers/{self._server_id}"))["attributes"]["limits"]
-
-    async def _get_specs_loop(self):
-        show_error = True
-        while self.looping:
+    async def update_limits(self):
+        url = f"{self._panel_url}/api/client/servers/{self._server_id}"
+        result = await self._request(url)
+        limits = result["attributes"]["limits"]
+        
+        self._max_memory = limits["memory"]  # In MB.
+        self._max_cpu_percent = limits["cpu"]
+        threads = limits["threads"]
+        self._threads = threads if threads else ceil(self._max_cpu_percent/100)
+        
+    async def update_usage(self):
+        url = f"{self._panel_url}/api/client/servers/{self._server_id}/resources"
+        result = await self._request(url)
+        current = result["attributes"]["resources"]
+        
+        self._memory_usage = current["memory_bytes"]/1_000_000  # Bytes -> MB
+        self._cpu_usage_percent = current["cpu_absolute"]
+        
+    async def update_loop(self, loop_time: float = 300.):
+        if self.looping:
+            raise RuntimeError("The update loop is already running.")
+        
+        logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
+        self.looping = True
+        notify = True
+        
+        async def _try(coro, error_message: str):
+            nonlocal notify
             try:
-                limits = await self._get_limits()
-                self._max_memory = limits["memory"]  # In MB.
-                self._max_cpu_percent = limits["cpu"]
-                self._threads = limits["threads"] if limits["threads"] else ceil(
-                    self._max_cpu_percent/100)
-                show_error = True
-            except Exception as e:
-                if show_error:
-                    logger.error(
-                        "Failed to obtain the bot's hardware limits on Pterodactyl.", e)
-                    show_error = False
-            for _ in range(int(300/self.secs_looping)):
-                sleep = self.secs_looping
-                try:
-                    current = await self._get_current()
-                    # Bytes -> MB
-                    self._memory_usage = current["memory_bytes"]/1_000_000
-                    self._cpu_usage_percent = current["cpu_absolute"]
-                    show_error = True
-                except Exception as e:
-                    if show_error:
-                        logger.error(
-                            "Failed to obtain the bot's hardware usage on Pterodactyl.", e)
-                        show_error = False
-                await asyncio.sleep(sleep)
-
-    async def _get_location(self):
-        async with ClientSession() as session:
-            logger.debug("Trying to get the location of the machine.")
-            got_response = False
-            while not got_response:
-                try:
-                    result = await session.get("http://ip-api.com/json/?fields=country,city")
-                    json_result = await result.json(loads=loads)
-                    self.location = f"{json_result['city']}, {json_result['country']}"
-                    logger.debug(f"Got location '{self.location}'.")
-                    got_response = True
-                except:
-                    await asyncio.sleep(40)
+                await coro
+                notify = True
+            except Exception as err:
+                if notify:
+                    logger.error(error_message, err)
+                    notify = False
+        
+        while self.looping:
+            await _try(self.update_limits(),
+                 error_message="Failed to obtain the bot's hardware limits on Pterodactyl.")
+            
+            for _ in range(int(loop_time/self.secs_looping)):
+                await _try(self.update_usage(),
+                     error_message="Failed to obtain the bot's hardware usage on Pterodactyl.")
+                await asyncio.sleep(self.secs_looping)
+                

@@ -9,7 +9,7 @@ import discord
 from discord.ext import bridge, commands as cmmds
 
 from . import utils, database
-from .utils.hardware import Uptime, ServerSpecifications
+from .utils.hardware import Uptime, ServerSpecifications, PteroContainerSpecifications
 from .logging import Logger, PStyles
 from .models import PluginCog, BaseCog
 from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
@@ -420,9 +420,9 @@ class PterodactylShibbot(Shibbot):
             Arguments that are directly passed into `.Shibbot`."""
         super().__init__(*args, **kwargs)
         logger.debug("Using the Pterodactyl API to get hardware usage.")
-        self.specs = ServerSpecifications(
-            using_ptero=True,
+        self.specs = PteroContainerSpecifications(
             ptero_url=ptero_url,
             ptero_token=ptero_token,
             ptero_server_id=ptero_server_id,
-            secs_looping=ptero_refresh)
+            secs_looping=ptero_refresh
+        )

@@ -53,8 +53,8 @@ def log(string, **kwargs):
     if cache.get(IS_ENABLED_KEY, True):
         print(string, **kwargs)
     with open(LATEST_LOGS_FILE_PATH, "a+") as f:
-        cleaned_string = remove_ansi_escape_sequences(string)
-        f.write(cleaned_string+"\n")
+        clean_string = remove_ansi_escape_sequences(string)
+        f.write(clean_string+"\n")
 
 
 class Logger:
@@ -89,17 +89,21 @@ class Logger:
         Can take a 'color' argument which is a string containing an ANSI escape sequence."""
         log(f"{(color or '')}[{self.formated_time()} INFO @{self.file_name}] {string}{PStyles.ENDC}")
 
-    def debug(self, string: str) -> None:
+    def warn(self, string: str) -> None:
+        """Warns the user about something."""
+        log(f"{PStyles.WARNING}[{self.formated_time()} WARN @{self.file_name}] {string}{PStyles.ENDC}")
+
+    def debug(self, string: str, error: Exception = None) -> None:
         """Prints the string if debug mode is enabled and writes to the log file whether
         debug is enabled or not.
         Use for debugging or unimportant things."""
         if not cache.get(IS_DEBUGGING_KEY):
             return
-        log(f"{PStyles.QUIET}[{self.formated_time()} DEBUG @{self.file_name}] {string}{PStyles.ENDC}")
-
-    def warn(self, string: str) -> None:
-        """Warns the user about something."""
-        log(f"{PStyles.WARNING}[{self.formated_time()} WARN @{self.file_name}] {string}{PStyles.ENDC}")
+        string = f"{PStyles.QUIET}[{self.formated_time()} DEBUG @{self.file_name}] {string}{PStyles.ENDC}"
+        if error:
+            formated_err_lines = format_exception(type(error), error,  error.__traceback__, 1)
+            string += f"\n-> {''.join(formated_err_lines)}".replace("\n\n", "\n")
+        log(string)
 
     def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
         """Prints the string in bold, bright red to indicate an error to consider.
@@ -184,7 +188,7 @@ def _close():
     _logger.debug("Done compressing.")
     cache[IS_CLOSED_KEY] = True
     dump_cache()
-    _logger.debug(f"Cleaning up logs (maximum: {MAX_LOG_FILES}).")
+    _logger.debug(f"Cleaning up logs (will delete the oldest files if their number exceeds {MAX_LOG_FILES}).")
     if items := cleanup(LOGS_PATH, MAX_LOG_FILES):
         _logger.debug(f"Deleted {items} log file(s).")
 

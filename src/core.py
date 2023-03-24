@@ -11,7 +11,7 @@ from discord.ext import bridge, commands as cmmds
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications
 from .logging import Logger, PStyles
-from .models import PluginCog
+from .models import PluginCog, BaseCog
 from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
                         OPTIONAL_COGS, CORE_COGS)
 from .console import Console
@@ -87,6 +87,7 @@ class Shibbot(bridge.Bot):
         self.commands_invoked = 0
         self.slash_commands_invoked = 0
         self.invite_bot_url = None
+        self._error_handler = None
 
         super().__init__(command_prefix=get_that_mf_prefix,
                          owner_ids=[SHIBZEL_ID] 
@@ -255,12 +256,16 @@ class Shibbot(bridge.Bot):
             logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
             self.languages.sort()
+            
+    def set_error_handler(self, handler: BaseCog):
+        handler.handle_error # Can raise AttributeError
+        logger.debug(f"Setting '{repr(handler)}' as new error handler for command exceptions.")
+        self._error_handler = handler
+            
 
-    async def handle_command_error(self, ctx, error):
-        for cog in self.cogs.values():
-            if type(cog).__name__ == "Events":  # Bad way to do this.
-                await cog.handle_error(ctx, error)
-                break
+    async def handle_command_error(self, ctx, error: Exception) -> None:
+        if self._error_handler:
+            self._error_handler.handle_error(ctx, error)
 
     def set_debug(self, debug: bool) -> None:
         self.debug_mode = debug

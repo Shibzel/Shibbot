@@ -20,6 +20,15 @@ class Events(BaseCog):
         self.bot: Shibbot = bot
         super().__init__(languages={"en": English, "fr": French}, hidden=True)
         self.cooldowns = []
+        self.bot.set_error_handler(self)
+
+    @discord.Cog.listener()
+    async def on_application_command_error(self, ctx, error):
+        await self.handle_error(ctx, error)
+
+    @discord.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        await self.handle_error(ctx, error)
 
     async def add_user_cooldown(self, seconds: float, command_name: str, user_id: int):
         data = (command_name, user_id,)
@@ -31,7 +40,8 @@ class Events(BaseCog):
         return (command_name, user_id) in self.cooldowns
 
     async def handle_error(self, ctx: bridge.BridgeContext, error):
-        logger.debug(f"Handling error : {type(error).__name__}: {str(error)}")
+        logger.debug(f"Handling error on guild '{ctx.guild} (ID: {getattr(ctx.guild, 'id', None)})' "
+                     f"by '{ctx.author} (ID: {ctx.author.id})'.", error)
         if isinstance(error, commands.CommandOnCooldown):
             if self.user_on_cooldown(ctx.command.name, ctx.author.id):
                 return
@@ -112,11 +122,3 @@ class Events(BaseCog):
         embed = discord.Embed(title=lang.ON_COMMAND_ERROR_TITLE,
                               description="🔶 "+description, color=discord.Color.red())
         await send(ctx, embed=embed, view=view, delete_after=time, ephemeral=ephemeral)
-
-    @discord.Cog.listener()
-    async def on_application_command_error(
-        self, ctx, error): await self.handle_error(ctx, error)
-
-    @discord.Cog.listener()
-    async def on_command_error(
-        self, ctx, error): await self.handle_error(ctx, error)

@@ -122,13 +122,15 @@ class Console:
         ut = self.bot.uptime
         logger.log("Statistics :\n"
                    f"Version of Shibbot : v{__version__}\n"
+                   f"Cogs: {len(self.bot.cogs)} ({len(self.bot.plugins)} plugins)\n"
                    f"Ping: {round(self.bot.latency*1000, 2)}ms\n"
                    f"Uptime : {ut.days}d {ut.hours}h {ut.minutes}m {ut.seconds}s\n"
-                   f"Invoked commands : {self.bot.invoked_commands}\n"
-                   f"Average processing time : {self.bot.avg_processing_time:.2f}ms\n"
                    f"Users : {len(self.bot.users)}\n"
                    f"Guilds : {len(self.bot.guilds)}\n"
-                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members")
+                   f"Biggest server : {max(len(guild.members) for guild in self.bot.guilds)} members\n"
+                   f"Invoked commands : {self.bot.invoked_commands}\n"
+                   f"Average processing time : {self.bot.avg_processing_time:.2f}ms"
+        )
 
     @console_command()
     def cogs(self, *args):
@@ -141,7 +143,8 @@ class Console:
             text += f"'{k}' ({bases}) located at '{cog_type.__module__}'."
             if author:= getattr(cog, "author", None):
                 text += f" Author: {author}."
-            text += "\n"
+            if k != list(cogs.keys())[-1]:
+                text += f"\n"
         logger.log(text)
 
     def _apply_on_cog(self, method, method_name, cog_name):

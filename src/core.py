@@ -28,26 +28,7 @@ async def get_that_mf_prefix(amogus, ctx):
 
 
 class Shibbot(bridge.Bot):
-    """Subclass of `bridge.Bot`, our little Shibbot :3.
-    
-    Attributes
-    ----------
-    debug_mode: `bool`
-        Whatever the bot is in debug mode or not.
-    caching: `bool`
-        Whatever the caching is enabled or not.
-    extention_path: `str`
-        Where the extentions are located.
-    init_time: `datetime.datetime`
-        The UTC datetime the bot initialized.
-    is_alive: `bool`
-        Whaterver the bot is alive or not. None if the bot never connected to Discord.
-    languages: `list`
-        The list of languages that the bot supports.
-    process_times: `list`
-        A list of times it took for the commands to execute (in sec).
-    invoked_commands: `int`
-        The number of commands that have been invoked since initialization."""
+    """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
     def __init__(self, debug: bool = False, instance_owners: list[int] = None, caching: bool = False,
                  use_optional_cogs: bool = True, extentions_path: str | None = None,
@@ -88,6 +69,7 @@ class Shibbot(bridge.Bot):
         self.slash_commands_invoked = 0
         self.invite_bot_url = None
         self._error_handler = None
+        self.cache = {}
 
         super().__init__(command_prefix=get_that_mf_prefix,
                          owner_ids=[SHIBZEL_ID] 

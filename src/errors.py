@@ -4,6 +4,11 @@ from discord.ext import commands
 from . import __version__
 
 
+class PrefixedNotAvailable(commands.CommandError):
+    def __init__(self, message: str | None = None):
+        super().__init__(message)
+
+
 class PluginDisabledError(commands.CheckFailure):
     """Raised when the user is trying to use a commands belonging to a disabled plugin."""
 
@@ -49,7 +54,7 @@ class CogDependanceMissing(Exception):
     """Raised when a cog is missing dependecies."""
 
     def __init__(self, cog_name: str | None = None, message: str | None = None):
-        super().__init__(message or "This cog depends on another."
+        super().__init__(message or "This cog depends on another." + \
                          ("" if not cog_name else f" Missing Cog: {cog_name}."))
 
 

@@ -6,6 +6,7 @@ class English:
         "CommandError": "Something went wrong, I couldn't do that.",
         "ChannelNotFound": "Couldn't find that channel.",
         "PrivateMessageOnly": "This command is dm only.",
+        "PrefixedNotAvailable": "The prefixed version of this command is unavailable, please use the slash command instead.",
         "PluginDisabledError": "The `{plugin}` plugin is disabled.",
         "UserNotFound": "Couldn't find that user.",
         "MissingArgumentsError": "Usage : `{command_usage}`.",

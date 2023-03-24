@@ -145,7 +145,7 @@ class Console:
         logger.log(text)
 
     def _apply_on_cog(self, method, method_name, cog_name):
-        def task():
+        async def task():
             try:
                 method(cog_name)
                 logger.log(f"Successfully {method_name}ed '{cog_name}' cog.")
@@ -153,15 +153,8 @@ class Console:
                 raise exc
             except Exception as err:
                 logger.error(f"Could not {method_name} '{cog_name}' cog.", err)
-        try:
-            task()
-            return
-        except ProgrammingError as err:
-            logger.error("Oops, an error occured with Sqlite."
-                            f" {method_name.title()}ing asynchronously instead.", err)
-        async def coro(): task()
         logger.log("The action on this cog is planned, it can take some time if the bot is busy.")
-        self.bot.loop.create_task(coro())
+        self.bot.loop.create_task(task())
 
     @console_command()
     def load(self, cog_name, *args):
@@ -223,3 +216,8 @@ class Console:
         logger.log("Stopping Shibbot...")
         self.bot.loop.create_task(self.bot.close(ConsoleInterruption()))
         self.running = False
+        
+    @console_command(name="exec")
+    def _exec(self, *code):
+        code = " ".join(code)
+        exec(code)

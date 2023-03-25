@@ -10,10 +10,11 @@ from discord.ext import bridge, commands as cmmds
 
 from . import utils, database
 from .utils.hardware import Uptime, ServerSpecifications, PteroContainerSpecifications
+from .utils import json as jayson
 from .logging import Logger, PStyles
 from .models import PluginCog, BaseCog
 from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
-                        OPTIONAL_COGS, CORE_COGS)
+                        OPTIONAL_COGS, CORE_COGS, CACHE_PATH)
 from .console import Console
 
 
@@ -21,6 +22,7 @@ logger = Logger(__name__)
 
 
 MAX_PROCESS_TIMES_LEN = 10000
+STATS_CACHE_FP = CACHE_PATH + "/stats.json"
 
 
 async def get_that_mf_prefix(amogus, ctx):
@@ -51,6 +53,7 @@ class Shibbot(bridge.Bot):
         logger.log("Initializing Shibbot...")
         start_time = perf_counter()
 
+        self.init_time = datetime.utcnow()
         self.set_debug(debug)
         if self.debug_mode:
             logger.warn("Debug/beta mode enabled.")
@@ -61,14 +64,11 @@ class Shibbot(bridge.Bot):
         self.extentions_path = extentions_path or EXTENSIONS_PATH
         self.instance_owners = None
         self.project_owner = None
-        self.init_time = datetime.utcnow()
         self.is_alive = None
-        self.languages = []
-        self.process_times = []
-        self.commands_invoked = 0
-        self.slash_commands_invoked = 0
         self.invite_bot_url = None
         self._error_handler = None
+        self.process_times = []
+        self.languages = []
         self.cache = {}
 
         super().__init__(command_prefix=get_that_mf_prefix,
@@ -101,6 +101,14 @@ class Shibbot(bridge.Bot):
                          *args, **kwargs)
         super().remove_command("help")
 
+        # Statistics
+        self._stats = jayson.load(STATS_CACHE_FP) if os.path.exists(STATS_CACHE_FP) else {}
+        async def update_stats():
+            while not self.loop.is_closed():
+                self._dump_stats()
+                await asyncio.sleep(300) # Updates every 5 minutes
+        self.loop.create_task(update_stats())
+        
         # Console object
         self.console = Console(self)
 
@@ -195,8 +203,35 @@ class Shibbot(bridge.Bot):
         return 0  # The list is empty
     
     @property
+    def commands_invoked(self) -> int:
+        key = "commands_invoked"
+        if not self._stats.get(key):
+            self._stats[key] = 0
+        return self._stats[key]
+    
+    @commands_invoked.setter
+    def commands_invoked(self, value: int):
+        assert isinstance(value, int)
+        self._stats["commands_invoked"] = value
+        
+    @property
+    def slash_commands_invoked(self) -> int:
+        key = "slash_commands_invoked"
+        if not self._stats.get(key):
+            self._stats[key] = 0
+        return self._stats[key]
+    
+    @slash_commands_invoked.setter
+    def slash_commands_invoked(self, value: int):
+        assert isinstance(value, int)
+        self._stats["slash_commands_invoked"] = value
+    
+    @property
     def invoked_commands(self) -> int:
         return self.commands_invoked + self.slash_commands_invoked
+    
+    def _dump_stats(self):
+        jayson.dump(self._stats, STATS_CACHE_FP)
     
     def get_commands(self, hidden: bool = False) -> set:
         if not hidden:
@@ -231,19 +266,16 @@ class Shibbot(bridge.Bot):
         ------
         `TypeError`: `language` isn't an str object.
         """
-        if not isinstance(language, str):
-            raise TypeError(
-                f"'language' must be an 'str' object and not '{type(language).__name__}'")
+        assert isinstance(language, str)
         if language not in self.languages:
             logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
             self.languages.sort()
             
     def set_error_handler(self, handler: BaseCog):
-        handler.handle_error # Can raise AttributeError
+        handler.handle_error  # Can raise AttributeError
         logger.debug(f"Setting '{repr(handler)}' as new error handler for command exceptions.")
         self._error_handler = handler
-            
 
     async def handle_command_error(self, ctx, error: Exception) -> None:
         if self._error_handler:
@@ -375,6 +407,7 @@ class Shibbot(bridge.Bot):
         `Exception`: Reraised error, if there is one.
         """
         logger.error("👋 Shibbot is being stopped, goodbye !", error)
+        self._dump_stats()
         await self.specs.close()
         await super().close()
         self.loop.close()

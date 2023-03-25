@@ -14,7 +14,7 @@ from src.utils.re import remove_ansi_escape_sequences
 
 MAX_LOG_FILES = 10
 LOG_EXTENSION = ".log"
-LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger_cache.json"
+LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger.json"
 LATEST_LOGS_FILE_PATH = LOGS_PATH + "/latest" + LOG_EXTENSION
 IS_CLOSED_KEY = "closed"
 IS_ENABLED_KEY = "enabled"
@@ -175,7 +175,7 @@ def cleanup(folder_fp: str, max_files: str):
 def _close():
     # Compressing log file.
     extension = LOG_EXTENSION + ".gz"
-    raw_name = name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d')}"
+    raw_name = name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
     n = 1
     while os.path.exists(name+extension):
         name = f"{raw_name}+{n}"

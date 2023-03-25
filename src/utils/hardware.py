@@ -98,7 +98,7 @@ class ServerSpecifications:
     def start(self):
         self.loop.create_task(self.location.update())
         
-    def stop(self):
+    async def close(self):
         pass  # Does nothing, to override.
 
 

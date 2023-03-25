@@ -41,8 +41,8 @@ class StorageCacheHandler:
     def caching(self) -> bool:
         return self.bot.caching
 
-    def store(self, obj: JsonObject = {}, convert: type = None) -> None:
-        if self.caching:
+    def store(self, obj: JsonObject = {}, convert: type = None, force: bool = False) -> None:
+        if self.caching or force:
             if convert:
                 obj = convert(obj)
             dump(obj, self.path)

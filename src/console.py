@@ -6,7 +6,6 @@ from sqlite3 import ProgrammingError
 
 from . import __version__
 from .logging import Logger
-from .constants import CACHE_PATH, TEMPORARY_CACHE_PATH
 
 logger = Logger(__name__)
 

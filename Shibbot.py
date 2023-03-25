@@ -112,7 +112,7 @@ def main():
                     assert len(_id) >= 18
                     instance_owners.append(int(_id))
             except (ValueError, AssertionError) as exc:
-                raise Syntax("Invalid Discord ids."
+                raise Syntax("Invalid Discord id(s)."
                              " Make sure that the ids are intergers inside a array (list).") from exc
         kwargs["instance_owners"] = instance_owners
 
@@ -124,7 +124,7 @@ def main():
             last_version = response[0]["name"]
             if last_version == version:
                 logger.log(
-                    "You're currently using the lastest version, thank you !")
+                    "You're currently using the lastest version !")
             else:
                 for release in response:
                     if release["name"] == version:

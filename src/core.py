@@ -1,6 +1,7 @@
 """Shibbot's base."""
 import os
 import random
+import sqlite3
 import asyncio
 from datetime import datetime, timedelta
 from traceback import format_exc
@@ -13,8 +14,11 @@ from .utils.hardware import Uptime, ServerSpecifications, PteroContainerSpecific
 from .utils import json as jayson
 from .logging import Logger, PStyles
 from .models import PluginCog, BaseCog
-from .constants import (COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
-                        OPTIONAL_COGS, CORE_COGS, CACHE_PATH)
+from .constants import (
+    COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
+    OPTIONAL_COGS, CORE_COGS, CACHE_PATH,
+    DATABASE_FILE_PATH
+)
 from .console import Console
 
 
@@ -116,12 +120,25 @@ class Shibbot(bridge.Bot):
         self.specs = ServerSpecifications()
 
         # Synchronous clients for Sqlite3
-        self.db = database.db()
+        self.db = sqlite3.connect(DATABASE_FILE_PATH)
         self.cursor = self.db.cursor()
-        # Creating default guild table
-        query = "CREATE TABLE IF NOT EXISTS " + \
-                "guilds(guild_id INTEGER PRIMARY KEY, prefix TEXT, lang TEXT)"
-        self.cursor.execute(query)
+        # Setting up cache
+        if self.caching:
+            query = "PRAGMA cache_size=-10000; PRAGMA temp_store=MEMORY"
+        else:
+            query = "PRAGMA cache_size=-2000; PRAGMA temp_store=FILE"
+        self.cursor.executescript(query) # VER: 1.0.0
+        # Creating default tables
+        query = """
+        CREATE TABLE IF NOT EXISTS guilds (
+            guild_id INTEGER PRIMARY KEY,
+            prefix   TEXT NOT NULL,
+            lang     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS plugins (
+            guild_id INTEGER PRIMARY KEY
+        )"""
+        self.cursor.executescript(query) # VER: 1.0.0
         self.db.commit()
 
         # Loading all extensions and cogs
@@ -279,7 +296,7 @@ class Shibbot(bridge.Bot):
 
     async def handle_command_error(self, ctx, error: Exception) -> None:
         if self._error_handler:
-            self._error_handler.handle_error(ctx, error)
+            await self._error_handler.handle_error(ctx, error)
 
     def set_debug(self, debug: bool) -> None:
         self.debug_mode = debug

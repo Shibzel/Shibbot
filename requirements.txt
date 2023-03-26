@@ -1,9 +1,9 @@
 aiogtrans @ git+https://github.com/Shibzel/aiogtrans
 aiohttp>=3.8.3
-aiosqlite>=0.17.0
+aiosqlite==0.18.0
 aiowiki @ git+https://github.com/Gelbpunkt/aiowiki
-psutil>=5.9.4
-py-cord==2.3.2
-requests>=2.28.1
+psutil==5.9.4
+py-cord[speed]==2.4.1
+requests==2.28.2
 orjson>=3.8.4
-tomli>=2.0.1 ; python_version < "3.11"
+tomli==2.0.1 ; python_version < "3.11"

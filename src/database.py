@@ -1,10 +1,8 @@
 """All core database functions."""
-import sqlite3
 import aiosqlite
 import discord
 from discord.ext import commands, bridge
 import os
-import asyncio
 
 from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE, DATABASE_FILE_PATH
 from src.logging import Logger
@@ -12,28 +10,14 @@ from src.logging import Logger
 
 logger = Logger(__name__)
 
-SQLITE3_TYPES = {
-    int: "INTEGER",
-    float: "REAL",
-    str: "TEXT",
-    bytes: "BLOB",
-    bool: "INTEGER"
-}
+GUILD_TABLE_NAME = "guild"
+PLUGINS_TABLE_NAME = "plugins"
+IsOrHasGuild = discord.Guild | commands.Context | bridge.BridgeContext
+
 
 if not os.path.exists(DATABASE_FILE_PATH):
     open(DATABASE_FILE_PATH, "x")
     logger.warn(f"Missing {DATABASE_FILE_PATH} file, creating one.")
-
-
-def db() -> sqlite3.Connection:
-    return sqlite3.connect(DATABASE_FILE_PATH)
-
-
-def aiodb() -> aiosqlite.Connection:
-    return aiosqlite.connect(DATABASE_FILE_PATH)
-
-
-IsOrHasGuild = discord.Guild | commands.Context | bridge.BridgeContext
 
 
 def _is_or_has_guild(obj: IsOrHasGuild):
@@ -50,20 +34,12 @@ async def get_prefix(obj: IsOrHasGuild):
     """Returns the prefix of a guild."""
     async with AsyncDB() as db:
         return await db.get_prefix(_is_or_has_guild(obj))
-    
-
-# def create_table(name: str, colums: dict[str, type], conn: sqlite3.Connection = db()):
-#     prop = ", ".join(f"{n} {type(t)}" for n, t in colums.items())
-#     query = f"CREATE TABLE IF NOT EXISTS {name} ({prop})"
-#     conn.execute(query)
-#     conn.commit()
-#     return conn
 
 
 class AsyncDB:
     def __init__(self, path: str = None, commit_on_exit: bool = False):
         self.commit_on_exit = commit_on_exit
-        self._conn = aiodb() if not path else aiosqlite.connect(path)
+        self._conn = aiosqlite.connect(path or DATABASE_FILE_PATH)
         self._connection = None
 
     @property
@@ -105,8 +81,7 @@ class AsyncDB:
             if guild.preferred_locale in bot.languages else DEFAULT_LANGUAGE)
         data = (guild.id, DEFAULT_PREFIX, language,)
         query = "INSERT INTO guilds (guild_id, prefix, lang) VALUES (?,?,?)"
-        cursor = await self.conn.execute(query, data)
-        await cursor.close()
+        await self.conn.execute(query, data)
 
     async def get_prefix(self, guild: discord.Guild):
         """Gets the prefix."""
@@ -123,8 +98,7 @@ class AsyncDB:
     async def change_prefix(self, bot, guild: discord.Guild, prefix: str):
         await self.create_or_fetch_guild(bot, guild)
         query = "UPDATE guilds SET prefix=? WHERE guild_id=?"
-        cursor = await self.conn.execute(query, (prefix, guild.id,))
-        await cursor.close()
+        await self.conn.execute(query, (prefix, guild.id,))
 
     async def get_language(self, guild: discord.Guild):
         """Gets the language of a guild."""
@@ -141,14 +115,13 @@ class AsyncDB:
     async def change_language(self, bot, guild: discord.Guild, language: str):
         await self.create_or_fetch_guild(bot, guild)
         query = "UPDATE guilds SET lang=? WHERE guild_id=?"
-        cursor = await self.conn.execute(query, (language, guild.id,))
-        await cursor.close()
+        await self.conn.execute(query, (language, guild.id,))
 
     async def plugin_is_enabled(self, guild: discord.Guild, plugin: str, 
                                 guild_only: bool = False):
         if not guild:
             return not guild_only
-        query = f"SELECT enabled FROM {plugin}_plugin WHERE guild_id=?"
+        query = f"SELECT {plugin} FROM {PLUGINS_TABLE_NAME} WHERE guild_id=?"
         async with self.conn.execute(query, (guild.id,)) as cursor:
             if enabled := await cursor.fetchone():
                 enabled = enabled[0]
@@ -158,16 +131,19 @@ class AsyncDB:
         await self.bulk_enable_plugin(guild, {plugin: enable})
 
     async def bulk_enable_plugin(self, guild: discord.Guild, mapping: dict[str, bool]):
-        async def _enable_plugin(plugin, enable):
-            query = f"SELECT * FROM {plugin}_plugin WHERE guild_id=?"
-            async with self.conn.execute(query, (guild.id,)) as cursor:
-                if await cursor.fetchone():
-                    args = (f"UPDATE {plugin}_plugin SET enabled=? WHERE guild_id=?",
-                            (enable, guild.id,)) 
-                else:
-                    args = (f"INSERT INTO {plugin}_plugin (guild_id, enabled) VALUES (?,?)",
-                            (guild.id, enable,))
-                cursor = await cursor.execute(*args)
-                await cursor.close()
-        await asyncio.gather(*[_enable_plugin(name, int(bool(enabled)))
-                               for name, enabled in mapping.items()])
+        query = f"SELECT * FROM {PLUGINS_TABLE_NAME} WHERE guild_id=?"
+        async with self.conn.execute(query, (guild.id,)) as cursor:
+            if await cursor.fetchone():
+                query = f"""
+                UPDATE {PLUGINS_TABLE_NAME}
+                SET {', '.join(f'{k}=?' for k in mapping.keys())}
+                WHERE guild_id=?"""
+                await cursor.execute(query, (*mapping.values(), guild.id))
+            else:
+                query = f"""
+                INSERT INTO {PLUGINS_TABLE_NAME} (
+                    guild_id,
+                    {', '.join(mapping.keys())}
+                )
+                VALUES (?,{','.join('?' for _ in range(len(mapping)))})"""
+                await cursor.execute(query, (guild.id, *mapping.values()))

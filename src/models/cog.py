@@ -1,3 +1,4 @@
+from sqlite3 import OperationalError
 from discord import Cog, SlashCommand
 from discord.ext import bridge, commands
 
@@ -26,29 +27,32 @@ class BaseCog(Cog):
         super().__init__(*args, **kwargs)
         self.bot = getattr(self, "bot", None) or bot
         if self.bot is None:
-            raise TypeError(
-                f"{self.__name__} missing required argument: 'bot'.")
+            raise TypeError(f"{self.__name__} missing required argument: 'bot'.")
 
         if not isinstance(name, dict) and name is not None:
-            raise TypeError(
-                "'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
-        self.name = name
+            raise TypeError("'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
+        self.name = name or {}
         if not isinstance(name, dict) and name is not None:
             raise TypeError(
                 "'description' must be a dict. Exemple : {'en': 'This is a description.', 'fr': 'Ceci est une description'}.")
-        self.description = description
-        if languages:
-            self.languages = languages
-            for lang in self.languages:
-                self.bot.add_language(lang)
+        self.description = description or {}
+        self.languages = languages or {}
         self.emoji = emoji
         self.is_hidden = hidden
-
         self._cached_cogs = None
         self._when_ready_called = False
-        if self.bot.is_alive:
+        
+        self.__subclass_init__()
+
+        if languages:
+            for lang in self.languages:
+                self.bot.add_language(lang)
+        if self.bot.is_alive is not None:
             self.bot.loop.create_task(self.when_ready())
             self._when_ready_called = True
+            
+    def __subclass_init__(self):
+        pass  # Override
 
     @Cog.listener("on_ready")
     async def _on_ready(self):
@@ -90,15 +94,20 @@ class BaseCog(Cog):
 
 
 class PluginCog(BaseCog):
-    def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):
-        logger.debug(f"Creating '{plugin_name}_plugin' table in database.")
-        query = ("CREATE TABLE IF NOT EXISTS "
-                f"{plugin_name}_plugin(guild_id INTERGER PRIMARY_KEY, enabled BOOLEAN)")
-        self.bot.cursor.execute(query)
-        self.bot.db.commit()
+    def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):        
         self.plugin_name = plugin_name
         self.guild_only = guild_only
+        
         super().__init__(*args, **kwargs)
+        
+    def __subclass_init__(self):
+        c = self.bot.cursor
+        try:
+            c.execute(f"SELECT {self.plugin_name} FROM plugins")
+        except OperationalError:
+            logger.debug(f"Adding '{self.plugin_name}' to 'plugin' table in database.")
+            c.execute(f"ALTER TABLE plugins ADD COLUMN {self.plugin_name} BOOLEAN")
+        self.bot.db.commit() # VER: 1.0.0
 
     async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
         async with AsyncDB() as db:

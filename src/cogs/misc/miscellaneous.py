@@ -149,8 +149,7 @@ class Miscellaneous(BaseCog):
                                 stage_count_percent=round(stage_count/channel_count*100, 2)))
 
             roles_str = ""
-            roles = guild.roles
-            roles.reverse()
+            roles = guild.roles[::-1][:-1]
             for role in roles:
                 _roles_str = roles_str + role.mention + \
                     ("" if role == roles[-1] else ", ")

@@ -1,47 +1,47 @@
-from os import path
+import os
+import random
 from shutil import copyfile
 from platform import python_version, python_version_tuple
-import random
-import requests
-import orjson
 try:
     import tomllib as toml
 except ModuleNotFoundError:
     import tomli as toml
+import requests
+import orjson
 
-from src import __version__ as version, __github__ as github
+from src import __version__
 from src.core import Shibbot, PterodactylShibbot
-from src.logging import Logger, PStyles
-logger = Logger(__name__)
+from src.logging import Logger, ANSIEscape, LoggingLevel
 
 
 CONFIG_FILE_PATH = "./config.toml"
 CONFIG_FP_EXEMPLE = CONFIG_FILE_PATH + ".exemple"
 
 
-class Missing(Exception):
-    """Raised when something is missing."""
+class MissingFile(Exception):
+    """Raised when a necessary file is missing."""
+    
+    def __init__(self, fp: str | None = None, message: str | None = None):
+        super().__init__(message or f"File '{fp}' is missing.")
+    
+class ConfigError(Exception):
+    """Raised when there is a problem with the configuration file."""
 
+class Syntax(ConfigError, TypeError):
+    """Raised when there is a syntax problem or an type problem."""
 
-class Syntax(Exception):
-    """Raised when there is a syntax problem."""
+class UncompletedOrMissing(ConfigError):
+    """Raised when the a line in the cofig file is uncompleted or missing."""
+    
 
-
-def ascii_art():
+def ascii_art(logger: Logger):
     """Shows a beautiful ascii art with a splash text."""
-    splash_text = (PStyles.ERROR+"oUUuh scary red message"+PStyles.ENDC, PStyles.OKBLUE+"blue"+PStyles.ENDC,
-                   "goofy aah bot", "E", "a", "really cool ascii art huh?", "boTs havE riGhts ToO",
-                   "microwaves be like: hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm *ding*",
-                   github, "ඞ", "i got a gun in my rari", "Python Edition", "i'm fucking retarded",
-                   "https://www.youtube.com/watch?v=ZE4yIP2V2uQ", "Around the World, Around the World 🎶",
-                   "*ping*", "created in 2021", "go watch Blade Runner 2049", "discord.com:443", "computer compatible!",
-                   "god I love listening to CloudNone", "open source!", "I'm in your walls.", "Work of Shibzel!",
-                   "I know your exact location.", "Why are you even reading this", "Singlethreaded!", "Water proof!",
-                   ".　　 。　 ඞ 。 . 　　•", "i love microplastics!", "random text!", "69420 lines of code!"
-                   "STOP POSTING ABOUT AMONG US, I'M TIRED OF SEEING IT! My friends on TikTok send me memes, on Discord it's fucking memes, i was in a server, right? and ALL of the channels are just Among Us stuff. I-I showed my Champion underwear to my girlfriend, and the logo i flipped it and i said \"Hey babe, when the underwear sus HAHA ding ding ding ding ding ding ding *takes breath* ding ding ding\" I FUCKING LOOKED AT A TRASH CAN, I SAID \"THAT'S A BIT SUSSY\", I LOOKED AT MY PENIS, I THINK OF THE ASTRONAUT'S HELMET, AND I GO \"PENIS, more like peenSUS\" *takes breath* AAAAAAAAAAAAAAA",
-                   "Wooo, memes!", "a vewy gud bot",  "amaznig!!!!", "text", "random splash text, go !"
-                   "holy cow!", "shibe going to space :O", "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                   "https://www.youtube.com/watch?v=JuEa6Hum0b4", "thanks for using shibbot!", "[put something here]",)
+    try:
+        with open("./splash_text.toml", "rb") as f:
+            splash_text = toml.load(f)["SplashText"]
+    except (FileNotFoundError, toml.TOMLDecodeError) as err:
+        logger.error("An error occured while loading splash texts.", err)
+        splash_text = ("placeholder",)
     print(f"""
             ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣀⣤⠀⣤⡄⡤⣤⢤⣀⡀
@@ -54,142 +54,163 @@ def ascii_art():
 ⠀⢠⠿⢿⣿⣿⡿⠒⠀⠀⠈⢮⣻⣿⣾⣿⣿⣾⠵⠋ |░░░▀▀█░█▀█░░█░░█▀▄░█▀▄░█░█░░█░░░|
 ⠀⠀⣰⣿⣿⠋⢀⣀⣠⡄⠀⣀⠑⢝⠿⢝⣫⣵⡞  |░░░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░▀░░░|
 ⠀⢠⣿⣿⣯⣶⣿⣿⣿⡇⣠⡟⡘⠀⢦⢿⣿⠟   |░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░|
-⠀⣾⣿⣿⣿⣿⠟⠁⣿⣿⡿⡡⠁⠀⠈⠋⠋     ---- • {PStyles.BOLD + f'Version {version}' + PStyles.ENDC} • ---------
-⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈       > {PStyles.ITALICIZED + random.choice(splash_text) + PStyles.ENDC}
-~~""")
+⠀⣾⣿⣿⣿⣿⠟⠁⣿⣿⡿⡡⠁⠀⠈⠋⠋     ---- • {ANSIEscape.bold + f'Version {__version__}' + ANSIEscape.endc} • ---------
+⠼⠿⠿⠟⠋⠁⠀⠾⠛⠉⠈       > {ANSIEscape.italicize + random.choice(splash_text) + ANSIEscape.endc}
+""")
 
 
 def main():
     """Main function. Do some checks and then starts the bot."""
     cls = Shibbot
-    logger.start()
 
-    repo_name = github.replace("https://github.com/", "")
-    try:
-        # Indicating Python version in debug logs
-        py_ver_string = python_version()
-        py_ver_tuple = python_version_tuple()
-        logger.debug(f"Running on Python {py_ver_string}.")
-        if not 7 < int(py_ver_tuple[1]) < 12 and int(py_ver_tuple[0]) != 3:
-            # If SOMEHOW you managed to run this script on something else than Python 3.x
-            logger.error(
-                f"Shibbot is not intended to run on version {py_ver_string} of Python.")
-
-        # Verifies if the config file exists
-        if not path.exists(CONFIG_FILE_PATH):
-            try:
-                copyfile(CONFIG_FP_EXEMPLE, CONFIG_FILE_PATH)
-            except FileNotFoundError as exc:
-                raise Missing("There are missing files."
-                              " To fix this you can re-download the code and try to run it again : "
-                              f"https://github.com/{repo_name}/releases/") from exc
-            else:
-                raise Missing(
-                    f"Please fulfill the requirements inside of the {CONFIG_FILE_PATH} file.")
-        # Loading config
-        with open(CONFIG_FILE_PATH, "rb") as toml_file:
-            config: dict[str, dict | object] = toml.load(toml_file)
-        settings = config["Settings"]
-
-        # Setting up debug mode
-        debug = settings.get("DebugMode", False)
-        caching = settings.get("UseCache", False)
-        console = settings.get("UseConsole", True)
-        kwargs = {"debug": debug, "caching": caching}
-
-        # Discord
-        discord = config["Discord"]
-        token = discord["Token"]
-        if token == "":
-            raise Missing("You forgot to set a token >:c"
-                          f" Go to your {CONFIG_FILE_PATH} file to set one. You can get yours here : "
-                          "https://discord.com/developers/applications/")
-        instance_owners = []
-        raw_ids = discord["Owners"]
-        if raw_ids != []:
-            try:
-                for _id in raw_ids:
-                    assert len(_id) >= 18
-                    instance_owners.append(int(_id))
-            except (ValueError, AssertionError) as exc:
-                raise Syntax("Invalid Discord id(s)."
-                             " Make sure that the ids are intergers inside a array (list).") from exc
-        kwargs["instance_owners"] = instance_owners
-
-        # Code version
-        request = requests.get(
-            f"https://api.github.com/repos/{repo_name}/tags", timeout=5)
-        response = orjson.loads(request.text)
-        if request.status_code == 200:
-            last_version = response[0]["name"]
-            if last_version == version:
-                logger.log(
-                    "You're currently using the lastest version !")
-            else:
-                for release in response:
-                    if release["name"] == version:
-                        logger.warn(f"You're not using the latest version '{version}' < '{last_version}'."
-                                    " Download the latest one here : https://github.com/{repo_name}/releases/")
-                        break
-                else:
-                    logger.warn(
-                        "You're currently using a wip/unlisted version.")
+    # Verifies if the config file exists
+    if not os.path.exists(CONFIG_FILE_PATH):
+        try:
+            copyfile(CONFIG_FP_EXEMPLE, CONFIG_FILE_PATH)
+        except FileNotFoundError as exc:
+            raise MissingFile(CONFIG_FP_EXEMPLE) from exc
         else:
-            logger.error("Couldn't verify if the bot is up to date.")
+            raise ConfigError(
+                f"Please fulfill the requirements inside of the {CONFIG_FILE_PATH} file.")
+    # Loading config
+    with open(CONFIG_FILE_PATH, "rb") as toml_file:
+        config: dict[str, dict | object] = toml.load(toml_file)
+    settings = config["Settings"]
+    console = settings["UseConsole"]
+    debug = settings["DebugMode"]
+    kwargs = {
+        "debug": debug,
+        "caching": settings["UseCache"],
+    }
+    paths = config["Paths"]
+    logs_path = paths["Logs"]
+    path_kwargs = {
+        "database_fp": paths["Database"],
+        "extentions_path": paths["Extensions"],
+        "cache_path": paths["Cache"],
+        "temp_cache_path": paths["TemporaryCache"]
+    }
+    for path in path_kwargs.values():
+        if not os.path.exists(path):
+            open(path, "x").close()
+    kwargs.update(path_kwargs)
+    
+    logger = Logger(
+        path=logs_path,
+        module=__name__,
+        level=LoggingLevel.debug if debug else LoggingLevel.info,
+    )
+    kwargs["logger"] = logger
+    
+    ascii_art(logger)
 
-        # Lavalink
-        # lavalink = config["Lavalink"]
-        # if lavalink["UseLavalink"]:
-        #     if lavalink["IP"] in ("", "127.0.0.1"):
-        #         raise Missing("Missing Lavalink server url/IP."
-        #                       " Self host your own Lavalink server or get a free one on the internet.")
-        #     ll_port = lavalink["Port"]
-        #     if isinstance(ll_port, int):
-        #         raise Syntax("The Lavalink port isn't valid.")
-        #     if lavalink["Password"] == "":
-        #         raise Missing("Missing Lavalink password.")
+    # Indicating Python version in debug logs
+    py_ver = python_version()
+    major, minor, _ = python_version_tuple()
+    logger.debug(f"Running on Python {py_ver}.")
+    if not 7 < int(minor) < 12 and int(major) != 3:
+        logger.warn(
+            f"Shibbot is not intended to run on version {py_ver} of Python.")
+        
+    # Discord
+    discord = config["Discord"]
+    token = discord["Token"]
+    if not token:
+        raise UncompletedOrMissing(
+            "You forgot to set a token >:c"
+            f" Go to your {CONFIG_FILE_PATH} file to set one."
+            " You can get yours here : https://discord.com/developers/applications/"
+        )
+    instance_owners = []
+    raw_ids = discord["OwnersID"]
+    if raw_ids:
+        try:
+            for _id in raw_ids:
+                assert len(_id) >= 18
+                instance_owners.append(int(_id))
+        except (ValueError, AssertionError) as exc:
+            raise Syntax(
+                "Invalid Discord id(s)."
+                " Make sure that the ids are intergers (len >= 18) inside a list."
+            ) from exc
+    kwargs["instance_owners"] = instance_owners
 
-        # Pterodactyl (for the hardware stats, optional)
-        pterodactyl = config["Pterodactyl"]
-        if pterodactyl["UsePterodactylAPI"]:
-            ptero_url = pterodactyl["URL"]
-            if ptero_url in ("", "https://"):
-                raise Missing("Missing pterodactyl ptero_url.")
-            if ptero_url.endswith("/"):
-                raise Syntax(
-                    "Your pterodactyl ptero_url mustn't end with '/'.")
-            ptero_token = pterodactyl["Token"]
-            if ptero_token in ("", "ptlc_"):
-                raise Missing(
-                    f"Missing pterodactyl token. You can it here : {ptero_url}account/api/")
-            ptero_server_id = pterodactyl["ServerID"]
-            if ptero_server_id == "":
-                raise Missing("Missing pterodactyl server ID."
-                              f" The ID is at the end of the server's link in the panel : {ptero_url}server/"
-                              + PStyles.UNDERLINE + "1IdHere" + PStyles.ENDC)
-            cls = PterodactylShibbot
-            kwargs.update({"ptero_url": ptero_url,
-                           "ptero_token": ptero_token,
-                           "ptero_server_id": ptero_server_id, })
-    except Exception as err:
-        logger.error("Hemmm... something went wrong :", err)
-        logger.end()
-        return err
-    else:
-        logger.debug("All checks done.")
+    # Code version
+    repo_name = "Shibzel/Shibbot"
+    try:
+        request = requests.get(
+            f"https://api.github.com/repos/{repo_name}/tags",
+            timeout=5)
+        response = orjson.loads(request.text)
+        assert request.status_code == 200
+        last_version = response[0]["name"]
+        if last_version == __version__:
+            logger.log("You're currently using the lastest version !")
+        else:
+            for release in response:
+                if release["name"] == __version__:
+                    logger.warn(
+                        f"You're not using the latest version '{__version__}' < '{last_version}'."
+                        f" Download the latest one here : https://github.com/{repo_name}/releases/")
+                    break
+            else:
+                logger.warn("You're currently using a wip/unlisted version.")
+    except (requests.RequestException, AssertionError) as err:
+        logger.error("Couldn't verify if the bot is up to date.", err)
+
+    # Lavalink
+    # lavalink = config["Lavalink"]
+    # if lavalink["UseLavalink"]:
+    #     if lavalink["IP"] in ("", "127.0.0.1"):
+    #         raise UncompletedOrMissing(
+    #             "Missing Lavalink server url/IP."
+    #             " Self host your own Lavalink server or get a free one on the internet."
+    #         )
+    #     ll_port = lavalink["Port"]
+    #     if isinstance(ll_port, int):
+    #         raise Syntax("The Lavalink port isn't valid.")
+    #     if lavalink["Password"] == "":
+    #         raise UncompletedOrMissing("Missing Lavalink password.")
+
+    # Pterodactyl (for the hardware stats, optional)
+    pterodactyl = config["Pterodactyl"]
+    if pterodactyl["UsePterodactylAPI"]:
+        ptero_url = pterodactyl["URL"]
+        if ptero_url in ("", "https://"):
+            raise UncompletedOrMissing("Missing pterodactyl ptero_url.")
+        if ptero_url.endswith("/"):
+            raise Syntax("Your pterodactyl ptero_url mustn't end with '/'.")
+        ptero_token = pterodactyl["Token"]
+        if ptero_token in ("", "ptlc_"):
+            raise UncompletedOrMissing(
+                f"Missing pterodactyl token. You can it here : {ptero_url}account/api/")
+        ptero_server_id = pterodactyl["ServerID"]
+        if ptero_server_id == "":
+            raise UncompletedOrMissing(
+                "Missing pterodactyl server ID."
+                " The ID is at the end of the server's link in the panel :"
+                f" {ptero_url}server/" + ANSIEscape.underline + "1IdHere" + ANSIEscape.endc
+            )
+        cls = PterodactylShibbot
+        parameters = {
+            "ptero_url": ptero_url,
+            "ptero_token": ptero_token,
+            "ptero_server_id": ptero_server_id
+        }
+        kwargs.update(parameters)
+    logger.debug("All checks done and settings loaded.")
 
     # Starting the bot
     try:
-        # Instancing Shibbot or PterodactylShibbot with all the necessary kwargs
+        # Instancing Shibbot or PterodactylShibbot
         shibbot = cls(**kwargs)
         shibbot.run(token, command_input=console)  # Running it
     except Exception as err:
-        logger.error("Oops... Shibbot stopped ?", err)
-
-    logger.end()
+        logger.critical("Oops... Shibbot stopped ?", err)
+    
+    logger.close()
 
 
 if __name__ == "__main__":
-    ascii_art()
     main()
-    exit()  # Exiting because some threads that cannot be terminated can still be running
+    exit()

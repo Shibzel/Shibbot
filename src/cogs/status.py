@@ -6,19 +6,16 @@ from discord.ext import tasks
 from src import __version__ as version, __github__ as __github__
 from src.core import Shibbot
 from src.models import BaseCog
-from src.logging import Logger
 
 
 LOOP_TIME = 60  # In seconds
-
-logger = Logger(__name__)
 
 def setup(bot):
     bot.add_cog(ChangeActivity(bot))
 
 class ChangeActivity(BaseCog):
-    def __init__(self, bot):
-        self.bot: Shibbot = bot
+    def __init__(self, bot: Shibbot):
+        self.bot = bot
         super().__init__(hidden=True)
 
         self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users"]
@@ -44,7 +41,7 @@ class ChangeActivity(BaseCog):
 
     async def when_ready(self):
         await asyncio.sleep(10)
-        logger.debug(f"Updating status every {LOOP_TIME} sec.")
+        self.logger.debug(f"Updating status every {LOOP_TIME} sec.")
         self.change_activity.start()
 
     @tasks.loop(seconds=LOOP_TIME)

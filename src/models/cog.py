@@ -4,12 +4,8 @@ from discord.ext import bridge, commands
 
 from .. import __version__
 from ..utils import fl, get_language
-from ..database import AsyncDB
-from ..logging import Logger
+from ..logging import SubLogger
 from ..errors import PluginDisabledError, DeprecatedBotError, PluginWithSameNameError
-
-
-logger = Logger(__name__)
 
 
 def version_deprecated(min_version: str, current_version: str):
@@ -18,7 +14,7 @@ def version_deprecated(min_version: str, current_version: str):
     if current_version[0] == min_version[0]:  # Major
         return current_version[1] < min_version[1]  # Minor
     else:
-        return False
+        return True
 
 
 class BaseCog(Cog):
@@ -28,6 +24,7 @@ class BaseCog(Cog):
         self.bot = getattr(self, "bot", None) or bot
         if self.bot is None:
             raise TypeError(f"{self.__name__} missing required argument: 'bot'.")
+        self.logger: SubLogger = self.bot.logger.get_logger(type(self).__module__)
 
         if not isinstance(name, dict) and name is not None:
             raise TypeError("'name' must be a dict. Exemple : {'en': 'Name', 'fr': 'Nom'}.")
@@ -48,7 +45,7 @@ class BaseCog(Cog):
             for lang in self.languages:
                 self.bot.add_language(lang)
         if self.bot.is_alive is not None:
-            self.bot.loop.create_task(self.when_ready())
+            self.bot.loop.create_task(self.when_ready)
             self._when_ready_called = True
             
     def __subclass_init__(self):
@@ -71,7 +68,7 @@ class BaseCog(Cog):
         return get_language(self.description, lang_code) if self.description else None
 
     def get_lang(self, ctx) -> object:
-        return fl(ctx, self.languages)
+        return fl(self.bot, ctx, self.languages)
 
     def get_commands(self, cached: bool = True) -> list[SlashCommand | commands.Command]:
         if self._cached_cogs and cached:
@@ -105,13 +102,15 @@ class PluginCog(BaseCog):
         try:
             c.execute(f"SELECT {self.plugin_name} FROM plugins")
         except OperationalError:
-            logger.debug(f"Adding '{self.plugin_name}' to 'plugin' table in database.")
+            self.logger.debug(f"Adding '{self.plugin_name}' to 'plugin' table in database.")
             c.execute(f"ALTER TABLE plugins ADD COLUMN {self.plugin_name} BOOLEAN")
         self.bot.db.commit() # VER: 1.0.0
 
     async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
-        async with AsyncDB() as db:
-            return await db.plugin_is_enabled(ctx.guild, self.plugin_name, self.guild_only)
+        db = self.bot.asyncdb
+        return await db.plugin_is_enabled(
+            ctx.guild, self.plugin_name, self.guild_only
+        )
 
     async def cog_before_invoke(self, ctx: bridge.BridgeApplicationContext):
         if not await self.is_enabled(ctx):

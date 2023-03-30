@@ -1,13 +1,13 @@
+__all__ = ("DEFAULT_PREFIX", "DEFAULT_LANGUAGE", "COGS_PATH", "CORE_COGS",
+           "OPTIONAL_COGS", "BUILTIN_COGS", "LANGUAGES", "LANGUAGES_FLAGS",
+           "SHIBZEL_ID", "SERVER_INVITATION_LINK", "DATABASE_FILE_PATH",
+           "LOGS_PATH", "CACHE_PATH", "TEMPORARY_CACHE_PATH", "EXTENSIONS_PATH")
+
+
 DEFAULT_PREFIX = "$"
 DEFAULT_LANGUAGE = "en"
 
-DATABASE_FILE_PATH = "./database.sqlite3"
-LOGS_PATH = "./logs"
-CACHE_PATH = "./cache"
-TEMPORARY_CACHE_PATH = CACHE_PATH + "/temp"
-
 COGS_PATH = "./src/cogs"
-EXTENSIONS_PATH = "./extensions"
 CORE_COGS = ("commands", "events",)
 OPTIONAL_COGS = (
     "admin",
@@ -110,3 +110,9 @@ LANGUAGES_FLAGS = {
 
 SHIBZEL_ID = 380044496370532353
 SERVER_INVITATION_LINK = "https://discord.gg/TZNWfJmPwj"
+
+DATABASE_FILE_PATH = "./database.db"
+LOGS_PATH = "./logs"
+CACHE_PATH = "./cache"
+TEMPORARY_CACHE_PATH = CACHE_PATH + "/temp"
+EXTENSIONS_PATH = "./extensions"

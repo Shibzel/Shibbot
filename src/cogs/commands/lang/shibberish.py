@@ -1,7 +1,7 @@
 from .en import English
 
 class Shibberish(English):
-    PING_EMBED_TITLE = "boing"
+    PING_EMBED_TITLE = "🏓 boing"
     PING_EMBED_DESCRIPTION = "shibebot sped : `{ping}ms`\ncheeseburgers : `CPU: {cpu}%` `RAM: {ram}%`"
 
     SHOW_HELP_OPTION_HOME_LABEL = "hoom"

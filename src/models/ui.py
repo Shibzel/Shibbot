@@ -2,12 +2,8 @@ import discord
 from discord import ui
 from discord.ext.commands import Context
 
-from ..logging import Logger
 from ..errors import NotInteractionOwner
 from ..utils import send
-
-
-logger = Logger(__name__)
 
 
 class CustomView(ui.View):
@@ -30,7 +26,6 @@ class CustomView(ui.View):
                     await self._message.edit(view=self)
             except discord.NotFound:
                 pass
-
 
 class EmbedViewer(CustomView):
     def __init__(self, embeds: list[discord.Embed], next_button: discord.ui.Button, previous_button: discord.ui.Button,

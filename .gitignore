@@ -1,5 +1,5 @@
 # For this project
-**.sqlite3
+**.db
 config.toml
 ideas.txt
 cache/*

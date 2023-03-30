@@ -2,7 +2,7 @@
     "_comment": "THIS FILE IS AN PTERODACTYL EGG DESIGNED FOR SHIBBOT. More about custom eggs : https://pterodactyl.io/community/config/eggs/creating_a_custom_egg.html",
     "meta": {
         "version": "PTDL_v2",
-        "update_url": "https://github.com/Shibzel/Shibbot/blob/main/shibbot-egg.json"
+        "update_url": "https://raw.githubusercontent.com/Shibzel/Shibbot/main/shibbot-egg.json"
     },
     "exported_at": "2022-12-24T21:58:25+01:00",
     "name": "Shibbot Python Egg",

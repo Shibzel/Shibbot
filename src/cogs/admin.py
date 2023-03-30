@@ -3,23 +3,21 @@ from discord.ext import commands
 import traceback
 
 from src.core import Shibbot
-from src.logging import Logger, LATEST_LOGS_FILE_PATH
-from src.constants import TEMPORARY_CACHE_PATH
-
-logger = Logger(__name__)
+from src.models.cog import BaseCog
 
 def setup(bot):
     bot.add_cog(OwnerCommands(bot))
 
-def create_log_file(error):
-    path = TEMPORARY_CACHE_PATH+"/latest_error.log"
+def create_log_file(bot, error):
+    path = bot.temp_cache_path+"/latest_error.log"
     with open(path, "w+") as f:
         f.write("".join(traceback.format_exception(type(error), error, error.__traceback__)))
     return path
 
-class OwnerCommands(commands.Cog):
-    def __init__(self, bot):
-        self.bot: Shibbot = bot
+class OwnerCommands(BaseCog):
+    def __init__(self, bot: Shibbot):
+        self.bot = bot
+        super().__init__(hidden=True)
 
     async def _on_cog(self, ctx, method, cog_name, method_name):
         try:   
@@ -27,8 +25,8 @@ class OwnerCommands(commands.Cog):
             await ctx.send(f"{method_name.title()}ed cog `{cog_name}` !")
         except Exception as error:
             message = f"Couldn't {method_name} '{cog_name}', the following error occured :"
-            logger.error(message, error)
-            await ctx.send(message, file=discord.File(fp=create_log_file(error)))
+            selflogger.error(message, error)
+            await ctx.send(message, file=discord.File(fp=create_log_file(self.bot, error)))
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx: commands.Context, cog):
@@ -51,7 +49,7 @@ class OwnerCommands(commands.Cog):
         except Exception as error:
             message = "Couldn't sync commands."
             logger.error(message, error)
-            await ctx.send(message, file=discord.File(fp=create_log_file(error)))
+            await ctx.send(message, file=discord.File(fp=create_log_file(self.bot, error)))
         
     @commands.command()
     async def owner(self, ctx: commands.Context):

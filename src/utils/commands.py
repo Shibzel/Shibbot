@@ -3,8 +3,11 @@ from discord.ext import commands
 from .language import get_language
 
 
-async def send(ctx: discord.ApplicationContext | commands.Context | discord.Interaction,
-               *args, view: discord.ui.View = None, ephemeral: bool = False, **kwargs):
+CommandsType = discord.SlashCommand | commands.Command
+FlexCommandType = discord.SlashCommand | commands.Command | discord.Interaction
+
+async def send(ctx: FlexCommandType, *args, view: discord.ui.View = None,
+               ephemeral: bool = False, **kwargs):
     result = None
     if isinstance(ctx, discord.ApplicationContext):
         result = await ctx.respond(*args, ephemeral=ephemeral, view=view, **kwargs)
@@ -40,7 +43,7 @@ def get_description_localization(obj, lang_code: str) -> str | None:
     return obj_description if obj_description else obj.description
 
 
-def stringify_command_usage(command: discord.SlashCommand | commands.Command, lang_code: str) -> str | None:
+def stringify_command_usage(command: CommandsType, lang_code: str) -> str | None:
     command_options = ""
     if isinstance(command, discord.SlashCommand):
         for option in command.options:

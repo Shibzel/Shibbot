@@ -1,6 +1,5 @@
 from discord.ext import bridge
 
-from src import database
 from src.constants import DEFAULT_LANGUAGE
 
 
@@ -25,7 +24,7 @@ def get_language(_dict: dict, lang_code: str) -> list:
         return list(_dict)[0] if len(_dict) else None
 
 
-async def factory_language(ctx: bridge.BridgeApplicationContext, languages_dict: dict):
+async def factory_language(bot, ctx: bridge.BridgeApplicationContext, languages_dict: dict):
     """Get the language from the database with the context and return the corresponding value using the `.get_language` function.
 
     Args:
@@ -35,7 +34,7 @@ async def factory_language(ctx: bridge.BridgeApplicationContext, languages_dict:
     Returns:
     `object`: The value corresponding to the language.
     """
-    lang_code = await database.get_language(ctx)
+    lang_code = await bot.asyncdb.get_language(ctx.guild)
     return get_language(languages_dict, lang_code)
 
 fl = factory_language

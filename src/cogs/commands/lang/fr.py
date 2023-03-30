@@ -1,7 +1,7 @@
 from .en import English
 
 class French(English):
-    PING_EMBED_TITLE = "Pong"
+    PING_EMBED_TITLE = "🏓 Pong"
     PING_EMBED_DESCRIPTION = "Latence de Shibbot : `{ping}ms`\nUtilisation machine : `CPU: {cpu}%` `RAM: {ram}%`"
 
     SHOW_HELP_OPTION_HOME_LABEL = "Accueil"

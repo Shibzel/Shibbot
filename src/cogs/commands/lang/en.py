@@ -1,5 +1,5 @@
 class English:
-    PING_EMBED_TITLE = "Pong"
+    PING_EMBED_TITLE = "🏓 Pong"
     PING_EMBED_DESCRIPTION = "Shibbot's latency : `{ping}ms`\nMachine load : `CPU: {cpu}%` `RAM: {ram}%`"
 
     SHOW_HELP_OPTION_HOME_LABEL = "Home"

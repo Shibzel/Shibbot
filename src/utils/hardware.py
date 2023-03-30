@@ -5,10 +5,7 @@ from aiohttp import ClientSession
 from datetime import datetime
 from orjson import loads
 
-from ..logging import Logger
-
-
-logger = Logger(__name__)
+from ..logging import SubLogger
 
 
 class Uptime:
@@ -25,9 +22,9 @@ class Uptime:
     def __str__(self) -> str:
         return f"{self.days}d, {self.hours}h, {self.minutes}m and {self.seconds}s"
 
-
 class SelfLocation:
-    def __init__(self):
+    def __init__(self, logger: SubLogger = None):
+        self.logger = logger
         self.country = None
         self.city = None
         self.continent = None
@@ -45,7 +42,8 @@ class SelfLocation:
     
     async def update(self, persist: bool = True):
         async with ClientSession() as session:
-            logger.debug("Trying to get the location of the machine.")
+            if self.logger:
+                self.logger.debug("Trying to get the location of the machine.")
             got_response = False
             while got_response is False:
                 try:
@@ -57,17 +55,18 @@ class SelfLocation:
                     self.continent = json_result["continentCode"]
                     
                     got_response = self.got_response = True
-                    logger.debug(f"Got location '{self}'.")
+                    self.logger.debug(f"Got location '{self}'.")
                 except:
                     if not persist:
                         break
                     await asyncio.sleep(40)
 
-
 class ServerSpecifications:
-    def __init__(self, loop = asyncio.get_event_loop()):
-        self.loop = loop
-        self.location = SelfLocation()
+    def __init__(self, bot):
+        self.bot = bot
+        self.loop = bot.loop
+        self.logger: SubLogger = bot.logger.get_logger(__name__)
+        self.location = SelfLocation(self.logger)
         
         self._max_memory = None
         self._memory_usage = None
@@ -101,11 +100,10 @@ class ServerSpecifications:
     async def close(self):
         pass  # Does nothing, to override.
 
-
 class PteroContainerSpecifications(ServerSpecifications):
-    def __init__(self, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None,
+    def __init__(self, bot, ptero_url: str = None, ptero_token: str = None, ptero_server_id: str = None,
                  secs_looping: float = 15.0,):
-        super().__init__()
+        super().__init__(bot)
         self._panel_url = ptero_url
         self._token = ptero_token
         self._server_id = ptero_server_id
@@ -115,6 +113,7 @@ class PteroContainerSpecifications(ServerSpecifications):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self._token}"
         }
+        self._session = ClientSession(headers=self._headers)
         self.looping = False
         
         self._cpu_usage_percent = .0
@@ -130,14 +129,14 @@ class PteroContainerSpecifications(ServerSpecifications):
 
     async def close(self):
         self.looping = False
+        await self._session.close()
 
     async def _request(self, url):
-        async with ClientSession(headers=self._headers) as session:
-            response = await session.get(url)
-            result = (await response.json(loads=loads))
-            if response.status != 200:
-                raise Exception(result)  # TODO: Generic exception, raise a more pertinent one.
-            return result
+        response = await self._session.get(url)
+        result = (await response.json(loads=loads))
+        if response.status != 200:
+            raise Exception(result)  # TODO: Generic exception, raise a more pertinent one.
+        return result
 
     async def update_limits(self):
         url = f"{self._panel_url}/api/client/servers/{self._server_id}"
@@ -161,7 +160,7 @@ class PteroContainerSpecifications(ServerSpecifications):
         if self.looping:
             raise RuntimeError("The update loop is already running.")
         
-        logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
+        self.logger.debug("Beginning to retrieve server hardware usage on the Pterodactyl API.")
         self.looping = True
         notify = True
         
@@ -172,7 +171,7 @@ class PteroContainerSpecifications(ServerSpecifications):
                 notify = True
             except Exception as err:
                 if notify:
-                    logger.error(error_message, err)
+                    self.logger.error(error_message, err)
                     notify = False
         
         while self.looping:

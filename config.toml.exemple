@@ -5,11 +5,18 @@ DebugMode = false
 # (uses more ram and storage)
 UseCache = false
 
+[Paths]
+Logs = "./logs"
+Database = "./database.db"
+Cache = "./cache"
+TemporaryCache = "./cache/temp"
+Extensions = "./extensions"
+
 [Discord]
 Token = ""
 # Some commands require to be "owner", so the bot must know your 
 # discord id to grant you access
-Owners = []
+OwnersID = []
 
 #[Lavalink]
 #UseLavalink = false

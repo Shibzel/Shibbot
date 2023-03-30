@@ -1,196 +1,212 @@
 """Really shitty logging module, I could have used logging instead but I wanted to do it my way.
 
 Note: Logging with a method of `Logger` takes around 3ms to run."""
-from datetime import datetime
-from traceback import format_exception
 import os
 import gzip
+from datetime import datetime
+from traceback import format_exception
 
 from src import __version__
-from src.constants import LOGS_PATH, CACHE_PATH
-from src.utils.json import load, dump
 from src.utils.re import remove_ansi_escape_sequences
 
 
-MAX_LOG_FILES = 10
+__all__ = ("LOG_EXTENSION", "LATEST_LOG_FILE_NAME", "END_CHARACTER", "ENCODING", "ANSIEscape"
+           "LoggingLevel", "format_error", "cleanup", "BaseLogger", "Logger", "SubLogger")
+
+
 LOG_EXTENSION = ".log"
-LOGGER_CACHE_FILE_PATH = CACHE_PATH + "/logger.json"
-LATEST_LOGS_FILE_PATH = LOGS_PATH + "/latest" + LOG_EXTENSION
-IS_CLOSED_KEY = "closed"
-IS_ENABLED_KEY = "enabled"
-IS_DEBUGGING_KEY = "debug"
+LATEST_LOG_FILE_NAME = "/latest" + LOG_EXTENSION
+END_CHARACTER = "ඞ"  # Don't ask questions
+ENCODING = "UTF-8"
 
-if not os.path.exists(LOGGER_CACHE_FILE_PATH):
-    dump({}, LOGGER_CACHE_FILE_PATH)
-
-
-def load_cache():
-    return load(LOGGER_CACHE_FILE_PATH)
-
-
-def dump_cache():
-    dump(cache, LOGGER_CACHE_FILE_PATH)
-
-
-cache = load_cache()
-
-
-class PStyles:
-    ENDC = "\033[00m"
-    WARNING = "\033[93m"
-    ERROR = "\033[1;31m"
-    QUIET = "\033[38;5;248m"
-    OKCYAN = "\033[96m"
-    OKBLUE = "\033[94m"
-    OKGREEN = "\033[92m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-    ITALICIZED = "\033[3m"
-
-
-def log(string, **kwargs):
-    """Adds text to the 'latest.log' file."""
-    if cache.get(IS_ENABLED_KEY, True):
-        print(string, **kwargs)
-    with open(LATEST_LOGS_FILE_PATH, "a+", encoding="utf-8") as f:
-        clean_string = remove_ansi_escape_sequences(string)
-        f.write(clean_string+"\n")
-
-
-class Logger:
-    """A logging class designed for Shibbot.
+class ANSIEscape:
+    """Collection of ANSI escape sequences for coloration or text formating."""
+    endc = "\033[00m"
+    cyan = "\033[96m"
+    blue = "\033[94m"
+    green = "\033[92m"
+    gray = "\033[38;5;248m"
+    orange = "\033[93m"
+    red = "\033[1;31m"
+    red_font = "\033[48;5;196m"
+    bold = "\033[1m"
+    underline = "\033[4m"
+    italicize = "\033[3m"
     
-    Attributes
-    ----------
-    file_name: str
-        The name of the file this instance is in."""
+class LoggingLevel:
+    """Self-explanatory, collection of logging levels."""
+    debug = 4
+    log = info = information = 3
+    warn = warning = 2
+    error = 1
+    critical = fatal = 0
+    disabled = -1
 
-    def __init__(self, file_name: str = None):
-        """Parameters
-        ----------
-        file_name: str
-            The name of the file you're in."""
-        self.file_name = file_name or "unspecified-dir"
+# The type can be retuned thanks to the index
+# >>> level = LoggingLevel.log  # int: 3
+# >>> LoggingType(level)
+# Output: INFO
+LoggingType = ("CRITICAL", "ERROR", "WARN", "INFO", "DEBUG")
 
-    @property
-    def enabled(*args):
-        return cache.get(IS_ENABLED_KEY, False)
-
-    @property
-    def debugging(*args):
-        return cache.get(IS_DEBUGGING_KEY, False)
-
-    @staticmethod
-    def formated_time(
-    ) -> str: return datetime.now().strftime("%H:%M:%S.%f")[:13]
-
-    def log(self, string: str, color: str | None = None) -> None:
-        """Classic method of logging.
-        Can take a 'color' argument which is a string containing an ANSI escape sequence."""
-        log(f"{(color or '')}[{self.formated_time()} INFO @{self.file_name}] {string}{PStyles.ENDC}")
-
-    def warn(self, string: str) -> None:
-        """Warns the user about something."""
-        log(f"{PStyles.WARNING}[{self.formated_time()} WARN @{self.file_name}] {string}{PStyles.ENDC}")
-
-    def debug(self, string: str, error: Exception = None) -> None:
-        """Prints the string if debug mode is enabled and writes to the log file whether
-        debug is enabled or not.
-        Use for debugging or unimportant things."""
-        if not cache.get(IS_DEBUGGING_KEY):
-            return
-        string = f"{PStyles.QUIET}[{self.formated_time()} DEBUG @{self.file_name}] {string}{PStyles.ENDC}"
-        if error:
-            formated_err_lines = format_exception(type(error), error,  error.__traceback__, 1)
-            string += f"\n-> {''.join(formated_err_lines)}".replace("\n\n", "\n")
-        log(string)
-
-    def error(self, string: str, error_or_traceback: str | Exception = None) -> None:
-        """Prints the string in bold, bright red to indicate an error to consider.
-        Can accept a traceback or an error that has been raised in order to format it."""
-        string = f"{PStyles.ERROR}[{self.formated_time()} ERROR @{self.file_name}] {string}{PStyles.ENDC}"
-        error_string = None
-        if isinstance(error_or_traceback, Exception):
-            formated_err_lines = format_exception(
-                type(error_or_traceback), error_or_traceback, error_or_traceback.__traceback__, 3)
-            error_string = f"-> {''.join(formated_err_lines)}".replace("\n\n", "\n")
-        elif isinstance(error_or_traceback, str):
-            error_string = error_or_traceback
-        log(string)
-        if error_string:
-            log(error_string)
-
-    @staticmethod
-    def enable() -> None:
-        cache[IS_ENABLED_KEY] = True
-        dump_cache()
-        _logger.log("Logging enabled. Hi, how have you been since ?")
-
-    @staticmethod
-    def disable() -> None:
-        cache[IS_ENABLED_KEY] = False
-        dump_cache()
-        _logger.log(
-            "Logging disabled, messages will no longer appear on the console.")
-
-    @staticmethod
-    def set_debug(boolean: bool) -> None:
-        cache[IS_DEBUGGING_KEY] = boolean
-        dump_cache()
-        _logger.log(f"Setting debug mode for logging as '{boolean}'.")
-
-    @staticmethod
-    def start() -> None:
-        """To be put at the beginning of the program."""
-        logger_cache = load(LOGGER_CACHE_FILE_PATH)
-        if IS_CLOSED_KEY in logger_cache and not logger_cache[IS_CLOSED_KEY]:
-            _logger.debug(
-                f"Closing '{LATEST_LOGS_FILE_PATH}' because the bot was not shut down properly.")
-            _close()
-        global cache
-        cache[IS_CLOSED_KEY] = False
-        if os.path.exists(LATEST_LOGS_FILE_PATH):
-            os.remove(LATEST_LOGS_FILE_PATH)
-        _logger.debug("~~ Starting logging.")
-
-    @staticmethod
-    def end() -> None:
-        """To be put at the end of the program."""
-        _logger.debug("~~ Program ended correctly.")
-        _close()
-
-
-def cleanup(folder_fp: str, max_files: str):
-    files = os.listdir(folder_fp)
-    if len(files) <= max_files:
+def format_error(error_or_traceback: str | Exception, limit: int = 3, **kwargs) -> str:
+    """Formats en error. If the error is already an string it's immediatly returned."""
+    if not error_or_traceback:
+        return ""
+    if not isinstance(error_or_traceback, Exception):
+        return "\n"+str(error_or_traceback)
+    
+    formated_err_lines = format_exception(
+        type(error_or_traceback),
+        error_or_traceback,
+        error_or_traceback.__traceback__,
+        limit=limit,
+        **kwargs)
+    error_string = f"\n-> {''.join(formated_err_lines)}"
+    return error_string.replace("\n\n", "\n")
+        
+def cleanup(folder_path: str, max_files: str):
+    """Deletes the oldests files if an limit is exceeded."""
+    files = os.listdir(folder_path)
+    if len(files) < max_files:
         return 0
-    sorted_by_date = sorted(files,
-                            key=lambda x: os.path.getmtime(os.path.join(folder_fp, x)))
+    sorted_by_date = sorted(
+        files,
+        key=lambda x: os.path.getmtime(folder_path + f"/{x}"))
     items = len(files) - max_files
     for fichier in sorted_by_date[:items]:
-        os.remove(os.path.join(folder_fp, fichier))
+        os.remove(os.path.join(folder_path, fichier))
     return items
 
+class BaseLogger:
+    """Primitive logger."""
+    
+    def __init__(
+            self,
+            module: str,
+            file: str,
+            level: int,
+            time_format: str,
+            instance_name: str = None,
+        ) -> None:
+        self.module = module
+        self.file = file
+        self.time_format = time_format
+        self.level = level
+        self.instance_name = instance_name
+    
+    def formated_time(self, override: str = None) -> str:
+        return datetime.now().strftime(override or self.time_format)
+        
+    def _log(self, level: int, msg: str, color: str = None) -> None:
+        msg = f"{color or ''}[{self.formated_time()} {LoggingType[level]} @{self.module}] {msg} {ANSIEscape.endc}"
+        
+        if self.instance_name:
+            print(f"[{self.instance_name}]", end="")
+        print(msg)
+        with open(self.file, "a+", encoding=ENCODING) as f:
+            clean_string = remove_ansi_escape_sequences(msg)
+            f.write(clean_string+"\n")
+                
+    def debug(self, msg: str, error: str | Exception = None) -> None:
+        if self.level >= LoggingLevel.debug:
+            msg += ANSIEscape.endc + format_error(error)
+            self._log(LoggingLevel.debug, msg, ANSIEscape.gray)
+    
+    def info(self, msg: str, color: str = None) -> None:
+        if self.level >= LoggingLevel.info:
+            self._log(LoggingLevel.info, msg, color)
+            
+    def log(self, msg: str, color: str = None) -> None:
+        self.info(msg, color)
+    
+    def warn(self, msg: str) -> None:
+        if self.level >= LoggingLevel.warn:
+            self._log(LoggingLevel.warn, msg, ANSIEscape.orange)
+    
+    def error(self, msg: str, error: str | Exception = None) -> None:
+        if self.level >= LoggingLevel.error:
+            msg += ANSIEscape.endc + format_error(error)
+            self._log(LoggingLevel.error, msg, ANSIEscape.red)
+    
+    def critical(self, msg: str, error: str | Exception = None) -> None:
+        if self.level >= LoggingLevel.critical:
+            msg += ANSIEscape.endc + format_error(error, limit=None)
+            self._log(LoggingLevel.critical, msg, ANSIEscape.red_font)
 
-def _close():
-    # Compressing log file.
-    extension = LOG_EXTENSION + ".gz"
-    raw_name = name = f"{LOGS_PATH}/{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
-    n = 1
-    while os.path.exists(name+extension):
-        name = f"{raw_name}+{n}"
-        n += 1
-    out_file = name + extension
-    _logger.debug(f"Compressing '{LATEST_LOGS_FILE_PATH}' into '{out_file}'.")
-    with open(LATEST_LOGS_FILE_PATH, "rb") as log_file:
-        with gzip.open(out_file, "wb+") as gzip_file:
-            gzip_file.write(log_file.read())
-    _logger.debug("Done compressing.")
-    cache[IS_CLOSED_KEY] = True
-    dump_cache()
-    _logger.debug(f"Cleaning up logs (will delete the oldest files if their number exceeds {MAX_LOG_FILES}).")
-    if items := cleanup(LOGS_PATH, MAX_LOG_FILES):
-        _logger.debug(f"Deleted {items} log file(s).")
-
-
-_logger = Logger(__name__)
+class Logger(BaseLogger):    
+    def __init__(
+            self,
+            path: str,
+            module: str,
+            level: int = LoggingLevel.info,
+            time_format: str = "%Y-%d-%m %H:%M",
+            max_logs: int = 10,
+            instance_name: str = None,
+        ):
+        self.path = path
+        self.max_logs = max_logs
+        self.instance_name = instance_name
+        super().__init__(
+            file=path+LATEST_LOG_FILE_NAME,
+            module="main" if module == "__main__" else module,
+            level=level,
+            time_format=time_format,
+            instance_name=instance_name
+        )
+        
+        with open(self.file, "r+", encoding="utf-8") as f:
+            if f.readlines()[-1] != END_CHARACTER:
+                self.debug("Program did not shut down corectly, closing...")
+                self.close()
+        os.remove(self.file)  # Removes the file
+        self.info("Starting logging.")  # But not explicitly recreated here
+        
+    def __enter__(self) -> "Logger":
+        return self
+    
+    def __exit__(self, *args) -> None:
+        self.close()
+        
+    def get_logger(self, module: str = "unspecified-dir") -> "SubLogger":
+        return SubLogger(self, module)
+        
+    def close(self) -> None:
+        self.info(f"Stopping logging.")
+        self.debug("Cleaning up logs.")
+        if items := cleanup(self.path, self.max_logs):
+            self.debug(f"Deleted {items} log file(s).")
+            
+        extension = LOG_EXTENSION + ".gz"
+        raw_name = f"{self.path}/{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+        out_file = raw_name + extension
+        n = 0
+        while os.path.exists(out_file):
+            n += 1
+            out_file = f"{raw_name}+{n}{extension}"
+        self.debug(f"Compressing {self.file} into {out_file}...")
+        with open(self.file, "rb") as log_file:
+            with gzip.open(out_file, "wb+") as gzip_file:
+                gzip_file.write(log_file.read())
+        with open(self.file, "a", encoding="utf-8") as log_file:
+            log_file.write(END_CHARACTER)
+        
+class SubLogger(BaseLogger):
+    """Subclass of `BaseLogger`. Primitive logger generated by the get_logger() method on `Logger`."""
+    
+    def __init__(self, logger: Logger, module: str):
+        self._logger = logger
+        self.module = module
+        self.instance_name = logger.instance_name
+        self.get_logger = self._logger.get_logger
+        
+    @property
+    def file(self) -> str:        # I don't know any other way to share the same
+        return self._logger.file  # attribute than wrapping it like this
+        
+    @property
+    def time_format(self) -> str:
+        return self._logger.time_format
+        
+    @property
+    def level(self) -> str:
+        return self._logger.level

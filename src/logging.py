@@ -154,9 +154,11 @@ class Logger(BaseLogger):
             time_format=time_format,
             instance_name=instance_name
         )
+        if not os.path.exists(self.file):
+            open(self.file, "x").close()
         
         with open(self.file, "r+", encoding="utf-8") as f:
-            if f.readlines()[-1] != END_CHARACTER:
+            if (lines := f.readlines()) and lines[-1] != END_CHARACTER:
                 self.debug("Program did not shut down corectly, closing...")
                 self.close()
         os.remove(self.file)  # Removes the file

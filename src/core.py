@@ -30,7 +30,7 @@ __all__ = ("MAX_PROCESS_TIMES_LEN", "Shibbot", "PterodactylShibbot")
 MAX_PROCESS_TIMES_LEN = 10000
 
 async def _get_prefix(bot: "Shibbot", ctx):
-    return bot.asyncdb.get_prefix(ctx)
+    return await bot.asyncdb.get_prefix(ctx)
 
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""

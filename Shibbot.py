@@ -92,7 +92,7 @@ def main():
     }
     for path in path_kwargs.values():
         if not os.path.exists(path):
-            open(path, "x").close()
+            os.makedirs(path)
     kwargs.update(path_kwargs)
     
     logger = Logger(

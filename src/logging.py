@@ -144,6 +144,7 @@ class Logger(BaseLogger):
             instance_name: str = None,
         ):
         self.path = path
+        os.makedirs(path, exist_ok=True)
         self.max_logs = max_logs
         self.instance_name = instance_name
         super().__init__(

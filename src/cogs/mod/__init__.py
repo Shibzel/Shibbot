@@ -57,7 +57,7 @@ class Moderation(PluginCog):
         query = f"""
         CREATE TABLE IF NOT EXISTS {self.plugin_name} (
             guild_id    INTEGER PRIMARY KEY,
-            log         BOOLEAN NOT NULL,
+            log         BOOLEAN,
             log_channel INTEGER,
             mute_role   INTEGER
         );

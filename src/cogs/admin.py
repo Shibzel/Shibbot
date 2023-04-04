@@ -25,7 +25,7 @@ class OwnerCommands(BaseCog):
             await ctx.send(f"{method_name.title()}ed cog `{cog_name}` !")
         except Exception as error:
             message = f"Couldn't {method_name} '{cog_name}', the following error occured :"
-            selflogger.error(message, error)
+            self.logger.error(message, error)
             await ctx.send(message, file=discord.File(fp=create_log_file(self.bot, error)))
     @commands.command()
     @commands.is_owner()
@@ -48,7 +48,7 @@ class OwnerCommands(BaseCog):
             await ctx.send("Synced all commands !")
         except Exception as error:
             message = "Couldn't sync commands."
-            logger.error(message, error)
+            self.logger.error(message, error)
             await ctx.send(message, file=discord.File(fp=create_log_file(self.bot, error)))
         
     @commands.command()
@@ -58,5 +58,5 @@ class OwnerCommands(BaseCog):
             
     @commands.command()
     @commands.is_owner()
-    async def logs(self, ctx: commands.Context):
-        await ctx.send(file=discord.File(fp=LATEST_LOGS_FILE_PATH))
+    async def latestlogs(self, ctx: commands.Context):
+        await ctx.send(file=discord.File(fp=self.logger.file))

@@ -1,6 +1,7 @@
 from discord.ext import bridge
 
-from src.constants import DEFAULT_LANGUAGE
+from ..constants import DEFAULT_LANGUAGE
+from ..database import is_or_has_guild
 
 
 def get_language(_dict: dict, lang_code: str) -> list:
@@ -34,7 +35,8 @@ async def factory_language(bot, ctx: bridge.BridgeApplicationContext, languages_
     Returns:
     `object`: The value corresponding to the language.
     """
-    lang_code = await bot.asyncdb.get_language(ctx.guild)
+    guild = is_or_has_guild(ctx)
+    lang_code = await bot.asyncdb.get_language(guild)
     return get_language(languages_dict, lang_code)
 
 fl = factory_language

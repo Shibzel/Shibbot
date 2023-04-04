@@ -8,14 +8,14 @@ from functools import partial
 from src.constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE
 
 
-__all__ = ("GUILD_TABLE_NAME", "PLUGINS_TABLE_NAME", "IsOrHasGuild", "AsyncDB")
+__all__ = ("GUILD_TABLE_NAME", "PLUGINS_TABLE_NAME", "IsOrHasGuild", "is_or_has_guild", "AsyncDB")
 
 GUILD_TABLE_NAME = "guild"
 PLUGINS_TABLE_NAME = "plugins"
 
 IsOrHasGuild = discord.Guild | commands.Context | bridge.BridgeContext
 
-def _is_or_has_guild(obj: IsOrHasGuild):
+def is_or_has_guild(obj: IsOrHasGuild):
     return obj if isinstance(obj, discord.Guild) else getattr(obj, "guild", None)
 
 class AsyncDB(aiosqlite.Connection):

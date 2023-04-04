@@ -27,6 +27,9 @@ from .constants import (
 __all__ = ("MAX_PROCESS_TIMES_LEN", "Shibbot", "PterodactylShibbot")
 
 
+SQLITE_DEFAULT_CACHE_SIZE = 2000
+SQLITE_DEFAULT_CACHE_TYPE = "FILE"
+
 MAX_PROCESS_TIMES_LEN = 10000
 
 async def _get_prefix(bot: "Shibbot", ctx):
@@ -36,19 +39,21 @@ class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
 
     def __init__(
-            self,
-            logger: Logger,
-            instance_owners: list[int] = None,
-            debug: bool = False,
-            caching: bool = False,
-            use_optional_cogs: bool = True,
-            disabled_cogs: list[str] | None = None,
-            database_fp: str | None = DATABASE_FILE_PATH,
-            extentions_path: str | None = EXTENSIONS_PATH,
-            cache_path: str | None = CACHE_PATH,
-            temp_cache_path: str | None = TEMPORARY_CACHE_PATH,
-            *args, **kwargs
-        ):
+        self,
+        logger: Logger,
+        instance_owners: list[int] = None,
+        debug: bool = False,
+        caching: bool = False,
+        use_optional_cogs: bool = True,
+        disabled_cogs: list[str] | None = None,
+        database_fp: str | None = DATABASE_FILE_PATH,
+        extentions_path: str | None = EXTENSIONS_PATH,
+        cache_path: str | None = CACHE_PATH,
+        temp_cache_path: str | None = TEMPORARY_CACHE_PATH,
+        sqlite_cache_size: str | None = SQLITE_DEFAULT_CACHE_SIZE,
+        sqlite_cache_type: str | None = SQLITE_DEFAULT_CACHE_TYPE,
+        *args, **kwargs
+    ):
         start_time = perf_counter()
         self.logger = logger.get_logger(__name__)
         self.__logger = logger
@@ -75,6 +80,7 @@ class Shibbot(bridge.Bot):
         self.languages = []
         self.cache = {}
 
+        self.logger.debug("Initializing base class.")
         super().__init__(
             command_prefix=_get_prefix,
             owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
@@ -117,15 +123,16 @@ class Shibbot(bridge.Bot):
         self.specs = ServerSpecifications(self)
 
         # SQLite3 database
+        self.logger.log(f"Connecting to database '{database_fp}'...")
         if not os.path.exists(database_fp):
-            open(database_fp, "x")
+            open(database_fp, "x").close()
             self.logger.warn(f"Missing {database_fp} file, creating one.")
         self.db = sqlite3.connect(database_fp)
         self.cursor = self.db.cursor()
         self.asyncdb = AsyncDB(database_fp)
         # Setting up cache
-        size, store = ("-10000", "MEMORY") if self.caching else ("-2000", "FILE")
-        query = f"PRAGMA cache_size={size}; PRAGMA temp_store={store}"
+        self.logger.debug(f"Allocating {int(sqlite_cache_size/1000)}MB for cache on '{sqlite_cache_type}'.")
+        query = f"PRAGMA cache_size=-{sqlite_cache_size}; PRAGMA temp_store={sqlite_cache_type}"
         self.cursor.executescript(query) # VER: 1.0.0
         # Creating default tables
         query = f"""

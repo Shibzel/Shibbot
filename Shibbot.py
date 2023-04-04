@@ -78,14 +78,18 @@ def main():
     settings = config["Settings"]
     console = settings["UseConsole"]
     debug = settings["DebugMode"]
+    advanced = config["Advanced"]
+    database = advanced["Database"]
+    paths = advanced["Paths"]
     kwargs = {
         "debug": debug,
         "caching": settings["UseCache"],
+        "database_fp": paths["Database"],
+        "sqlite_cache_size": database["CacheSize"],
+        "sqlite_cache_type": database["CacheType"],
     }
-    paths = config["Paths"]
     logs_path = paths["Logs"]
     path_kwargs = {
-        "database_fp": paths["Database"],
         "extentions_path": paths["Extensions"],
         "cache_path": paths["Cache"],
         "temp_cache_path": paths["TemporaryCache"]
@@ -173,7 +177,7 @@ def main():
     #         raise UncompletedOrMissing("Missing Lavalink password.")
 
     # Pterodactyl (for the hardware stats, optional)
-    pterodactyl = config["Pterodactyl"]
+    pterodactyl = advanced["Pterodactyl"]
     if pterodactyl["UsePterodactylAPI"]:
         ptero_url = pterodactyl["URL"]
         if ptero_url in ("", "https://"):

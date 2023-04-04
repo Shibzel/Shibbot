@@ -161,7 +161,7 @@ class Moderation(PluginCog):
         
     async def set_log_channel(self, channel: discord.TextChannel) -> None:
         guild = channel.guild
-        db = self.bot.db
+        db = self.bot.asyncdb
         query = f"SELECT log_channel FROM {self.plugin_name} WHERE guild_id=?"
         async with db.execute(query, (guild.id,)) as cursor:
             result = await cursor.fetchone()

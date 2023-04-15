@@ -130,7 +130,7 @@ def main():
     if raw_ids:
         try:
             for _id in raw_ids:
-                assert len(_id) >= 18
+                assert len(str(_id)) >= 18
                 instance_owners.append(int(_id))
         except (ValueError, AssertionError) as exc:
             raise Syntax(

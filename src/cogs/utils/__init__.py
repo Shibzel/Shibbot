@@ -29,43 +29,43 @@ class Utilities(PluginCog):
             languages={"en": English, "fr": French}, emoji="🔍"
         )
         
-    @bridge.bridge_command(name="embed",
-                           description="Creates a rich embed just for you.")
-    async def embed_generator(self, ctx: bridge.BridgeApplicationContext):
-        if isinstance(ctx, bridge.BridgeExtContext):
-            return PrefixedNotAvailable
+    # @bridge.bridge_command(name="embed",
+    #                        description="Creates a rich embed just for you.")
+    # async def embed_generator(self, ctx: bridge.BridgeApplicationContext):
+    #     if isinstance(ctx, bridge.BridgeExtContext):
+    #         return PrefixedNotAvailable
         
-        async def send_embed(interaction: discord.Interaction):
-            childrens = modal.children
-            if value:= childrens[3].value:
-                color = int(value.replace("#", "0x"), 16)
-            else:
-                color = discord.Embed.Empty
+    #     async def send_embed(interaction: discord.Interaction):
+    #         childrens = modal.children
+    #         if value:= childrens[3].value:
+    #             color = int(value.replace("#", "0x"), 16)
+    #         else:
+    #             color = discord.Embed.Empty
             
-            embed = discord.Embed(title=childrens[0].value or discord.Embed.Empty,
-                                  description=childrens[1].value or discord.Embed.Empty,
-                                  url=childrens[2].value or discord.Embed.Empty,
-                                  color=color)
-            await interaction.response.send_message(embed=embed)
+    #         embed = discord.Embed(title=childrens[0].value or discord.Embed.Empty,
+    #                               description=childrens[1].value or discord.Embed.Empty,
+    #                               url=childrens[2].value or discord.Embed.Empty,
+    #                               color=color)
+    #         await interaction.response.send_message(embed=embed)
         
-        modal = discord.ui.Modal(title="Embed")
-        modal.add_item(discord.ui.InputText(label="Title",
-                                            placeholder="The title of your embed here.",
-                                            max_length=256))
-        modal.add_item(discord.ui.InputText(label="Description",
-                                            style=discord.InputTextStyle.long,
-                                            placeholder="Blablabla...",
-                                            max_length=4000,
-                                            required=False))
-        modal.add_item(discord.ui.InputText(label="URL",
-                                            placeholder="https://www.youtube.com/watch?v=JuEa6Hum0b4",
-                                            required=False))
-        modal.add_item(discord.ui.InputText(label="Color",
-                                            placeholder="Exemple: #FFD700 or 0xFFD700",
-                                            min_length=7, max_length=8,
-                                            required=False))
-        modal.callback = send_embed
-        await ctx.send_modal(modal)
+    #     modal = discord.ui.Modal(title="Embed")
+    #     modal.add_item(discord.ui.InputText(label="Title",
+    #                                         placeholder="The title of your embed here.",
+    #                                         max_length=256))
+    #     modal.add_item(discord.ui.InputText(label="Description",
+    #                                         style=discord.InputTextStyle.long,
+    #                                         placeholder="Blablabla...",
+    #                                         max_length=4000,
+    #                                         required=False))
+    #     modal.add_item(discord.ui.InputText(label="URL",
+    #                                         placeholder="https://www.youtube.com/watch?v=JuEa6Hum0b4",
+    #                                         required=False))
+    #     modal.add_item(discord.ui.InputText(label="Color",
+    #                                         placeholder="Exemple: #FFD700 or 0xFFD700",
+    #                                         min_length=7, max_length=8,
+    #                                         required=False))
+    #     modal.callback = send_embed
+    #     await ctx.send_modal(modal)
 
     @staticmethod
     async def req_short_url(service_url, url_to_shorten):
@@ -166,7 +166,7 @@ class Utilities(PluginCog):
             embed.set_footer(icon_url=ctx.author.avatar,
                              text=English.DEFAULT_FOOTER.format(user=ctx.author) + \
                                  f" | 👍 {definition['thumbs_up']} "
-                                 "• 👎 {definition['thumbs_down']}")
+                                 f"• 👎 {definition['thumbs_down']}")
             embeds.append(embed)
         
         next_button = discord.ui.Button(style=discord.ButtonStyle.blurple,

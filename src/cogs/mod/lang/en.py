@@ -6,6 +6,9 @@ class English:
     DAYS = "days"
     AND = "and"
     
+    SET_LOG_CHANNEL_TITLE = "Updated !"
+    SET_LOG_CHANNEL_DESCRIPTION = "Every log will now appear in this channel."
+    
     ON_KICK_TITLE = "Kick"
     ON_KICK_DESCRIPTION = "{member.mention} ({member}) has been kicked by {mod.mention}.\nReason: {reason}"
     

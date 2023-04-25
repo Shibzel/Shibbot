@@ -16,6 +16,7 @@ from src.logging import Logger, ANSIEscape, LoggingLevel
 
 CONFIG_FILE_PATH = "./config.toml"
 CONFIG_FP_EXEMPLE = CONFIG_FILE_PATH + ".exemple"
+SPLASH_TEXT_FP = "./misc/splash_text.toml"
 
 
 class MissingFile(Exception):
@@ -36,7 +37,7 @@ class UncompletedOrMissing(ConfigError):
 def ascii_art(logger: Logger):
     """Shows a beautiful ascii art with a splash text."""
     try:
-        with open("./splash_text.toml", "rb") as f:
+        with open(SPLASH_TEXT_FP, "rb") as f:
             splash_text = toml.load(f)["SplashText"]
     except (FileNotFoundError, toml.TOMLDecodeError) as err:
         logger.error("An error occured while loading splash texts.", err)
@@ -94,7 +95,6 @@ def main():
     }
 
     logs_path = paths["Logs"]
-
     path_kwargs = {
         "extentions_path": paths["Extensions"],
         "cache_path": paths["Cache"],

@@ -6,6 +6,7 @@ from discord.ext import tasks
 from src import __version__ as version, __github__ as __github__
 from src.core import Shibbot
 from src.models import BaseCog
+from src.constants import OFFICIAL_SHIBBOT_INSTANCES
 
 
 LOOP_TIME = 60  # In seconds
@@ -18,7 +19,9 @@ class ChangeActivity(BaseCog):
         self.bot = bot
         super().__init__(hidden=True)
 
-        self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users"]
+        self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users",]
+        if self.bot.user.id in OFFICIAL_SHIBBOT_INSTANCES:
+            self.bot_statutes.append("shibbot.ml/invite")
         self.watching_statutes = [
             "after the guy who stole my milk", "you.", "submissions on Reddit",
             "the end of the world", "ur mama", "inside your soul", "(Mg, Fe)₇Si₈O₂₂(OH)₂",
@@ -51,7 +54,7 @@ class ChangeActivity(BaseCog):
         latency = int(self.bot.latency * 1000)
         
         name = "/help • {}"
-        if random.randint(0, 3): # 1/4 chance
+        if random.randint(0, 2): # 1/3 chance
             activity = Activity(type=ActivityType.watching,
                                 name=name.format(random.choice(self.bot_statutes).format(
                                     latency=latency,

@@ -57,7 +57,7 @@ class Moderation(PluginCog):
         query = f"""
         CREATE TABLE IF NOT EXISTS {self.plugin_name} (
             guild_id    INTEGER PRIMARY KEY,
-            log         BOOLEAN,
+            log         BOOLEAN DEFAULT 1,
             log_channel INTEGER,
             mute_role   INTEGER
         );
@@ -65,7 +65,7 @@ class Moderation(PluginCog):
             guild_id    INTEGER NOT NULL,
             user_id     INTEGER NOT NULL,
             type        TEXT NOT NULL,
-            timestamp    REAL NOT NULL
+            timestamp   REAL NOT NULL
         );
         CREATE INDEX IF NOT EXISTS {self.plugin_name}_idx_guild_sanctions
             ON {self.plugin_name}_sanctions (guild_id, user_id, type, timestamp);
@@ -158,8 +158,11 @@ class Moderation(PluginCog):
         ]
         if tasks:
             await asyncio.gather(*tasks)
+            
+    async def enable_logs(self, guild_id,):
+        pass
         
-    async def set_log_channel(self, channel: discord.TextChannel) -> None:
+    async def set_log_channel(self, channel: discord.TextChannel, lang: English = None) -> None:
         guild = channel.guild
         db = self.bot.asyncdb
         query = f"SELECT log_channel FROM {self.plugin_name} WHERE guild_id=?"
@@ -171,6 +174,14 @@ class Moderation(PluginCog):
             query = f"INSERT INTO {self.plugin_name} (log_channel, guild_id) VALUES (?, ?)"
         async with db:
             await db.execute(query, (channel.id, guild.id,))
+        
+        if not lang:
+            lang = await self.get_lang(guild)        
+        embed = discord.Embed(title=lang.SET_LOG_CHANNEL_TITLE,
+                              description=lang.SET_LOG_CHANNEL_DESCRIPTION,
+                              color=discord.Color.green())
+        log_channel = await self.get_log_channel(guild)
+        await log_channel.send(embed=embed)
     
     async def get_log_channel(self, guild: discord.Guild) -> discord.TextChannel | None:
         db = self.bot.asyncdb
@@ -415,12 +426,12 @@ class Moderation(PluginCog):
         if not (log_channel := log_channel or await self.get_log_channel(member.guild)):
             return
         if not lang:
-            lang = await self.get_lang(member.guild)
+            lang = await self.get_lang(guild)
             
         description = lang.ON_MUTE_DESCRIPTION.format(
             member=member, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
         embed = LogEmbed(title=lang.ON_MUTE_TITLE, member=member,
-                         description=description, color=discord.Color.dark_red())
+                         description=description, color=discord.Color.yellow())
         await log_channel.send(embed=embed)
         
     async def on_temp_mute(
@@ -450,7 +461,7 @@ class Moderation(PluginCog):
             member=member, mod=moderator, duration=duration,
             reason=reason or lang.NO_REASON_PLACEHOLDER)
         embed = LogEmbed(title=lang.ON_TEMPMUTE_TITLE, member=member,
-                         description=description, color=discord.Color.greyple())
+                         description=description, color=discord.Color.yellow())
         await log_channel.send(embed=embed)
         
     async def on_unmute(
@@ -506,7 +517,7 @@ class Moderation(PluginCog):
     async def _set_log_channel(self, ctx: bridge.BridgeApplicationContext, channel: discord.TextChannel) -> None:
         lang: English = await self.get_lang(ctx)
         
-        await self.set_log_channel(channel)
+        await self.set_log_channel(channel, lang)
         
         description = lang.SET_LOG_CHANNEL_DESCRIPTION.format(channel=channel)
         embed = discord.Embed(title=lang.SET_LOG_CHANNEL_TITLE, description=description,

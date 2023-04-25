@@ -124,15 +124,15 @@ class Shibbot(bridge.Bot):
         self.specs = ServerSpecifications(self)
 
         # SQLite3 database
-        self.logger.log(f"Connecting to database '{database_fp}'...")
+        self.logger.debug(f"Connecting to database with synchronous client.")
         if not os.path.exists(database_fp):
             open(database_fp, "x").close()
             self.logger.warn(f"Missing {database_fp} file, creating one.")
         self.db = sqlite3.connect(database_fp)
         self.cursor = self.db.cursor()
-        self.asyncdb = AsyncDB(database_fp)
+        self.asyncdb = AsyncDB(database_fp, bot=self)
         # Creating default tables and setting up cache
-        self.logger.debug(f"Cache allocation for SQLite database in '{sqlite_cache_size}': {round(sqlite_cache_size/1000, 2)}MB.")
+        self.logger.debug(f"Cache allocation for SQLite database in '{sqlite_cache_type}': {round(sqlite_cache_size/1000, 2)}MB.")
         query = f"""
         PRAGMA cache_size=-{sqlite_cache_size};
         PRAGMA temp_store={sqlite_cache_type};
@@ -180,7 +180,7 @@ class Shibbot(bridge.Bot):
             except Exception as err:
                 self.logger.error(f"Couldn't load cog '{cog}'.", err)
 
-        if not os.path.exists("./burgir.jpg"):
+        if not os.path.exists("./misc/burgir.jpg"):
             self.logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")
             # Really ?! Why ???
 
@@ -219,6 +219,7 @@ class Shibbot(bridge.Bot):
             underlined_link = ANSIEscape.underline + self.invite_bot_url + ANSIEscape.endc
             self.logger.log(f"Setting bot invitation link as {underlined_link}")
 
+            self.logger.debug("Fetching owners and Shibzel's account.")
             self.project_owner = await self.get_or_fetch_user(SHIBZEL_ID)
             self.instance_owners = await asyncio.gather(
                 *[self.get_or_fetch_user(_id) for _id in self.owner_ids])
@@ -249,6 +250,7 @@ class Shibbot(bridge.Bot):
             five_minutes_ago = (datetime.utcnow()-timedelta(minutes=5)).timestamp()
             if before.created_at.timestamp() >= five_minutes_ago:
                 await self.process_commands(after)
+        #return await super().on_message_edit()  # Only an event ?
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         self.logger.debug(f"Joined guild '{guild.name}' (ID: {guild.id}).")
@@ -416,6 +418,7 @@ class Shibbot(bridge.Bot):
             self.asyncdb.close(),
         )
         self.console.stop()
+        self.logger.debug("Closing database connection for synchronous client.")
         self.db.close()
         for cog in tuple(self.extensions):
             try:
@@ -425,6 +428,7 @@ class Shibbot(bridge.Bot):
         await super().close()
         self.loop.stop()
         self.loop.close()
+        self.logger.debug("Loop closed.")
 
 class PterodactylShibbot(Shibbot):
     """A subclass of `Shibbot` using the Pterodactyl API for hardware usage."""

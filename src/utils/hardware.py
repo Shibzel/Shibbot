@@ -128,6 +128,7 @@ class PteroContainerSpecifications(ServerSpecifications):
         super().start()
 
     async def close(self):
+        self.logger.debug("Closing session and loop.")
         self.looping = False
         await self._session.close()
 

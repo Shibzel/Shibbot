@@ -20,8 +20,6 @@ class ChangeActivity(BaseCog):
         super().__init__(hidden=True)
 
         self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users",]
-        if self.bot.user.id in OFFICIAL_SHIBBOT_INSTANCES:
-            self.bot_statutes.append("shibbot.ml/invite")
         self.watching_statutes = [
             "after the guy who stole my milk", "you.", "submissions on Reddit",
             "the end of the world", "ur mama", "inside your soul", "(Mg, Fe)₇Si₈O₂₂(OH)₂",
@@ -43,6 +41,8 @@ class ChangeActivity(BaseCog):
         ]
 
     async def when_ready(self):
+        if self.bot.user.id in OFFICIAL_SHIBBOT_INSTANCES:
+            self.bot_statutes.append("shibbot.ml/invite")
         await asyncio.sleep(10)
         self.logger.debug(f"Updating status every {LOOP_TIME} sec.")
         self.change_activity.start()

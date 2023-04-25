@@ -6,8 +6,8 @@ import gzip
 from datetime import datetime
 from traceback import format_exception
 
-from src import __version__
-from src.utils.re import remove_ansi_escape_sequences
+from . import __version__
+from .utils.re import remove_ansi_escape_sequences
 
 
 LOG_EXTENSION = ".log"

@@ -6,7 +6,6 @@ from discord.ext import commands, bridge
 from functools import partial
 
 from .constants import DEFAULT_PREFIX, DEFAULT_LANGUAGE
-from .logging import SubLogger
 
 
 GUILD_TABLE_NAME = "guilds"
@@ -26,7 +25,7 @@ class AsyncDB(aiosqlite.Connection):
             iter_chunk_size: int = 64,
         ):
         self.bot = bot
-        self.logger: SubLogger = bot.logger.get_logger(__name__)
+        self.logger = bot.logger.get_logger(__name__)
         self.commit_on_exit = commit_on_exit
         self.path = path
         super().__init__(

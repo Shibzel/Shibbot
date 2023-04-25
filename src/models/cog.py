@@ -1,25 +1,25 @@
 from sqlite3 import OperationalError
 from discord import Cog, SlashCommand
 from discord.ext import bridge, commands
+from time import perf_counter
 
 from .. import __version__
 from ..utils import fl, get_language
 from ..logging import SubLogger
-from ..errors import PluginDisabledError, DeprecatedBotError, PluginWithSameNameError
-
-
-def version_deprecated(min_version: str, current_version: str):
-    current_version, min_version = current_version.split(
-        "."), min_version.split(".")
-    if current_version[0] == min_version[0]:  # Major
-        return current_version[1] < min_version[1]  # Minor
-    else:
-        return True
-
+from ..errors import PluginDisabledError, DeprecatedBotError
 
 class BaseCog(Cog):
-    def __init__(self, bot=None, name: dict | None = None, description: dict | None = None, languages: dict | None = None, emoji: str | None = None,
-                 hidden: bool = False, *args, **kwargs):
+    def __init__(
+        self,
+        bot = None,
+        name: dict = None,
+        description: dict = None,
+        languages: dict = None,
+        emoji: str = None,
+        hidden: bool = False,
+        *args, **kwargs
+    ):
+        start_time = perf_counter()
         super().__init__(*args, **kwargs)
         self.bot = getattr(self, "bot", None) or bot
         if self.bot is None:
@@ -45,8 +45,10 @@ class BaseCog(Cog):
             for lang in self.languages:
                 self.bot.add_language(lang)
         if self.bot.is_alive is not None:
-            self.bot.loop.create_task(self.when_ready)
+            self.bot.loop.create_task(self.when_ready())
             self._when_ready_called = True
+        end_time = perf_counter()
+        self.logger.debug(f"Initialization took {(end_time-start_time)*1000:.2f}ms.")
             
     def __subclass_init__(self):
         pass  # Override
@@ -89,7 +91,6 @@ class BaseCog(Cog):
         self._cached_cogs = result
         return self._cached_cogs
 
-
 class PluginCog(BaseCog):
     def __init__(self, plugin_name: str, guild_only: bool = False, *args, **kwargs):        
         self.plugin_name = plugin_name
@@ -103,7 +104,7 @@ class PluginCog(BaseCog):
             c.execute(f"SELECT {self.plugin_name} FROM plugins")
         except OperationalError:
             self.logger.debug(f"Adding '{self.plugin_name}' to 'plugin' table in database.")
-            c.execute(f"ALTER TABLE plugins ADD COLUMN {self.plugin_name} BOOLEAN")
+            c.execute(f"ALTER TABLE plugins ADD COLUMN {self.plugin_name} BOOLEAN DEFAULT 1")
         self.bot.db.commit() # VER: 1.0.0
 
     async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
@@ -117,25 +118,34 @@ class PluginCog(BaseCog):
             raise PluginDisabledError(self.plugin_name)
         return await super().cog_before_invoke(ctx)
 
-
 class Extension(BaseCog):
-    def __init__(self, author: str | None = None, min_version_supported: str = None, *args, **kwargs):
+    def __init__(self, author: str = None, min_version_supported: str = None, *args, **kwargs):
         self.author = author
-        if min_version_supported and version_deprecated(min_version_supported, __version__):
-            raise DeprecatedBotError(
-                min_version_supported, type(self).__name__)
+        self.min_version_supported = min_version_supported
         super().__init__(*args, **kwargs)
 
+    def __subclass_init__(self) -> None:
+        if self.min_version_supported:
+            min_version = self.min_version_supported.split('.')
+            current_version = __version__.split('.')
+            if current_version[0] != min_version[0]:  # Major
+                return
+            if current_version[1] > min_version[1]:  # Minor
+                return
+            raise DeprecatedBotError(self.min_version_supported, type(self).__name__)
 
-class PluginExtension(PluginCog):
-    def __init__(self, plugin_name: str, author: str | None = None, min_version_supported: str = None, *args, **kwargs):
+class PluginExtension(PluginCog, Extension):
+    def __init__(self, plugin_name: str, author: str = None, min_version_supported: str = None, *args, **kwargs):
+        self.author = author
+        self.min_version_supported = min_version_supported
+
         for cog in [plugin for plugin in self.bot.cogs.values() if isinstance(plugin, PluginCog)]:
             if cog.plugin_name == plugin_name:
-                self.plugin_name = plugin_name
-                raise PluginWithSameNameError(self, cog)
+                self.logger.warn(f"One of the plugins has the same name as this one: {plugin_name}.")
+                break
 
-        self.author = author
-        if min_version_supported and version_deprecated(min_version_supported, __version__):
-            raise DeprecatedBotError(
-                min_version_supported, type(self).__name__)
-        super().__init__(plugin_name, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def __subclass_init__(self):
+        super(Extension, self).__subclass_init__()
+        super(PluginExtension, self).__subclass_init__()

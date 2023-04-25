@@ -10,10 +10,6 @@ from src import __version__
 from src.utils.re import remove_ansi_escape_sequences
 
 
-__all__ = ("LOG_EXTENSION", "LATEST_LOG_FILE_NAME", "END_CHARACTER", "ENCODING", "ANSIEscape"
-           "LoggingLevel", "format_error", "cleanup", "BaseLogger", "Logger", "SubLogger")
-
-
 LOG_EXTENSION = ".log"
 LATEST_LOG_FILE_NAME = "/latest" + LOG_EXTENSION
 END_CHARACTER = "ඞ"  # Don't ask questions
@@ -24,10 +20,11 @@ class ANSIEscape:
     endc = "\033[00m"
     cyan = "\033[96m"
     blue = "\033[94m"
-    green = "\033[92m"
+    green = "\033[32m"
+    light_green = "\033[92m"
     gray = "\033[38;5;248m"
-    orange = "\033[93m"
-    red = "\033[1;31m"
+    yellow = "\033[93m"
+    red = "\033[31m"
     red_font = "\033[48;5;196m"
     bold = "\033[1m"
     underline = "\033[4m"
@@ -97,8 +94,11 @@ class BaseLogger:
     def formated_time(self, override: str = None) -> str:
         return datetime.now().strftime(override or self.time_format)
         
-    def _log(self, level: int, msg: str, color: str = None) -> None:
-        msg = f"{color or ''}[{self.formated_time()} {LoggingType[level]} @{self.module}] {msg} {ANSIEscape.endc}"
+    def _log(self, level: int, msg: str, color: str = "") -> None:
+        formated_time = ANSIEscape.green + self.formated_time() + ANSIEscape.endc
+        logging_type = color + LoggingType[level] + ANSIEscape.endc
+        module = ANSIEscape.italicize + self.module + ANSIEscape.endc
+        msg = f"[{formated_time} {logging_type} @{module}] {color + msg + ANSIEscape.endc}"
         
         if self.instance_name:
             print(f"[{self.instance_name}]", end="")
@@ -112,16 +112,16 @@ class BaseLogger:
             msg += ANSIEscape.endc + format_error(error)
             self._log(LoggingLevel.debug, msg, ANSIEscape.gray)
     
-    def info(self, msg: str, color: str = None) -> None:
+    def info(self, msg: str, color: str = "") -> None:
         if self.level >= LoggingLevel.info:
             self._log(LoggingLevel.info, msg, color)
             
-    def log(self, msg: str, color: str = None) -> None:
+    def log(self, msg: str, color: str = "") -> None:
         self.info(msg, color)
     
     def warn(self, msg: str) -> None:
         if self.level >= LoggingLevel.warn:
-            self._log(LoggingLevel.warn, msg, ANSIEscape.orange)
+            self._log(LoggingLevel.warn, msg, ANSIEscape.yellow)
     
     def error(self, msg: str, error: str | Exception = None) -> None:
         if self.level >= LoggingLevel.error:

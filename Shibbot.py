@@ -20,7 +20,6 @@ CONFIG_FP_EXEMPLE = CONFIG_FILE_PATH + ".exemple"
 
 class MissingFile(Exception):
     """Raised when a necessary file is missing."""
-    
     def __init__(self, fp: str | None = None, message: str | None = None):
         super().__init__(message or f"File '{fp}' is missing.")
     
@@ -78,17 +77,24 @@ def main():
     settings = config["Settings"]
     console = settings["UseConsole"]
     debug = settings["DebugMode"]
+
     advanced = config["Advanced"]
     database = advanced["Database"]
     paths = advanced["Paths"]
+
     kwargs = {
         "debug": debug,
         "caching": settings["UseCache"],
+        "minimal": settings["Minimal"],
+        "allowed_cogs": settings["AllowedCogs"],
+        "disabled_cogs": settings["DisabledCogs"],
         "database_fp": paths["Database"],
         "sqlite_cache_size": database["CacheSize"],
         "sqlite_cache_type": database["CacheType"],
     }
+
     logs_path = paths["Logs"]
+
     path_kwargs = {
         "extentions_path": paths["Extensions"],
         "cache_path": paths["Cache"],
@@ -97,6 +103,7 @@ def main():
     for path in path_kwargs.values():
         if not os.path.exists(path):
             os.makedirs(path)
+
     kwargs.update(path_kwargs)
     
     logger = Logger(
@@ -161,20 +168,6 @@ def main():
                 logger.warn("You're currently using a wip/unlisted version.")
     except (requests.RequestException, AssertionError) as err:
         logger.error("Couldn't verify if the bot is up to date.", err)
-
-    # Lavalink
-    # lavalink = config["Lavalink"]
-    # if lavalink["UseLavalink"]:
-    #     if lavalink["IP"] in ("", "127.0.0.1"):
-    #         raise UncompletedOrMissing(
-    #             "Missing Lavalink server url/IP."
-    #             " Self host your own Lavalink server or get a free one on the internet."
-    #         )
-    #     ll_port = lavalink["Port"]
-    #     if isinstance(ll_port, int):
-    #         raise Syntax("The Lavalink port isn't valid.")
-    #     if lavalink["Password"] == "":
-    #         raise UncompletedOrMissing("Missing Lavalink password.")
 
     # Pterodactyl (for the hardware stats, optional)
     pterodactyl = advanced["Pterodactyl"]

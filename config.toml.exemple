@@ -11,6 +11,14 @@ DebugMode = false
 # of ressources by caching them (uses
 # more ram and storage)
 UseCache = false
+# / Disables every default cog
+Minimal = false
+# / Cogs that can load even if the
+# minimal mode is enabled
+AllowedCogs = []
+# / The path of the cogs that won't
+# load at initialization
+DisabledCogs = ["src.cogs.automod", "src.cogs.test"]
 
 [Discord]
 Token = ""

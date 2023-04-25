@@ -17,7 +17,7 @@ from .lang import English, French
 
 
 PLUGIN_NAME = "fun"
-CACHED_IMAGES_LINKS_FP = "/images.json"
+FUN_CACHE_FP = "/fun_cache.json"
 MAXIMUM_IMAGES = 1500
 
 MEME_SUBREDDITS = ['memes', 'dankmemes', 'me_irl']
@@ -47,7 +47,7 @@ class Fun(PluginCog):
         )
         
         self.cache_handler = StorageCacheHandler(
-            self.bot, self.bot.temp_cache_path+CACHED_IMAGES_LINKS_FP)
+            self.bot, self.bot.temp_cache_path+FUN_CACHE_FP)
         default = {
             "shibes": [],
             "cats": [],
@@ -271,7 +271,7 @@ class Fun(PluginCog):
         description_localizations={"fr": "Affiche de mignonnes petites photos d'oiseau."})
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_birb_pictures(self, ctx: bridge.BridgeApplicationContext):
-        birds = await self.get_birbs()
+        birds = await self.get_birds()
         lang = await self.get_lang(ctx)
         await self._image_factory(ctx, birds, lang.GET_BIRDS_NEXT_BUTTON,
                                   lang.GET_BIRDS_PREVIOUS_BUTTON,

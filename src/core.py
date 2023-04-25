@@ -5,8 +5,6 @@ import asyncio
 from datetime import datetime, timedelta
 from traceback import format_exc
 from time import perf_counter
-from inspect import iscoroutinefunction
-from functools import partial
 import discord
 from discord.ext import bridge, commands as cmmds
 
@@ -18,19 +16,18 @@ from .logging import Logger, ANSIEscape, LoggingLevel
 from .models import PluginCog, BaseCog
 from .console import Console
 from .constants import (
-    COGS_PATH, SHIBZEL_ID, EXTENSIONS_PATH,
-    OPTIONAL_COGS, CORE_COGS, CACHE_PATH,
-    DATABASE_FILE_PATH, TEMPORARY_CACHE_PATH
+    COGS_PATH, BUILTIN_COGS,
+    DATABASE_FILE_PATH, EXTENSIONS_PATH, CACHE_PATH, TEMPORARY_CACHE_PATH,
+    SHIBZEL_ID,
 )
-
-
-__all__ = ("MAX_PROCESS_TIMES_LEN", "Shibbot", "PterodactylShibbot")
 
 
 SQLITE_DEFAULT_CACHE_SIZE = 2000
 SQLITE_DEFAULT_CACHE_TYPE = "FILE"
 
 MAX_PROCESS_TIMES_LEN = 10000
+
+STATS_FILE_NAME = "/stats.json"
 
 async def _get_prefix(bot: "Shibbot", ctx):
     return await bot.asyncdb.get_prefix(ctx)
@@ -44,14 +41,17 @@ class Shibbot(bridge.Bot):
         instance_owners: list[int] = None,
         debug: bool = False,
         caching: bool = False,
-        use_optional_cogs: bool = True,
+
+        minimal: bool = False,
+        allowed_cogs: list[str] | None = None,
         disabled_cogs: list[str] | None = None,
-        database_fp: str | None = DATABASE_FILE_PATH,
-        extentions_path: str | None = EXTENSIONS_PATH,
-        cache_path: str | None = CACHE_PATH,
-        temp_cache_path: str | None = TEMPORARY_CACHE_PATH,
-        sqlite_cache_size: str | None = SQLITE_DEFAULT_CACHE_SIZE,
-        sqlite_cache_type: str | None = SQLITE_DEFAULT_CACHE_TYPE,
+
+        database_fp: str = DATABASE_FILE_PATH,
+        extentions_path: str = EXTENSIONS_PATH,
+        cache_path: str = CACHE_PATH,
+        temp_cache_path: str = TEMPORARY_CACHE_PATH,
+        sqlite_cache_size: str = SQLITE_DEFAULT_CACHE_SIZE,
+        sqlite_cache_type: str = SQLITE_DEFAULT_CACHE_TYPE,
         *args, **kwargs
     ):
         start_time = perf_counter()
@@ -75,10 +75,8 @@ class Shibbot(bridge.Bot):
         self.is_alive = None
         self.invite_bot_url = None
         self._error_handler = None
-        self._looping_tasks = []
         self.process_times = []
         self.languages = []
-        self.cache = {}
 
         self.logger.debug("Initializing base class.")
         super().__init__(
@@ -105,16 +103,19 @@ class Shibbot(bridge.Bot):
             case_insensitive=True,
             activity=discord.Streaming(
                 name="connecting...",
-                url="https://www.youtube.com/watch?v=dQw4w9WgXcQ") if use_optional_cogs else None,
+                url="https://www.youtube.com/watch?v=dQw4w9WgXcQ") if not minimal else None,
             *args, **kwargs
         )
         super().remove_command("help")
 
         # Statistics
-        stats_fp = self.cache_path + "/stats.json"
+        stats_fp = self.cache_path + STATS_FILE_NAME
         self._stats = jayson.load(stats_fp) if os.path.exists(stats_fp) else {}
-        async def callback(): jayson.dump(self._stats, stats_fp)
-        self.loop_task(callback, time=300)
+        async def task():
+            while self.loop.is_running():
+                jayson.dump(self._stats, stats_fp)
+                await asyncio.sleep(300)  # Every 5 min
+        self.loop.create_task(task())
         
         # Console object
         self.console = Console(self)
@@ -130,12 +131,11 @@ class Shibbot(bridge.Bot):
         self.db = sqlite3.connect(database_fp)
         self.cursor = self.db.cursor()
         self.asyncdb = AsyncDB(database_fp)
-        # Setting up cache
-        self.logger.debug(f"Allocating {int(sqlite_cache_size/1000)}MB for cache on '{sqlite_cache_type}'.")
-        query = f"PRAGMA cache_size=-{sqlite_cache_size}; PRAGMA temp_store={sqlite_cache_type}"
-        self.cursor.executescript(query) # VER: 1.0.0
-        # Creating default tables
+        # Creating default tables and setting up cache
+        self.logger.debug(f"Cache allocation for SQLite database in '{sqlite_cache_size}': {round(sqlite_cache_size/1000, 2)}MB.")
         query = f"""
+        PRAGMA cache_size=-{sqlite_cache_size};
+        PRAGMA temp_store={sqlite_cache_type};
         CREATE TABLE IF NOT EXISTS {GUILD_TABLE_NAME} (
             guild_id INTEGER PRIMARY KEY,
             prefix   TEXT NOT NULL,
@@ -148,13 +148,16 @@ class Shibbot(bridge.Bot):
         self.db.commit()
 
         # Loading all extensions and cogs
-        self.logger.log("Loading cogs...")
-        # Builtins cogs
-        builtin_path = convert_to_import_path(COGS_PATH)  # Converts "./module/submodule" into "module.submodule"
-        builtins_cogs = {f"{builtin_path}.{cog}" for cog in CORE_COGS}
-        if use_optional_cogs:
-            builtins_cogs |= {f"{builtin_path}.{cog}" for cog in OPTIONAL_COGS}
         disabled_cogs = set(disabled_cogs) if disabled_cogs else set()
+        if minimal:
+            self.logger.warn("Shibbot started in minimal mode so no default cog will load except allowed ones.")
+            cogs = allowed_cogs
+        else:
+            cogs = BUILTIN_COGS
+            
+        self.logger.log("Loading cogs...")
+        builtin_path = convert_to_import_path(COGS_PATH)  # Converts "./module/submodule" into "module.submodule"
+        builtins_cogs = {f"{builtin_path}.{cog}" for cog in cogs}
         for cog in builtins_cogs - disabled_cogs:
             self.load_extension(cog)
             
@@ -166,13 +169,14 @@ class Shibbot(bridge.Bot):
             if extension.endswith(".py"):
                 extension = extension[:-3]
             extensions.append(f"{extension_path}.{extension}")
+
         for cog in extensions:
             try:
                 self.load_extension(cog)
             except ImportError as exc:
                 self.logger.error(f"Couldn't import the necessary modules for the extension '{cog}'."
-                             " See if there is a requirements.txt inside the folder "
-                             "and then install the dependencies.", exc)
+                            " See if there is a requirements.txt inside the folder "
+                            "and then install the dependencies.", exc)
             except Exception as err:
                 self.logger.error(f"Couldn't load cog '{cog}'.", err)
 
@@ -191,14 +195,6 @@ class Shibbot(bridge.Bot):
     async def start(self, *args, **kwargs) -> None:
         await self.__async_init__()
         return await super().start(*args, **kwargs)
-        
-    def loop_task(self, callback, *args, time: int, **kwargs) -> None:
-        async def loop():
-            while self.loop.is_running():
-                await callback(*args, **kwargs)
-                await asyncio.sleep(time)
-        self._looping_tasks.append(callback(*args, **kwargs))
-        self.loop.create_task(loop())
                 
     @property
     def caching(self) -> bool:
@@ -232,7 +228,7 @@ class Shibbot(bridge.Bot):
             await self.on_resumed()
         self.is_alive = True
         self.logger.log(f"☁ Ready. Connected as '{self.user}' (ID : {self.user.id}).",
-                   ANSIEscape.green)
+                        ANSIEscape.green)
 
     async def on_resumed(self) -> None:
         self.is_alive = True
@@ -401,42 +397,34 @@ class Shibbot(bridge.Bot):
         if self._error_handler:
             return await self._error_handler.handle_error(ctx, error)
 
-    async def on_error(self, event_method: str, *args, **kwargs) -> None:
+    async def on_error(self, event_method: str, *args) -> None:
         self.logger.error(f"Ignoring exception in {event_method}:", format_exc())
 
     def run(self, token: str, command_input: bool = False, *args, **kwargs) -> None:
         if command_input:
-            self.console.start()
+            self.loop.call_soon(asyncio.ensure_future, self.console.run())
         self.specs.start()
-        connect_message = ("🚀 Connecting... wait a few seconds." 
-                           if random.randint(0, 99) else "🍔 Lodin cheeseburgers...")
+        connect_message = ("🚀 Connecting... wait a few seconds."  # 99% chance of happening
+                           if random.randint(0, 99) else "🍔 Lodin cheeseburgers...")  # 1%
         self.logger.log(connect_message, ANSIEscape.blue)
         return super().run(token, *args, **kwargs)
 
     async def close(self, error: Exception = None) -> None:
-        """Closes the bot.
-
-        Parameters
-        ----------
-        error: `Exception`
-            The error which caused the bot to stop.
-
-        Raises
-        ------
-        `Exception`: Reraised error, if there is one.
-        """
         self.logger.error("👋 Shibbot is being stopped, goodbye !", error)
         await asyncio.gather(
-            *self._looping_tasks,
             self.specs.close(),
             self.asyncdb.close(),
         )
+        self.console.stop()
         self.db.close()
+        for cog in tuple(self.extensions):
+            try:
+                self.unload_extension(cog)
+            except Exception as err:
+                self.logger.error(f"Couldn't unload cog '{cog}'.", err)
         await super().close()
         self.loop.stop()
         self.loop.close()
-        if error:
-            raise error
 
 class PterodactylShibbot(Shibbot):
     """A subclass of `Shibbot` using the Pterodactyl API for hardware usage."""
@@ -448,8 +436,9 @@ class PterodactylShibbot(Shibbot):
             ptero_server_id: str = None,
             ptero_refresh: float = 15.0,
             *args, **kwargs
-        ):
+        ):        
         super().__init__(*args, **kwargs)
+        
         self.logger.debug("Using the Pterodactyl API to get hardware usage.")
         self.specs = PteroContainerSpecifications(
             self,

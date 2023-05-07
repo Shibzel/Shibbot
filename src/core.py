@@ -8,6 +8,7 @@ from time import perf_counter
 import discord
 from discord.ext import bridge, commands as cmmds
 
+from . import __version__
 from .database import AsyncDB, GUILD_TABLE_NAME, PLUGINS_TABLE_NAME
 from .utils import convert_to_import_path
 from .utils import json as jayson
@@ -28,6 +29,7 @@ SQLITE_DEFAULT_CACHE_TYPE = "FILE"
 MAX_PROCESS_TIMES_LEN = 10000
 
 STATS_FILE_NAME = "/stats.json"
+PREVIOUS_VERSIONS_FILE_NAME = "/previous_versions.json"
 
 async def _get_prefix(bot: "Shibbot", ctx):
     return await bot.asyncdb.get_prefix(ctx)
@@ -73,6 +75,7 @@ class Shibbot(bridge.Bot):
         self.instance_owners = None
         self.project_owner = None
         self.is_alive = None
+        self.last_disconnection = None
         self.invite_bot_url = None
         self._error_handler = None
         self.process_times = []
@@ -108,6 +111,13 @@ class Shibbot(bridge.Bot):
         )
         super().remove_command("help")
 
+        # Cache
+        # Previous versions
+        prev_v_fp = self.cache_path + PREVIOUS_VERSIONS_FILE_NAME
+        self._versions = jayson.load(prev_v_fp) if os.path.exists(prev_v_fp) else []
+        if __version__ not in self._versions:
+            self._versions.append(__version__)
+            jayson.dump(self._versions, prev_v_fp)
         # Statistics
         stats_fp = self.cache_path + STATS_FILE_NAME
         self._stats = jayson.load(stats_fp) if os.path.exists(stats_fp) else {}
@@ -117,7 +127,7 @@ class Shibbot(bridge.Bot):
                 await asyncio.sleep(300)  # Every 5 min
         self.loop.create_task(task())
         
-        # Console object
+        # Console objects
         self.console = Console(self)
 
         # Client that gets the specifications of the bot
@@ -233,9 +243,12 @@ class Shibbot(bridge.Bot):
 
     async def on_resumed(self) -> None:
         self.is_alive = True
-        self.logger.debug("Resuming.")
+        dtime = datetime.utcnow().timestamp() - self.last_disconnection.timestamp()
+        log = "Resuming" + f"(has been disconnected for {dtime} sec)." if dtime > 5 else "."
+        self.logger.debug(log)
 
     async def on_disconnect(self) -> None:
+        self.last_disconnection = datetime.utcnow()
         if self.is_alive is not False:
             self.is_alive = False
             self.logger.debug("Disconnected.")
@@ -392,7 +405,7 @@ class Shibbot(bridge.Bot):
     def set_error_handler(self, handler: BaseCog) -> None:
         if not hasattr(handler, "handle_error"):
             raise AttributeError("The error handler must have a async method named 'handle_error()'.")
-        self.logger.debug(f"Setting '{repr(handler)}' as new error handler for command exceptions.")
+        self.logger.debug(f"Setting '{type(handler).__module__}' as error handler for command exceptions.")
         self._error_handler = handler
 
     async def handle_command_error(self, ctx, error: Exception) -> None:

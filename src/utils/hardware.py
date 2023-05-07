@@ -64,7 +64,7 @@ class SelfLocation:
 class ServerSpecifications:
     def __init__(self, bot):
         self.bot = bot
-        self.loop = bot.loop
+        self.loop: asyncio.AbstractEventLoop = bot.loop
         self.logger: SubLogger = bot.logger.get_logger(__name__)
         self.location = SelfLocation(self.logger)
         

@@ -28,8 +28,8 @@ async def json_from_urls(urls: list, *args, **kwargs) -> list[JsonObject]:
         async with ClientSession(*args, **kwargs) as session:
             return [await response.json(loads=loads)
                     for response in await asyncio.gather(*[session.get(url) for url in urls])]
-    except Exception:  # TODO: Change this general exception
-        raise ServiceUnavailableError()
+    except Exception as exc:  # TODO: Change this general exception
+        raise ServiceUnavailableError from exc
 
 
 class StorageCacheHandler:

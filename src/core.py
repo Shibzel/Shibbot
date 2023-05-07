@@ -244,7 +244,7 @@ class Shibbot(bridge.Bot):
     async def on_resumed(self) -> None:
         self.is_alive = True
         dtime = datetime.utcnow().timestamp() - self.last_disconnection.timestamp()
-        log = "Resuming" + f"(has been disconnected for {dtime} sec)." if dtime > 5 else "."
+        log = "Resuming" + (f"(has been disconnected for {dtime} sec)." if dtime > 5 else ".")
         self.logger.debug(log)
 
     async def on_disconnect(self) -> None:
@@ -426,6 +426,11 @@ class Shibbot(bridge.Bot):
 
     async def close(self, error: Exception = None) -> None:
         self.logger.error("👋 Shibbot is being stopped, goodbye !", error)
+        for cog in tuple(self.extensions):
+            try:
+                self.unload_extension(cog)
+            except Exception as err:
+                self.logger.error(f"Couldn't unload cog '{cog}'.", err)
         await asyncio.gather(
             self.specs.close(),
             self.asyncdb.close(),
@@ -433,11 +438,6 @@ class Shibbot(bridge.Bot):
         self.console.stop()
         self.logger.debug("Closing database connection for synchronous client.")
         self.db.close()
-        for cog in tuple(self.extensions):
-            try:
-                self.unload_extension(cog)
-            except Exception as err:
-                self.logger.error(f"Couldn't unload cog '{cog}'.", err)
         await super().close()
         self.loop.stop()
         self.loop.close()

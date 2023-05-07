@@ -1,17 +1,21 @@
-import os
-import random
-from shutil import copyfile
-from platform import python_version, python_version_tuple
 try:
-    import tomllib as toml
-except ModuleNotFoundError:
-    import tomli as toml
-import requests
-import orjson
+    import os
+    import random
+    from shutil import copyfile
+    from platform import python_version, python_version_tuple
+    try:
+        import tomllib as toml
+    except ModuleNotFoundError:
+        import tomli as toml
+    import requests
+    import orjson
 
-from src import __version__
-from src.core import Shibbot, PterodactylShibbot
-from src.logging import Logger, ANSIEscape, LoggingLevel
+    from src import __version__
+    from src.core import Shibbot, PterodactylShibbot
+    from src.logging import Logger, ANSIEscape, LoggingLevel
+except ModuleNotFoundError as exc:
+    raise ImportError("An import error occured."
+        " Be sure you installed all the requirements modules or using a correct version of Python.") from exc
 
 
 CONFIG_FILE_PATH = "./config.toml"
@@ -21,7 +25,7 @@ SPLASH_TEXT_FP = "./misc/splash_text.toml"
 
 class MissingFile(Exception):
     """Raised when a necessary file is missing."""
-    def __init__(self, fp: str | None = None, message: str | None = None):
+    def __init__(self, fp: str = None, message: str | None = None):
         super().__init__(message or f"File '{fp}' is missing.")
     
 class ConfigError(Exception):
@@ -154,6 +158,7 @@ def main():
             timeout=5)
         response = orjson.loads(request.text)
         assert request.status_code == 200
+        assert len(response) > 0
         last_version = response[0]["name"]
         if last_version == __version__:
             logger.log("You're currently using the lastest version !")
@@ -210,4 +215,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    exit()

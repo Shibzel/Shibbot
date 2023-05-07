@@ -26,8 +26,8 @@ class BotsCommands(BaseCog):
                 "fr": "Tout ce qui concerne le bot."
             },
             languages={
-                "en": English,
-                "fr": French,
+                "en": English(),
+                "fr": French(),
                 "shibberish": Shibberish
             },
             emoji="⚙️"
@@ -43,7 +43,7 @@ class BotsCommands(BaseCog):
         db = self.bot.asyncdb
         lang_code = await db.get_language(ctx.guild)
         prefix = await db.get_prefix(ctx.guild)
-        lang = get_language(self.languages, lang_code)
+        lang: English = get_language(self.languages, lang_code)
 
         TITLE = lang.SHOW_HELP_TITLE
         FOOTER = f"Shibbot v{version} | "
@@ -133,7 +133,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Obtient le ping du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
     async def ping(self, ctx: bridge.BridgeApplicationContext):
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         embed = discord.Embed(
             title=lang.PING_EMBED_TITLE,
             description=lang.PING_EMBED_DESCRIPTION.format(
@@ -150,7 +150,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
     async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
 
         embed = discord.Embed(
             title=lang.GET_INVITATIONS_TITLE,
@@ -173,7 +173,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Obtiens des informartions sur le bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_infos(self, ctx: bridge.BridgeApplicationContext):
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
 
         embed = discord.Embed(color=discord.Color.dark_gold())
         embed.set_author(name=lang.GET_INFOS_TITLE.format(
@@ -207,15 +207,6 @@ class BotsCommands(BaseCog):
                         value=lang.GET_INFOS_FIELD3_DESCRIPTION, inline=False)
 
         await ctx.respond(embed=embed)
-
-    @bridge.bridge_command(
-        name="tip",
-        description="Tip the creator of the bot.",
-        description_localizations={"fr": "Faites un don au créateur du bot."})
-    @commands.cooldown(1, 7, commands.BucketType.default)
-    async def gimme_money(self, ctx: bridge.BridgeApplicationContext):
-        # TODO: Complete this command.
-        await ctx.respond("Command not available yet.")
 
     @bridge.bridge_command(
         name="prefix", 
@@ -254,7 +245,7 @@ class BotsCommands(BaseCog):
     async def change_lang(self, ctx: bridge.BridgeApplicationContext):
         db = self.bot.asyncdb
         lang_code = await db.get_language(ctx.guild)
-        lang = get_language(self.languages, lang_code)
+        lang: English = get_language(self.languages, lang_code)
 
         select = discord.ui.Select(options=[discord.SelectOption(
             label=LANGUAGES[language].title(),
@@ -295,7 +286,7 @@ class BotsCommands(BaseCog):
     async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
         async with self.bot.asyncdb as db:
             lang_code = await db.get_language(ctx.guild)
-            lang = get_language(self.languages, lang_code)
+            lang: English = get_language(self.languages, lang_code)
 
             options = [discord.SelectOption(
                 label=plugin.get_name(lang_code),

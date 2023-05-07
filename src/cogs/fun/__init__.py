@@ -40,8 +40,8 @@ class Fun(PluginCog):
                 "fr": "Divertissement."
             },
             languages={
-                "en": English,
-                "fr": French
+                "en": English(),
+                "fr": French()
             },
             emoji="🎉"
         )
@@ -178,7 +178,7 @@ class Fun(PluginCog):
                 raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["memes"]
 
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         embeds = []
         author = ctx.author
         avatar = author.avatar.url
@@ -214,7 +214,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 15, commands.BucketType.default)
     async def prefixed_memes(self, ctx: commands.Context, subreddit: str = None):
         if subreddit not in (None, *MEME_SUBREDDITS):
-            lang = await self.get_lang(ctx)
+            lang: English = await self.get_lang(ctx)
             raise MissingArgumentsError(ctx.command, lang.GET_MEME_CHECK_SUBREDDIT.format(
                 subreds=", ".join(MEME_SUBREDDITS)))
 
@@ -246,7 +246,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_shibe_pictures(self, ctx: bridge.BridgeApplicationContext):
         shibes = await self.get_shibes()
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         await self._image_factory(ctx, shibes, lang.GET_SHIBES_NEXT_BUTTON,
                                   lang.GET_SHIBES_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -259,7 +259,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_cat_pictures(self, ctx: bridge.BridgeApplicationContext):
         cats = await self.get_cats()
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         await self._image_factory(ctx, cats, lang.GET_CATS_NEXT_BUTTON,
                                   lang.GET_CATS_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -272,7 +272,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_birb_pictures(self, ctx: bridge.BridgeApplicationContext):
         birds = await self.get_birds()
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         await self._image_factory(ctx, birds, lang.GET_BIRDS_NEXT_BUTTON,
                                   lang.GET_BIRDS_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -290,7 +290,7 @@ class Fun(PluginCog):
             url = f"https://api.capy.lol/v1/capybara/{random.randint(1, 739)}"
             if url not in urls:
                 urls.append(url)
-        lang = await self.get_lang(ctx)
+        lang: English = await self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON,
                                   lang.GET_CAPY_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | capy.lol")
@@ -339,66 +339,8 @@ class Fun(PluginCog):
     # @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
     # @commands.cooldown(1, 180, commands.BucketType.channel)
     # async def funni_button(self, ctx: bridge.BridgeApplicationContext):
-    #     lang = await self.get_lang(ctx)
-
-    #     actions_list = []
-    #     def action(foo): actions_list.append(foo)
-    #     @action
-    #     async def message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_MESSAGES).format(user=interaction.user.mention))
-    #     @action
-    #     async def ephemeral_message(interaction): await reply_method(choice(lang.FUNNI_BUTTON_EPHEMERAL_MESSAGES), ephemeral=True)
-    #     @action
-    #     async def chonk_shibe(interaction):
-    #         smol_to_chonk_shibes = [
-    #             "",
-    #             "",
-    #         ]
-    #         embeds = []
-    #         for shibe in smol_to_chonk_shibes:
-    #             embed = discord.Embed(color=discord.Color.dark_gold())
-    #             embed.set_image(url=shibe)
-    #         next_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BIGGER_SHIBE_BUTTON)
-    #         previous_button = discord.ui.Button(style=discord.ButtonStyle.blurple, label=lang.FUNNI_BUTTON_smoller_SHIBE_BUTTON)
-    #         embed_viewer = EmbedViewer(embeds, next_button, previous_button, bot=self.bot)
-    #         embed_viewer.next_button.disabled = False
-    #         embed_viewer.previous_button.disabled = False
-    #         embed_viewer.page = int(len(smol_to_chonk_shibes)/2)
-    #         await reply_method(embed=embeds[embed_viewer.page], view=embed_viewer)
-    #     # @action
-    #     # async def shrek_script(interaction):
-    #     #     if (not ctx.guild or interaction.user.guild_permissions.administrator()) and not random.randint(0, 99): # Very low chances of happening
-    #     #         async for chunk in get_local_data("/fun/funni_button/shrek.json"):
-    #     #             await reply_method(chunk)
-    #     #     else:
-    #     #         await the_button_callback(interaction)
-    #     @action
-    #     async def gif_or_images(interaction):
-    #         links = [
-    #             "",
-    #             "",
-    #         ]
-    #         await reply_method(choice(links), delete_after=5)
-    #     @action
-    #     async def kick(interaction):
-    #         if not random.randint(0, 99) and ctx.guild:
-    #             try:
-    #                 return await ctx.guild.kick(interaction.user)
-    #             except: pass
-    #         await the_button_callback(interaction)
-    #     @action
-    #     async def another_button(interaction): await reply_method(view=CustomView(the_button, timeout=300))
-
-    #     the_button = discord.ui.Button(style=discord.ButtonStyle.danger, label=lang.FUNNI_BUTTON_BUTTON_NAME)
-    #     async def the_button_callback(interaction: discord.Interaction):
-    #         action = choice(actions_list)
-    #         await action(interaction)
-    #     the_button.callback = the_button_callback
-
-    #     response_message = await ctx.respond(view=CustomView(the_button, timeout=300))
-    #     if isinstance(response_message, discord.Message):
-    #         reply_method = response_message.reply
-    #     elif isinstance(response_message, discord.Interaction):
-    #         reply_method = response_message.message.reply
+    #     lang: English = await self.get_lang(ctx)
+    #     ...  # TODO: Complete
 
 
 def setup(bot):

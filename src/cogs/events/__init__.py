@@ -13,7 +13,7 @@ from .lang import French, English
 class Events(BaseCog):
     def __init__(self, bot: Shibbot):
         self.bot = bot
-        super().__init__(languages={"en": English, "fr": French}, hidden=True)
+        super().__init__(languages={"en": English(), "fr": French()}, hidden=True)
         self.cooldowns = []
         self.bot.set_error_handler(self)
 
@@ -41,7 +41,7 @@ class Events(BaseCog):
 
         db = self.bot.asyncdb
         lang_code = await db.get_language(ctx.guild)
-        lang = get_language(self.languages, lang_code)
+        lang: English = get_language(self.languages, lang_code)
         error_dict: dict[str, str] = lang.ON_COMMAND_ERROR
         time = None if self.bot.debug_mode else 20
         ephemeral = False

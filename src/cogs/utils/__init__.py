@@ -26,46 +26,8 @@ class Utilities(PluginCog):
             plugin_name=PLUGIN_NAME,
             name={"en": "Utilities", "fr": "Utilitaires"},
             description={"en": "A variety of commands.", "fr": "Un ensemble de commandes variées."},
-            languages={"en": English, "fr": French}, emoji="🔍"
+            languages={"en": English(), "fr": French()}, emoji="🔍"
         )
-        
-    # @bridge.bridge_command(name="embed",
-    #                        description="Creates a rich embed just for you.")
-    # async def embed_generator(self, ctx: bridge.BridgeApplicationContext):
-    #     if isinstance(ctx, bridge.BridgeExtContext):
-    #         return PrefixedNotAvailable
-        
-    #     async def send_embed(interaction: discord.Interaction):
-    #         childrens = modal.children
-    #         if value:= childrens[3].value:
-    #             color = int(value.replace("#", "0x"), 16)
-    #         else:
-    #             color = discord.Embed.Empty
-            
-    #         embed = discord.Embed(title=childrens[0].value or discord.Embed.Empty,
-    #                               description=childrens[1].value or discord.Embed.Empty,
-    #                               url=childrens[2].value or discord.Embed.Empty,
-    #                               color=color)
-    #         await interaction.response.send_message(embed=embed)
-        
-    #     modal = discord.ui.Modal(title="Embed")
-    #     modal.add_item(discord.ui.InputText(label="Title",
-    #                                         placeholder="The title of your embed here.",
-    #                                         max_length=256))
-    #     modal.add_item(discord.ui.InputText(label="Description",
-    #                                         style=discord.InputTextStyle.long,
-    #                                         placeholder="Blablabla...",
-    #                                         max_length=4000,
-    #                                         required=False))
-    #     modal.add_item(discord.ui.InputText(label="URL",
-    #                                         placeholder="https://www.youtube.com/watch?v=JuEa6Hum0b4",
-    #                                         required=False))
-    #     modal.add_item(discord.ui.InputText(label="Color",
-    #                                         placeholder="Exemple: #FFD700 or 0xFFD700",
-    #                                         min_length=7, max_length=8,
-    #                                         required=False))
-    #     modal.callback = send_embed
-    #     await ctx.send_modal(modal)
 
     @staticmethod
     async def req_short_url(service_url, url_to_shorten):

@@ -46,7 +46,7 @@ If you want to try it yourself on your server you can invite it by adding it on 
 Of course, a new instance of the bot can be hosted on your machine with your own modifications or "vanilla" but you must consider some things :
 - Shibbot is not designed to be lightweight, you must provide him at least more than **64 MiB of RAM** otherwise it will not work or not proprely.
 - Since it uses a file based portable database, **"hosts" like Heroku won't fit** because they wipe all the bot's files every 24 hours or less.
-- It won't work out of the box, **don't forget to create a copy of [`congig.toml.exemple`](/congig.toml.exemple) named `congig.toml` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use [Pterodactyl](https://pterodactyl.io/) you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware (optional).
+- It won't work out of the box, **don't forget to create a copy of [`config.toml.exemple`](/config.toml.exemple) named `config.toml` and reference the Discord token of the new instance and other credentials** that the bot needs. If you're using a host that use [Pterodactyl](https://pterodactyl.io/) you can set the utilisation of the Pterodactyl API to `True` so that the bot can know the usage of its hardware (optional).
 
 Nevertheless, using our own hosted instance of the bot is also a higly recommended option if you just don't want to undergo all the issues that it is to host a Discord bot.
 

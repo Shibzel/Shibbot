@@ -1,5 +1,6 @@
 # For this project
 **.db
+**.db-journal
 config.toml
 ideas.txt
 cache/*

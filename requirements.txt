@@ -1,6 +1,5 @@
 aiogtrans @ git+https://github.com/Shibzel/aiogtrans
 aiohttp>=3.8.3
-aiosqlite==0.18.0
 aiowiki @ git+https://github.com/Gelbpunkt/aiowiki
 psutil==5.9.4
 py-cord[speed]==2.4.1

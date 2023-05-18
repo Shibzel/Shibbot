@@ -57,7 +57,7 @@ class Utilities(PluginCog):
         except ServiceUnavailableError: 
             result = await self.req_short_url("https://v.gd/create.php", url)
         except commands.BadArgument:
-            lang = await self.get_lang(ctx)
+            lang = self.get_lang(ctx)
             raise MissingArgumentsError(ctx.command,
                                         error_case_msg=lang.SHORTEN_URL_WRONG_URL)
         await ctx.respond(content=result["shorturl"])
@@ -73,7 +73,7 @@ class Utilities(PluginCog):
     # @commands.cooldown(1, 7, commands.BucketType.default)
     # async def translate(self, ctx: discord.ApplicationContext, language: str = None, sentence: str = None):
     #     if language not in LANGUAGES or language not in LANGUAGES.values():
-    #         lang = await self.get_lang(ctx)
+    #         lang = self.get_lang(ctx)
     #         raise MissingArgumentsError(ctx.command, lang.TRANSLATE_TEXT_LANG_CODE_ERR)
         
     #     async with ctx.typing():
@@ -85,7 +85,7 @@ class Utilities(PluginCog):
     #         except (aiogtrans.RequestError, aiogtrans.TooManyRequests, asyncio.TimeoutError):
     #             raise ServiceUnavailableError
             
-    #     lang = await self.get_lang(ctx)
+    #     lang = self.get_lang(ctx)
     #     embed = discord.Embed(color=0x4b8cf5)
     #     embed.set_author(name="Translate",
     #                      icon_url="https://www.googlewatchblog.de/wp-content/uploads/google-translate-logo-1024x1024.png")

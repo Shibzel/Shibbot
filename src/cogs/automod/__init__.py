@@ -9,11 +9,6 @@ from src.models import PluginCog
 from src.utils.json import StorageCacheHandler
 from src.utils.re import get_urls, url_to_domain
 from src.errors import CogDependanceMissing
-
-try:
-    from ..mod import Moderation
-except ImportError:
-    Moderation = None
     
 
 PLUGIN_NAME = "automod"
@@ -44,7 +39,6 @@ class Automod(PluginCog):
             emoji="🤖"
         )
         self.sus_domains = set()
-        self._mod_cog = None
         self.on_cooldown = {}
         
         query = f"""
@@ -58,26 +52,8 @@ class Automod(PluginCog):
         )"""
         self.bot.db.execute(query) # VER: v1.0.0
         self.bot.db.commit()
-        
-    @property
-    def mod_cog(self) -> Moderation:
-        return self._mod_cog
-    
-    @mod_cog.setter
-    def mod_cog(self, value):
-        self.logger.debug(f"Setting '{value}' as moderation cog for automod.")
-        self._mod_cog = value
 
     async def when_ready(self):
-        if not self.mod_cog:
-            for cog in self.bot.cogs.values():
-                if isinstance(cog, Moderation):
-                    self.mod_cog = cog
-                    break
-            else:
-                self.cog_unload()
-                raise CogDependanceMissing(Moderation)
-        
         self.update_sus_domains.start()
         
     @discord.Cog.listener()
@@ -85,15 +61,15 @@ class Automod(PluginCog):
         if not message.content and not message.attachments:
             return
                 
-        db = self.bot.asyncdb
-        if not await db.plugin_is_enabled(message.guild, PLUGIN_NAME, guild_only=True):
+        db = self.bot.db
+        if not db.plugin_is_enabled(message.guild, PLUGIN_NAME, guild_only=True):
             return
         query = f"SELECT profanity, sus_domains, cooldown, nudity FROM {self.plugin_name} WHERE guild_id=?"
-        async with db.execute(query, (message.guild.id,)) as cursor:
-            if result := await cursor.fetchone():
-                profanity, sus_domains, cooldown, nudity = result
-            else:
-                return
+        cur = db.execute(query, (message.guild.id,))
+        if result := cur.fetchone():
+            profanity, sus_domains, cooldown, nudity = result
+        else:
+            return
     
         tasks = []
         if cooldown:

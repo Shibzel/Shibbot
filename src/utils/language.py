@@ -25,7 +25,7 @@ def get_language(_dict: dict, lang_code: str) -> list:
         return list(_dict)[0] if len(_dict) else None
 
 
-async def factory_language(bot, ctx: bridge.BridgeApplicationContext, languages_dict: dict):
+def factory_language(bot, ctx: bridge.BridgeApplicationContext, languages_dict: dict):
     """Get the language from the database with the context and return the corresponding value using the `.get_language` function.
 
     Args:
@@ -36,7 +36,7 @@ async def factory_language(bot, ctx: bridge.BridgeApplicationContext, languages_
     `object`: The value corresponding to the language.
     """
     guild = is_or_has_guild(ctx)
-    lang_code = await bot.asyncdb.get_language(guild)
+    lang_code = bot.db.get_language(guild)
     return get_language(languages_dict, lang_code)
 
 fl = factory_language

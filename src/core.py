@@ -1,6 +1,5 @@
 import os
 import random
-import sqlite3
 import asyncio
 from datetime import datetime, timedelta
 from traceback import format_exc
@@ -9,7 +8,7 @@ import discord
 from discord.ext import bridge, commands as cmmds
 
 from . import __version__
-from .database import AsyncDB, GUILD_TABLE_NAME, PLUGINS_TABLE_NAME
+from .database import SqliteDatabase
 from .utils import convert_to_import_path
 from .utils import json as jayson
 from .utils.hardware import Uptime, ServerSpecifications, PteroContainerSpecifications
@@ -32,7 +31,7 @@ STATS_FILE_NAME = "/stats.json"
 PREVIOUS_VERSIONS_FILE_NAME = "/previous_versions.json"
 
 async def _get_prefix(bot: "Shibbot", ctx):
-    return await bot.asyncdb.get_prefix(ctx)
+    return bot.db.get_prefix(ctx.guild)
 
 class Shibbot(bridge.Bot):
     """Subclass of `bridge.Bot`, our little Shibbot :3."""
@@ -67,19 +66,23 @@ class Shibbot(bridge.Bot):
         self._caching = caching
         if self.caching:
             self.logger.warn("Caching enabled. Note that this option offers higher disponibility"
-                        " for some ressources but can increase the RAM and disk usage.")
+                " for some ressources but can increase the RAM and disk usage.")
         self.database_fp = database_fp
         self.cache_path = cache_path
         self.temp_cache_path = temp_cache_path
         self.extentions_path = extentions_path
-        self.instance_owners = None
-        self.project_owner = None
+        self.sqlite_cache_size = sqlite_cache_size
+        self.sqlite_cache_type = sqlite_cache_type
+        self.instance_owners: list[discord.User] = None
+        self.project_owner: discord.User = None
         self.is_alive = None
-        self.last_disconnection = None
-        self.invite_bot_url = None
+        self.last_disconnection: datetime = None
+        self.invite_bot_url: str = None
         self._error_handler = None
-        self.process_times = []
-        self.languages = []
+        self.process_times: list[float] = []
+        self.languages: list[str] = []
+        self.commands_invoked = 0
+        self.slash_commands_invoked = 0
 
         self.logger.debug("Initializing base class.")
         super().__init__(
@@ -118,14 +121,6 @@ class Shibbot(bridge.Bot):
         if __version__ not in self._versions:
             self._versions.append(__version__)
             jayson.dump(self._versions, prev_v_fp)
-        # Statistics
-        stats_fp = self.cache_path + STATS_FILE_NAME
-        self._stats = jayson.load(stats_fp) if os.path.exists(stats_fp) else {}
-        async def task():
-            while self.loop.is_running():
-                jayson.dump(self._stats, stats_fp)
-                await asyncio.sleep(300)  # Every 5 min
-        self.loop.create_task(task())
         
         # Console objects
         self.console = Console(self)
@@ -134,28 +129,7 @@ class Shibbot(bridge.Bot):
         self.specs = ServerSpecifications(self)
 
         # SQLite3 database
-        self.logger.debug(f"Connecting to database with synchronous client.")
-        if not os.path.exists(database_fp):
-            open(database_fp, "x").close()
-            self.logger.warn(f"Missing {database_fp} file, creating one.")
-        self.db = sqlite3.connect(database_fp)
-        self.cursor = self.db.cursor()
-        self.asyncdb = AsyncDB(database_fp, bot=self)
-        # Creating default tables and setting up cache
-        self.logger.debug(f"Cache allocation for SQLite database in '{sqlite_cache_type}': {round(sqlite_cache_size/1000, 2)}MB.")
-        query = f"""
-        PRAGMA cache_size=-{sqlite_cache_size};
-        PRAGMA temp_store={sqlite_cache_type};
-        CREATE TABLE IF NOT EXISTS {GUILD_TABLE_NAME} (
-            guild_id INTEGER PRIMARY KEY,
-            prefix   TEXT NOT NULL,
-            lang     TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS {PLUGINS_TABLE_NAME} (
-            guild_id INTEGER PRIMARY KEY
-        )"""
-        self.cursor.executescript(query) # VER: 1.0.0
-        self.db.commit()
+        self.db = SqliteDatabase(self, database_fp)
 
         # Loading all extensions and cogs
         disabled_cogs = set(disabled_cogs) if disabled_cogs else set()
@@ -198,13 +172,6 @@ class Shibbot(bridge.Bot):
             f"Finished initialization : {len(self.languages)} languages"
             f", {len(self.get_commands())} commands for {len(self.cogs)} cogs ({len(self.plugins)} plugins)."
             f" Took {(perf_counter()-start_time)*1000:.2f} ms.", ANSIEscape.cyan)
-        
-    async def __async_init__(self) -> None:
-        await self.asyncdb
-        
-    async def start(self, *args, **kwargs) -> None:
-        await self.__async_init__()
-        return await super().start(*args, **kwargs)
                 
     @property
     def caching(self) -> bool:
@@ -222,9 +189,31 @@ class Shibbot(bridge.Bot):
     @property
     def uptime(self) -> Uptime:
         return Uptime(self.init_time)
+    
+    @property
+    def member_count(self):
+        return sum(len(guild.members) for guild in self.guilds)
+    
+    @property
+    def invoked_commands(self) -> int:
+        return self.commands_invoked + self.slash_commands_invoked
+
+    @property
+    def avg_processing_time(self) -> float:
+        """The average processing time of the bot for a command.
+        
+        Returns
+        -------
+        `float`: The average in ms.
+        """
+        if length_processing_times := len(self.process_times):  # Returns True if the length != 0
+            return sum(self.process_times)/length_processing_times*1000
+        return 0.  # The list is empty
 
     async def on_ready(self) -> None:
         if self.is_alive is None:
+            self.db._init_stats()
+
             self.invite_bot_url = f"https://discord.com/api/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot%20applications.commands"
             underlined_link = ANSIEscape.underline + self.invite_bot_url + ANSIEscape.endc
             self.logger.log(f"Setting bot invitation link as {underlined_link}")
@@ -235,6 +224,7 @@ class Shibbot(bridge.Bot):
                 *[self.get_or_fetch_user(_id) for _id in self.owner_ids])
             users = ", ".join(f"'{user}'" for user in self.instance_owners)
             self.logger.log(f"The following users are the owners of this instance : {users}.")
+            self.logger.debug(f"Ping: {self.latency*1000:.2f}, servers: {len(self.guilds)}, users: {len(self.users)}.")
         elif self.is_alive is False:
             await self.on_resumed()
         self.is_alive = True
@@ -288,48 +278,6 @@ class Shibbot(bridge.Bot):
         if language not in self.languages:
             self.logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
-    
-    @property
-    def commands_invoked(self) -> int:
-        key = "commands_invoked"
-        if not self._stats.get(key):
-            self._stats[key] = 0
-        return self._stats[key]
-    
-    @commands_invoked.setter
-    def commands_invoked(self, value: int) -> None:
-        if not isinstance(value, int):
-            raise TypeError("value must be an int.")
-        self._stats["commands_invoked"] = value
-        
-    @property
-    def slash_commands_invoked(self) -> int:
-        key = "slash_commands_invoked"
-        if not self._stats.get(key):
-            self._stats[key] = 0
-        return self._stats[key]
-    
-    @slash_commands_invoked.setter
-    def slash_commands_invoked(self, value: int) -> None:
-        if not isinstance(value, int):
-            raise TypeError("value must be an int.")
-        self._stats["slash_commands_invoked"] = value
-    
-    @property
-    def invoked_commands(self) -> int:
-        return self.commands_invoked + self.slash_commands_invoked
-
-    @property
-    def avg_processing_time(self) -> float:
-        """The average processing time of the bot for a command.
-        
-        Returns
-        -------
-        `float`: The average in ms.
-        """
-        if length_processing_times := len(self.process_times):  # Returns True if the length != 0
-            return sum(self.process_times)/length_processing_times*1000
-        return 0.  # The list is empty
 
     async def _invoke(self, method, ctx: discord.SlashCommand | cmmds.Context) -> None:
         coro = method(ctx)
@@ -426,18 +374,18 @@ class Shibbot(bridge.Bot):
 
     async def close(self, error: Exception = None) -> None:
         self.logger.error("👋 Shibbot is being stopped, goodbye !", error)
+        self.db._update_stats()
+        self.db.close()
+        await asyncio.gather(
+            self.specs.close(),
+            # ...
+        )
+        self.console.stop()
         for cog in tuple(self.extensions):
             try:
                 self.unload_extension(cog)
             except Exception as err:
                 self.logger.error(f"Couldn't unload cog '{cog}'.", err)
-        await asyncio.gather(
-            self.specs.close(),
-            self.asyncdb.close(),
-        )
-        self.console.stop()
-        self.logger.debug("Closing database connection for synchronous client.")
-        self.db.close()
         await super().close()
         self.loop.stop()
         self.loop.close()

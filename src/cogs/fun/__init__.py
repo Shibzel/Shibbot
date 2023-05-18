@@ -178,7 +178,7 @@ class Fun(PluginCog):
                 raise ServiceUnavailableError()
             response = (await request.json(loads=loads))["memes"]
 
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         embeds = []
         author = ctx.author
         avatar = author.avatar.url
@@ -214,7 +214,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 15, commands.BucketType.default)
     async def prefixed_memes(self, ctx: commands.Context, subreddit: str = None):
         if subreddit not in (None, *MEME_SUBREDDITS):
-            lang: English = await self.get_lang(ctx)
+            lang: English = self.get_lang(ctx)
             raise MissingArgumentsError(ctx.command, lang.GET_MEME_CHECK_SUBREDDIT.format(
                 subreds=", ".join(MEME_SUBREDDITS)))
 
@@ -246,7 +246,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_shibe_pictures(self, ctx: bridge.BridgeApplicationContext):
         shibes = await self.get_shibes()
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         await self._image_factory(ctx, shibes, lang.GET_SHIBES_NEXT_BUTTON,
                                   lang.GET_SHIBES_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -259,7 +259,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_cat_pictures(self, ctx: bridge.BridgeApplicationContext):
         cats = await self.get_cats()
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         await self._image_factory(ctx, cats, lang.GET_CATS_NEXT_BUTTON,
                                   lang.GET_CATS_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -272,7 +272,7 @@ class Fun(PluginCog):
     @commands.cooldown(1, 10, commands.BucketType.default)
     async def get_birb_pictures(self, ctx: bridge.BridgeApplicationContext):
         birds = await self.get_birds()
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         await self._image_factory(ctx, birds, lang.GET_BIRDS_NEXT_BUTTON,
                                   lang.GET_BIRDS_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | shibe.online")
@@ -290,7 +290,7 @@ class Fun(PluginCog):
             url = f"https://api.capy.lol/v1/capybara/{random.randint(1, 739)}"
             if url not in urls:
                 urls.append(url)
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         await self._image_factory(ctx, urls, lang.GET_CAPY_NEXT_BUTTON,
                                   lang.GET_CAPY_PREVIOUS_BUTTON,
                                   lang.DEFAULT_FOOTER + " | capy.lol")
@@ -339,7 +339,7 @@ class Fun(PluginCog):
     # @bridge.bridge_command(name="button", description="Just a button, nothing dangerous.", description_localizations={"fr": "Juste un bouton, rien de dangereux."})
     # @commands.cooldown(1, 180, commands.BucketType.channel)
     # async def funni_button(self, ctx: bridge.BridgeApplicationContext):
-    #     lang: English = await self.get_lang(ctx)
+    #     lang: English = self.get_lang(ctx)
     #     ...  # TODO: Complete
 
 

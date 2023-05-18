@@ -36,7 +36,7 @@ class Miscellaneous(BaseCog):
     @commands.cooldown(3, 15, commands.BucketType.default)
     async def get_avatar(self, ctx: bridge.BridgeContext, user: discord.User = None):
         user = user if user else ctx.author
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
 
         embed = discord.Embed(color=discord.Color.dark_gold())
         embed.set_footer(text=lang.DEFAULT_FOOTER.format(
@@ -54,7 +54,7 @@ class Miscellaneous(BaseCog):
     @commands.cooldown(1, 7, commands.BucketType.default)
     async def get_user_info(self, ctx: bridge.BridgeContext, user: discord.User = None):
         user = user if user else ctx.author
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
 
         async with ctx.typing():
             if ctx.guild:
@@ -101,7 +101,7 @@ class Miscellaneous(BaseCog):
     @commands.cooldown(1, 15, commands.BucketType.channel)
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_server_info(self, ctx: bridge.BridgeContext):
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
 
         guild: discord.Guild = ctx.guild
 

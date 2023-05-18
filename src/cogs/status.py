@@ -19,7 +19,8 @@ class ChangeActivity(BaseCog):
         self.bot = bot
         super().__init__(hidden=True)
 
-        self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users",]
+        self.bot_statutes = [f"version v{version}", "{guilds} servers", "{users} users",
+                             "{members} members"]
         self.watching_statutes = [
             "after the guy who stole my milk", "you.", "submissions on Reddit",
             "the end of the world", "ur mama", "inside your soul", "(Mg, Fe)₇Si₈O₂₂(OH)₂",
@@ -59,7 +60,8 @@ class ChangeActivity(BaseCog):
                                 name=name.format(random.choice(self.bot_statutes).format(
                                     latency=latency,
                                     guilds=len(self.bot.guilds),
-                                    users=len(self.bot.users))))
+                                    users=len(self.bot.users),
+                                    members=self.bot.member_count)))
         else:
             activity = random.choice(
                 (Activity(type=ActivityType.watching,

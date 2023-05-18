@@ -40,9 +40,8 @@ class BotsCommands(BaseCog):
     @commands.cooldown(1, 7, commands.BucketType.user)
     @commands.cooldown(1, 15, commands.BucketType.channel)
     async def show_help(self, ctx: bridge.BridgeApplicationContext):
-        db = self.bot.asyncdb
-        lang_code = await db.get_language(ctx.guild)
-        prefix = await db.get_prefix(ctx.guild)
+        db = self.bot.db
+        _, prefix, lang_code, *_ = db.create_or_fetch_guild(self.bot, ctx.guild)
         lang: English = get_language(self.languages, lang_code)
 
         TITLE = lang.SHOW_HELP_TITLE
@@ -133,7 +132,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Obtient le ping du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
     async def ping(self, ctx: bridge.BridgeApplicationContext):
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         embed = discord.Embed(
             title=lang.PING_EMBED_TITLE,
             description=lang.PING_EMBED_DESCRIPTION.format(
@@ -150,7 +149,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Vous obtient les liens d'invitation du bot."})
     @commands.cooldown(1, 7, commands.BucketType.default)
     async def get_invitations(self, ctx: bridge.BridgeApplicationContext):
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
 
         embed = discord.Embed(
             title=lang.GET_INVITATIONS_TITLE,
@@ -173,7 +172,7 @@ class BotsCommands(BaseCog):
         description_localizations={"fr": "Obtiens des informartions sur le bot."})
     @commands.cooldown(1, 7, commands.BucketType.member)
     async def get_infos(self, ctx: bridge.BridgeApplicationContext):
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
 
         embed = discord.Embed(color=discord.Color.dark_gold())
         embed.set_author(name=lang.GET_INFOS_TITLE.format(
@@ -226,10 +225,10 @@ class BotsCommands(BaseCog):
         if not prefix:
             raise MissingArgumentsError(ctx.command)
 
-        async with self.bot.asyncdb as db:
-            lang = get_language(self.languages, await db.get_language(ctx.guild))
-            prefix = prefix.lower().split(" ")[0]
-            await db.change_prefix(self.bot, ctx.guild, prefix)
+        db = self.bot.db
+        lang = get_language(self.languages, db.get_language(ctx.guild))
+        prefix = prefix.lower().split(" ")[0]
+        db.change_prefix(self.bot, ctx.guild, prefix)
         embed = discord.Embed(title=lang.CHANGE_PREFIX_TITLE, description="✅ " +
                               lang.CHANGE_PREFIX_DESCRIPTION.format(prefix=prefix), color=discord.Color.green())
         await ctx.respond(embed=embed)
@@ -243,8 +242,8 @@ class BotsCommands(BaseCog):
     @commands.cooldown(2, 10, commands.BucketType.guild)
     @bridge.guild_only()
     async def change_lang(self, ctx: bridge.BridgeApplicationContext):
-        db = self.bot.asyncdb
-        lang_code = await db.get_language(ctx.guild)
+        db = self.bot.db
+        lang_code = db.get_language(ctx.guild)
         lang: English = get_language(self.languages, lang_code)
 
         select = discord.ui.Select(options=[discord.SelectOption(
@@ -258,8 +257,8 @@ class BotsCommands(BaseCog):
                 raise NotInteractionOwner(ctx.author, interaction.user)
 
             set_language = select.values[0]
-            async with self.bot.asyncdb as db:
-                await db.change_language(self.bot, ctx.guild, set_language)
+            db = self.bot.db
+            db.change_language(self.bot, ctx.guild, set_language)
             lang = get_language(self.languages, set_language)
             embed = discord.Embed(
                 title=lang.CHANGE_LANG_DONE_TITLE,
@@ -284,17 +283,17 @@ class BotsCommands(BaseCog):
     @commands.cooldown(1, 7, commands.BucketType.guild)
     @bridge.guild_only()
     async def enable_plugins(self, ctx: bridge.BridgeApplicationContext):
-        async with self.bot.asyncdb as db:
-            lang_code = await db.get_language(ctx.guild)
-            lang: English = get_language(self.languages, lang_code)
+        db = self.bot.db
+        lang_code = db.get_language(ctx.guild)
+        lang: English = get_language(self.languages, lang_code)
 
-            options = [discord.SelectOption(
-                label=plugin.get_name(lang_code),
-                description=plugin.get_description(
-                    lang_code) if plugin.description else "...",
-                emoji=plugin.emoji, default=await db.plugin_is_enabled(ctx.guild, plugin.plugin_name),
-                value=plugin.plugin_name)
-                for plugin in self.bot.plugins.values()]
+        options = [discord.SelectOption(
+            label=plugin.get_name(lang_code),
+            description=plugin.get_description(
+                lang_code) if plugin.description else "...",
+            emoji=plugin.emoji, default=db.plugin_is_enabled(ctx.guild, plugin.plugin_name),
+            value=plugin.plugin_name)
+            for plugin in self.bot.plugins.values()]
         select = discord.ui.Select(placeholder=lang.ENABLE_PLUGINS_PLACEHOLDER,
                                    min_values=0, max_values=len(options), options=options)
 
@@ -302,12 +301,12 @@ class BotsCommands(BaseCog):
             if interaction.user != ctx.author:
                 raise NotInteractionOwner(ctx.author, interaction.user)
 
-            async with self.bot.asyncdb as db:
-                mapping = {
-                    plugin.plugin_name: (plugin.plugin_name in select.values)
-                    for plugin in self.bot.plugins.values()
-                }
-                await db.bulk_enable_plugin(ctx.guild, mapping)
+            db = self.bot.db
+            mapping = {
+                plugin.plugin_name: (plugin.plugin_name in select.values)
+                for plugin in self.bot.plugins.values()
+            }
+            db.bulk_enable_plugin(ctx.guild, mapping)
             embed = discord.Embed(title=lang.ENABLE_PLUGIN_DONE_TITLE,
                                   description=lang.ENABLE_PLUGIN_DONE_DESCRIPTION,
                                   color=discord.Color.dark_gold())

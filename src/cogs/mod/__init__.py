@@ -1,6 +1,6 @@
 import time
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import discord
 from discord.ext import bridge, commands
 
@@ -24,13 +24,13 @@ class SanctionType:
 
 class LogEmbed(discord.Embed):
     def __init__(self, title: str, user: discord.User, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         title = f"📜 Log | {title}"
         if user and user.avatar:
             self.set_author(name=title, icon_url=user.avatar)
         else:
             self.title = title
         self.timestamp = datetime.utcnow()
-        super().__init__(*args, **kwargs)
 
 class Moderation(PluginCog):
     def __init__(self, bot: Shibbot):
@@ -47,8 +47,8 @@ class Moderation(PluginCog):
                 "fr": "Des outils pour modérer votre serveur."
             },
             languages={
-                "en": English,
-                # "fr": French,
+                "en": English(),
+                # "fr": French(),
             },
             emoji="👮"
         )
@@ -96,14 +96,14 @@ class Moderation(PluginCog):
         if not (guild := self.bot.get_guild(guild_id)):
             return
         
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"""SELECT id FROM {self.plugin_name}_sancrions 
                     WHERE guild_id=? AND user_id=? AND type=? AND timestamp=?"""
         args = (guild_id, user_id, sanction_type, timestamp,)
-        async with db.execute(query, args) as cursor:
-            if not (result := await cursor.fetchone()):
-                return  # The sanction doesn't exist anymore
-            sanction_id = result[0]
+        cur = db.execute(query, args)
+        if not (result := cur.fetchone()):
+            return  # The sanction doesn't exist anymore
+        sanction_id = result[0]
         
         try:
             if sanction_type == SanctionType.tempmute:
@@ -129,17 +129,18 @@ class Moderation(PluginCog):
                 f" Sanction ID: {sanction_id}.", err)
             return
         
-        async with db:
-            query = f"DELETE FROM {self.plugin_name}_sancrions WHERE id=?"
-            await db.execute(query, (sanction_id,))
+        query = f"DELETE FROM {self.plugin_name}_sancrions WHERE id=?"
+        db.execute(query, (sanction_id,))
+        db.commit()
     
     async def when_ready(self) -> None:
-        db = self.bot.asyncdb
+        self.logger.debug("Fetching sheduled sanctions.")
+        db = self.bot.db
         query = f"""SELECT guild_id, user_id, type, timestamp FROM {self.plugin_name}_sanctions
                     WHERE type IN (?, ?)"""
-        async with db.execute(query, (SanctionType.tempmute, SanctionType.tempban)) as cursor:
-            if not (temporary_sanctions := await cursor.fetchall()):
-                return
+        cur = db.execute(query, (SanctionType.tempmute, SanctionType.tempban))
+        if not (temporary_sanctions := cur.fetchall()):
+            return
             
         bot_guilds = {guild.id for guild in self.bot.guilds}
         sanctions_guilds = {sanction[0] for sanction in temporary_sanctions}
@@ -148,8 +149,7 @@ class Moderation(PluginCog):
         if guilds_to_remove := sanctions_guilds - suitable_guilds:
             query = f"""DELETE FROM {self.plugin_name}_sanctions
                         WHERE guild_id IN ({','.join('?'*len(guilds_to_remove))})"""
-            async with db:
-                await db.execute(query, guilds_to_remove)
+            db.execute(query, guilds_to_remove)
             
         tasks = [
             self.shedule_sanction(*sanction)
@@ -157,39 +157,41 @@ class Moderation(PluginCog):
             if sanction[0] in suitable_guilds
         ]
         if tasks:
+            self.logger.debug(f"Resuming {len(tasks)} tempbans and tempmutes.")
             await asyncio.gather(*tasks)
             
     async def enable_logs(self, guild_id,):
-        pass
+        pass  # TODO: Complete
         
     async def set_log_channel(self, channel: discord.TextChannel, lang: English = None) -> None:
         guild = channel.guild
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"SELECT log_channel FROM {self.plugin_name} WHERE guild_id=?"
-        async with db.execute(query, (guild.id,)) as cursor:
-            result = await cursor.fetchone()
+        cur = db.execute(query, (guild.id,))
+        result = cur.fetchone()
         if result:
             query = f"UPDATE {self.plugin_name} SET log_channel=? WHERE guild_id=?"
         else:
             query = f"INSERT INTO {self.plugin_name} (log_channel, guild_id) VALUES (?, ?)"
-        async with db:
-            await db.execute(query, (channel.id, guild.id,))
+
+        db.execute(query, (channel.id, guild.id,))
+        db.commit()
         
         if not lang:
-            lang = await self.get_lang(guild)        
-        embed = discord.Embed(title=lang.SET_LOG_CHANNEL_TITLE,
-                              description=lang.SET_LOG_CHANNEL_DESCRIPTION,
+            lang = self.get_lang(guild)        
+        embed = discord.Embed(title=lang.ON_LOG_CHANNEL_UPDATE_TITLE,
+                              description=lang.ON_LOG_CHANNEL_UPDATE_DESCRIPTION,
                               color=discord.Color.green())
-        log_channel = await self.get_log_channel(guild)
+        log_channel = self.get_log_channel(guild)
         await log_channel.send(embed=embed)
     
-    async def get_log_channel(self, guild: discord.Guild) -> discord.TextChannel | None:
-        db = self.bot.asyncdb
+    def get_log_channel(self, guild: discord.Guild) -> discord.TextChannel | None:
+        db = self.bot.db
         query = f"SELECT log, log_channel FROM {self.plugin_name} WHERE guild_id=?"
-        async with db.execute(query, (guild.id,)) as cursor:
-            if not (result := await cursor.fetchone()):
-                return  # Guild not in database
-            log, log_channel_id = result
+        cur = db.execute(query, (guild.id,))
+        if not (result := cur.fetchone()):
+            return  # Guild not in database
+        log, log_channel_id = result
         if not log or not log_channel_id:
             return  # Logs are disabled or channel is not set
         return guild.get_channel(log_channel_id) # Can either be None or discord.TextChannel
@@ -206,27 +208,28 @@ class Moderation(PluginCog):
             await asyncio.gather(*tasks)
     
     async def get_mute_role(self, guild: discord.Guild) -> discord.Role:
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"SELECT mute_role FROM {self.plugin_name} WHERE guild_id=?"
-        async with db.execute(query, (guild.id,)) as cursor:
-            result = await cursor.fetchone()
+        cur = db.execute(query, (guild.id,))
+        result = cur.fetchone()
         if result and (mute_role := guild.get_role(result[0])):
             self.bot.loop.create_task(self.setup_mute_role(mute_role))
             return mute_role
         permissions = discord.Permissions(**self.mute_kwargs)
         mute_role = await guild.create_role(name="Mute", permissions=permissions,
                                             color=discord.Color.dark_red())
-        async with db:
-            query = f"INSERT INTO {self.plugin_name} (guild_id, mute_role) VALUES (?, ?)"
-            await db.execute(query, (guild.id, mute_role.id,))
-        self.bot.loop.call_soon(asyncio.ensure_future, self.setup_mute_role(mute_role))
+
+        query = f"INSERT INTO {self.plugin_name} (guild_id, mute_role) VALUES (?, ?)"
+        db.execute(query, (guild.id, mute_role.id,))
+        db.commit()
+        self.bot.loop.create_task(self.setup_mute_role(mute_role))
         return mute_role
             
     async def get_warns(self, guild: discord.Guild, user: discord.User) -> tuple[int, int, int, float, str | None]:
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"SELECT * FROM {self.plugin_name}_warns WHERE guild_id=? AND member_id=?"
-        async with db.execute(query, (guild.id, user.id,)) as cursor:
-            return await cursor.fetchall()
+        cur = db.execute(query, (guild.id, user.id,))
+        return cur.fetchall()
     
     # CAT: Events
     
@@ -249,10 +252,10 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = member.guild
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         description = lang.ON_KICK_DESCRIPTION.format(
             member=member, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
@@ -263,7 +266,7 @@ class Moderation(PluginCog):
     @discord.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
         guild = member.guild
-        if not (log_channel := await self.get_log_channel(guild)):
+        if not (log_channel := self.get_log_channel(guild)):
             return
         await asyncio.sleep(0.5)
         if found_entry := await self._find_entry(guild, member, discord.AuditLogAction.kick):
@@ -278,10 +281,10 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = moderator.guild            
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         description = lang.ON_BAN_DESCRIPTION.format(
             user=user, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
@@ -299,17 +302,17 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = moderator.guild
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"""INSERT INTO {self.plugin_name}_sanctions (guild_id, user_id, mod_id, timestamp, reason)
                     VALUES (?, ?, ?, ?, ?)"""
-        async with db:
-            await db.execute(query, (guild.id, user.id, moderator.id, timestamp, reason))
+
+        db.execute(query, (guild.id, user.id, moderator.id, timestamp, reason))
         await self.shedule_sanction(guild.id, user.id, SanctionType.tempban, timestamp)
                  
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         duration = secs_to_humain(time.time() - timestamp)
         description = lang.ON_TEMPBAN_DESCRIPTION.format(
@@ -321,7 +324,7 @@ class Moderation(PluginCog):
 
     @discord.Cog.listener()
     async def on_member_ban(self, guild: discord.Guild, user: discord.User):
-        if not (log_channel := await self.get_log_channel(guild)):
+        if not (log_channel := self.get_log_channel(guild)):
             return
         await asyncio.sleep(0.5)
         if found_entry := await self._find_entry(guild, user, discord.AuditLogAction.ban):
@@ -336,10 +339,10 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = moderator.guild
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         description = lang.ON_UNBAN_DESCRIPTION.format(
             user=user, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
@@ -349,7 +352,7 @@ class Moderation(PluginCog):
 
     @discord.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
-        if not (log_channel := await self.get_log_channel(guild)):
+        if not (log_channel := self.get_log_channel(guild)):
             return
         await asyncio.sleep(0.5)
         if found_entry := await self._find_entry(guild, user, discord.AuditLogAction.unban):
@@ -365,16 +368,16 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = member.guild
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"""INSERT INTO {self.plugin_name}_warns (guild_id, member_id, mod_id, time, reason)
                     VALUES (?, ?, ?, ?, ?)"""
-        async with db:
-            await db.execute(query, (guild.id, member.id, moderator.id, reason))
+
+        db.execute(query, (guild.id, member.id, moderator.id, reason))
             
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         if not warns:
             warns = len(await self.get_warns(guild, member))
         
@@ -394,13 +397,13 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None
     ) -> None:
         guild = channel.guild
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
             
         description = lang.ON_PURGE_USER_DESCRIPTION if user else lang.ON_PURGE_CHANNEL_DESCRIPTION
-        description = description.format(user=user, mod=moderator, messages=messages,
+        description = description.format(user=user, mod=moderator, messages=messages, channel=channel,
                                          reason=reason or lang.NO_REASON_PLACEHOLDER)
         embed = LogEmbed(title=lang.ON_WARN_TITLE, user=user,
                          description=description, color=discord.Color.yellow())
@@ -417,16 +420,16 @@ class Moderation(PluginCog):
     ) -> None:
         guild = member.guild
         if update_from_db:
-            db = self.bot.asyncdb
+            db = self.bot.db
             query = f"""INSERT INTO {self.plugin_name}_sanctions (guild_id, user_id, type)
                         VALUES (?, ?, ?, ?)"""
-            async with db:
-                await db.execute(query, (guild.id, member.id, SanctionType.mute,))
     
-        if not (log_channel := log_channel or await self.get_log_channel(member.guild)):
+            db.execute(query, (guild.id, member.id, SanctionType.mute,))
+    
+        if not (log_channel := log_channel or self.get_log_channel(member.guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
             
         description = lang.ON_MUTE_DESCRIPTION.format(
             member=member, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
@@ -444,17 +447,17 @@ class Moderation(PluginCog):
         log_channel: discord.TextChannel = None,
     ) -> None:
         guild = member.guild
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"""INSERT INTO {self.plugin_name}_sanctions (guild_id, user_id, mod_id, timestamp, reason)
                     VALUES (?, ?, ?, ?, ?)"""
-        async with db:
-            await db.execute(query, (guild.id, member.id, moderator.id, timestamp, reason))
+
+        db.execute(query, (guild.id, member.id, moderator.id, timestamp, reason))
         await self.shedule_sanction(guild.id, member.id, SanctionType.tempmute, timestamp)
                  
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         duration = secs_to_humain(time.time()-timestamp)
         description = lang.ON_TEMPMUTE_DESCRIPTION.format(
@@ -475,15 +478,15 @@ class Moderation(PluginCog):
     ) -> None:
         guild = member.guild
         if remove_from_db:
-            async with self.bot.asyncdb as db:
-                query = f"""DELETE FROM {self.plugin_name}_sanctions
-                            WHERE guild_id=? AND user_id=? AND type=?"""
-                await db.execute(query, (guild.id, member.id, SanctionType.mute))
+            db = self.bot.db
+            query = f"""DELETE FROM {self.plugin_name}_sanctions
+                        WHERE guild_id=? AND user_id=? AND type=?"""
+            db.execute(query, (guild.id, member.id, SanctionType.mute))
         
-        if not (log_channel := log_channel or await self.get_log_channel(guild)):
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
             return
         if not lang:
-            lang = await self.get_lang(guild)
+            lang = self.get_lang(guild)
         
         description = lang.ON_UNMUTE_DESCRIPTION.format(
             member=member, mod=moderator, reason=reason or lang.NO_REASON_PLACEHOLDER)
@@ -494,12 +497,12 @@ class Moderation(PluginCog):
     @discord.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         guild = member.guild
-        db = self.bot.asyncdb
+        db = self.bot.db
         query = f"""SELECT id FROM {self.plugin_name}_sanctions
                     WHERE guild_id=? AND user_id=? AND type IN (?, ?)"""
-        async with db.execute(query, (guild.id, member.id, SanctionType.mute, SanctionType.tempmute)) as cursor:
-            if not await cursor.fetchone():
-                return
+        cur = db.execute(query, (guild.id, member.id, SanctionType.mute, SanctionType.tempmute))
+        if not cur.fetchone():
+            return
         
         mute_role = await self.get_mute_role(guild)
         await member.add_roles(mute_role)
@@ -515,7 +518,7 @@ class Moderation(PluginCog):
     @bridge.has_permissions(manage_channels=True)
     @commands.cooldown(2, 15, commands.BucketType.guild)
     async def _set_log_channel(self, ctx: bridge.BridgeApplicationContext, channel: discord.TextChannel) -> None:
-        lang: English = await self.get_lang(ctx)
+        lang: English = self.get_lang(ctx)
         
         await self.set_log_channel(channel, lang)
         
@@ -523,7 +526,63 @@ class Moderation(PluginCog):
         embed = discord.Embed(title=lang.SET_LOG_CHANNEL_TITLE, description=description,
                               color=discord.Color.green())
         await ctx.respond(embed=embed)
+    
+    @bridge.bridge_command(
+        name="clear",
+        aliases=["purge"],
+        options=[
+            discord.Option(int, name="limit", description="The number of messages you want to clear, maximum: 100."),
+            discord.Option(str, name="reason", description="Why.", required=False)
+    ])
+    async def clean_messages(self, ctx: bridge.BridgeApplicationContext, limit: int, reason: str = None):
+        lang: English = self.get_lang(ctx)
+
+        if limit > 100:
+            limit = 100
+
+        async with ctx.channel.typing():
+            deleted_messages = len(await ctx.channel.purge(limit=limit) or ())
+            description = lang.CLEAN_MESSAGES_DESCRIPTION.format(
+                messages=deleted_messages)
         
+        embed = discord.Embed(title=lang.CLEAN_MESSAGES_TITLE, description=description,
+                              color=discord.Color.green())
+        await ctx.respond(embed=embed)
+        await self.on_purge(ctx.channel, deleted_messages, ctx.author, reason=reason, lang=lang)
+
+    @bridge.bridge_command(
+        name="clearuser",
+        aliases=["purgeuser"],
+        options=[
+            discord.Option(int, name="limit", description="The number of messages you want to clear, maximum: 1000."),
+            discord.Option(discord.User, name="user", description="The user you want to clean the messages from."),
+            discord.Option(str, name="reason", description="Why.", required=False)
+    ])
+    async def clean_user_messages(self, ctx: bridge.BridgeApplicationContext, limit: int, user: discord.User, reason: str = None):
+        lang: English = self.get_lang(ctx)
+
+        if limit > 1000:
+            limit = 1000
+
+        async with ctx.channel.typing():
+            messages = []
+            after = datetime.utcnow() - timedelta(days=14-1)
+            async for message in ctx.channel.history(limit=None, after=after):
+                # The bot can't bulk delete messages older than 14 days
+                if len(messages) >= limit:
+                    break
+                if message.author == user:
+                    messages.append(message)
+            deleted_messages = len(await ctx.channel.delete_messages(messages) or ())
+            description = lang.CLEAN_MESSAGES_USER_DESCRIPTION.format(
+                messages=deleted_messages,
+                user=user)
+        
+        embed = discord.Embed(title=lang.CLEAN_MESSAGES_TITLE, description=description,
+                              color=discord.Color.green())
+        await ctx.respond(embed=embed)
+        await self.on_purge(ctx.channel, deleted_messages, ctx.author, user, reason, lang)
+
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

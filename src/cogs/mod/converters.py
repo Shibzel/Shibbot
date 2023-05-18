@@ -5,9 +5,9 @@ import re
 from .lang import English
 
 def secs_to_humain(lang: English, seconds: int | float):
-    jours, rem = divmod(int(seconds), 86400)
-    if jours:
-        return f"{jours} {lang.DAYS}"
+    days, rem = divmod(int(seconds), 86400)
+    if days:
+        return f"{days} {lang.DAYS}"
     
     hours, rem = divmod(rem, 3600)
     if hours:

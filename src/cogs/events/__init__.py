@@ -39,8 +39,8 @@ class Events(BaseCog):
             if self.user_on_cooldown(ctx.command.name, ctx.author.id):
                 return
 
-        db = self.bot.asyncdb
-        lang_code = await db.get_language(ctx.guild)
+        db = self.bot.db
+        lang_code = db.get_language(ctx.guild)
         lang: English = get_language(self.languages, lang_code)
         error_dict: dict[str, str] = lang.ON_COMMAND_ERROR
         time = None if self.bot.debug_mode else 20

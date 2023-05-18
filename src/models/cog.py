@@ -99,22 +99,16 @@ class PluginCog(BaseCog):
         super().__init__(*args, **kwargs)
         
     def __subclass_init__(self):
-        c = self.bot.cursor
-        try:
-            c.execute(f"SELECT {self.plugin_name} FROM plugins")
-        except OperationalError:
-            self.logger.debug(f"Adding '{self.plugin_name}' to 'plugin' table in database.")
-            c.execute(f"ALTER TABLE plugins ADD COLUMN {self.plugin_name} BOOLEAN DEFAULT 1")
-        self.bot.db.commit() # VER: 1.0.0
+        self.bot.db.add_plugin_table(self.plugin_name)
 
-    async def is_enabled(self, ctx: bridge.BridgeApplicationContext):
-        db = self.bot.asyncdb
-        return await db.plugin_is_enabled(
+    def is_enabled(self, ctx: bridge.BridgeApplicationContext):
+        db = self.bot.db
+        return db.plugin_is_enabled(
             ctx.guild, self.plugin_name, self.guild_only
         )
 
     async def cog_before_invoke(self, ctx: bridge.BridgeApplicationContext):
-        if not await self.is_enabled(ctx):
+        if not self.is_enabled(ctx):
             raise PluginDisabledError(self.plugin_name)
         return await super().cog_before_invoke(ctx)
 

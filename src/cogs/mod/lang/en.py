@@ -6,8 +6,8 @@ class English:
     DAYS = "days"
     AND = "and"
     
-    SET_LOG_CHANNEL_TITLE = "Updated !"
-    SET_LOG_CHANNEL_DESCRIPTION = "Every log will now appear in this channel."
+    ON_LOG_CHANNEL_UPDATE_TITLE = "Updated !"
+    ON_LOG_CHANNEL_UPDATE_DESCRIPTION = "Every log will now appear in this channel."
     
     ON_KICK_TITLE = "Kick"
     ON_KICK_DESCRIPTION = "{member.mention} ({member}) has been kicked by {mod.mention}.\nReason: {reason}"
@@ -25,8 +25,8 @@ class English:
     ON_WARN_DESCRIPTION = "{member.mention} ({member}) has been warned by {mod.mention}.\nReason: {reason}"
     
     ON_PURGE_TITLE = "Purge"
-    ON_PURGE_USER_DESCRIPTION = "`{messages}` of {user.mention} ({user}) has been purged in {channel.mention} by {mod.mention}.\nReason: {reason}"
-    ON_PURGE_CHANNEL_DESCRIPTION = "`{messages}` of {channel.mention} has been purged by {mod.mention}.\nReason: {reason}"
+    ON_PURGE_USER_DESCRIPTION = "{mod.mention} deleted `{messages}` messages of {user.mention} ({user}) in {channel.mention}.\nReason: {reason}"
+    ON_PURGE_CHANNEL_DESCRIPTION = "{mod.mention} deleted `{messages}` messages in {channel.mention}.\nReason: {reason}"
     
     ON_MUTE_TITLE = "Mute"
     ON_MUTE_DESCRIPTION = "{member.mention} ({member}) has been muted by {mod.mention}.\nReason: {reason}"
@@ -39,3 +39,8 @@ class English:
     
     SET_LOG_CHANNEL_TITLE = "Done !"
     SET_LOG_CHANNEL_DESCRIPTION = "The logs channel has successfully been updated to {channel.mention}."
+
+    CLEAN_MESSAGES_TITLE = "🧹 Purged !"
+    CLEAN_MESSAGES_DESCRIPTION = "`{messages}` messages in this channel has been purged."
+    
+    CLEAN_MESSAGES_USER_DESCRIPTION = "`{messages}` messages of {user.mention} ({user}) has been purged."

@@ -161,8 +161,11 @@ class Shibbot(bridge.Bot):
                 self.logger.error(f"Couldn't import the necessary modules for the extension '{cog}'."
                             " See if there is a requirements.txt inside the folder "
                             "and then install the dependencies.", exc)
+                extensions.remove(cog)
             except Exception as err:
                 self.logger.error(f"Couldn't load cog '{cog}'.", err)
+        if extensions:
+            self.logger.log(f"Loaded {len(extensions)} extensions : {', '.join(extensions)}.")
 
         if not os.path.exists("./misc/burgir.jpg"):
             self.logger.warn("File 'burgir.jpg' is missing, why did you delete it ???")

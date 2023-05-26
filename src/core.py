@@ -48,7 +48,7 @@ class Shibbot(bridge.Bot):
         disabled_cogs: list[str] | None = None,
 
         database_fp: str = DATABASE_FILE_PATH,
-        extentions_path: str = EXTENSIONS_PATH,
+        extensions_path: str = EXTENSIONS_PATH,
         cache_path: str = CACHE_PATH,
         temp_cache_path: str = TEMPORARY_CACHE_PATH,
         sqlite_cache_size: str = SQLITE_DEFAULT_CACHE_SIZE,
@@ -70,7 +70,7 @@ class Shibbot(bridge.Bot):
         self.database_fp = database_fp
         self.cache_path = cache_path
         self.temp_cache_path = temp_cache_path
-        self.extentions_path = extentions_path
+        self.extensions_path = extensions_path
         self.sqlite_cache_size = sqlite_cache_size
         self.sqlite_cache_type = sqlite_cache_type
         self.instance_owners: list[discord.User] = None
@@ -146,10 +146,10 @@ class Shibbot(bridge.Bot):
             self.load_extension(cog)
             
         # Extensions
-        extension_path = convert_to_import_path(self.extentions_path)
+        extension_path = convert_to_import_path(self.extensions_path)
         extensions = []
         exclude = {"__pycache__",}
-        for extension in set(os.listdir(self.extentions_path)) - exclude:
+        for extension in set(os.listdir(self.extensions_path)) - exclude:
             if extension.endswith(".py"):
                 extension = extension[:-3]
             extensions.append(f"{extension_path}.{extension}")

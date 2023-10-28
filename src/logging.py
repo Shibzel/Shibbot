@@ -32,6 +32,7 @@ class ANSIEscape:
     
 class LoggingLevel:
     """Self-explanatory, collection of logging levels."""
+    verbose = 5
     debug = 4
     log = info = information = 3
     warn = warning = 2
@@ -39,14 +40,14 @@ class LoggingLevel:
     critical = fatal = 0
     disabled = -1
 
-# The type can be retuned thanks to the index
+# The type can be returned thanks to the index
 # >>> level = LoggingLevel.log  # int: 3
 # >>> LoggingType(level)
 # Output: INFO
-LoggingType = ("CRITICAL", "ERROR", "WARN", "INFO", "DEBUG")
+LoggingType = ("CRITICAL", "ERROR", "WARN", "INFO", "DEBUG", "VERBOSE")
 
 def format_error(error_or_traceback: str | Exception, limit: int = 3, **kwargs) -> str:
-    """Formats en error. If the error is already an string it's immediatly returned."""
+    """Formats en error. If the error is already an string it's immediately returned."""
     if not error_or_traceback:
         return ""
     if not isinstance(error_or_traceback, Exception):
@@ -106,6 +107,11 @@ class BaseLogger:
         with open(self.file, "a+", encoding=ENCODING) as f:
             clean_string = remove_ansi_escape_sequences(msg)
             f.write(clean_string+"\n")
+
+    def verbose(self, msg: str, data):
+        if self.level >= LoggingLevel.verbose:
+            msg += ANSIEscape.endc + str(data)
+            self._log(LoggingLevel.verbose, msg, ANSIEscape.gray)
                 
     def debug(self, msg: str, error: str | Exception = None) -> None:
         if self.level >= LoggingLevel.debug:

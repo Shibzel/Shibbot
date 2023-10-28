@@ -19,7 +19,6 @@ class BaseCog(Cog):
         hidden: bool = False,
         *args, **kwargs
     ):
-        start_time = perf_counter()
         super().__init__(*args, **kwargs)
         self.bot = getattr(self, "bot", None) or bot
         if self.bot is None:
@@ -47,8 +46,6 @@ class BaseCog(Cog):
         if self.bot.is_alive is not None:
             self.bot.loop.create_task(self.when_ready())
             self._when_ready_called = True
-        end_time = perf_counter()
-        self.logger.debug(f"Initialization took {(end_time-start_time)*1000:.2f}ms.")
             
     def __subclass_init__(self):
         pass  # Override

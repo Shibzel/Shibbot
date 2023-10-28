@@ -14,8 +14,9 @@ try:
     from src.core import Shibbot, PterodactylShibbot
     from src.logging import Logger, ANSIEscape, LoggingLevel
 except ModuleNotFoundError as exc:
-    raise ImportError("An import error occured."
-        " Be sure you installed all the requirements modules or using a correct version of Python.") from exc
+    raise ImportError("An import error occurred."
+        " Be sure you installed all the requirements modules or using a correct version of Python."
+        "\nEntering this in your terminal could help :\n    python3 -m pip install -r requirements.txt") from exc
 
 
 CONFIG_FILE_PATH = "./config.toml"
@@ -34,7 +35,7 @@ class Syntax(ConfigError, TypeError):
     """Raised when there is a syntax problem or an type problem."""
 
 class UncompletedOrMissing(ConfigError):
-    """Raised when the a line in the cofig file is uncompleted or missing."""
+    """Raised when the a line in the config file is uncompleted or missing."""
     
 
 def ascii_art(splash_text_fp: str, logger: Logger):
@@ -43,7 +44,7 @@ def ascii_art(splash_text_fp: str, logger: Logger):
         with open(splash_text_fp, "rb") as f:
             splash_text = toml.load(f)["SplashText"]
     except (FileNotFoundError, toml.TOMLDecodeError) as err:
-        logger.error("An error occured while loading splash texts.", err)
+        logger.error("An error occurred while loading splash texts.", err)
         splash_text = ("placeholder",)
     print(f"""
             ᵛᵉʷʸ ᵖᵒʷᵉʳᶠᵘˡ
@@ -64,10 +65,11 @@ def ascii_art(splash_text_fp: str, logger: Logger):
 
 def main(
     config_fp: str = CONFIG_FILE_PATH,
-    config_exemple_fp: str = CONFIG_FILE_PATH + ".exemple",
+    config_example_fp: str = CONFIG_FILE_PATH + ".example",
     splash_text_dp: str = SPLASH_TEXT_FP,
     checks: bool = True,
-    show_ascii: bool = True
+    show_ascii: bool = True,
+    *args, **_kwargs
 ):
     """Main function. Do some checks and then starts the bot."""
     cls = Shibbot
@@ -75,9 +77,9 @@ def main(
     # Verifies if the config file exists
     if not os.path.exists(config_fp):
         try:
-            copyfile(config_exemple_fp, config_fp)
+            copyfile(config_example_fp, config_fp)
         except FileNotFoundError as exc:
-            raise MissingFile(config_exemple_fp) from exc
+            raise MissingFile(config_example_fp) from exc
         else:
             raise ConfigError(
                 f"Please fulfill the requirements inside of the {config_fp} file.")
@@ -105,7 +107,7 @@ def main(
 
     logs_path = paths["Logs"]
     path_kwargs = {
-        "extentions_path": paths["Extensions"],
+        "extensions_path": paths["Extensions"],
         "cache_path": paths["Cache"],
         "temp_cache_path": paths["TemporaryCache"]
     }
@@ -144,7 +146,7 @@ def main(
         except (ValueError, AssertionError) as exc:
             raise Syntax(
                 "Invalid Discord id(s)."
-                " Make sure that the ids are intergers (len >= 18) inside a list."
+                " Make sure that the ids are integers (len >= 18) inside a list."
             ) from exc
     kwargs["instance_owners"] = instance_owners
 
@@ -168,7 +170,7 @@ def main(
             assert len(response) > 0
             last_version = response[0]["name"]
             if last_version == __version__:
-                logger.log("You're currently using the lastest version !")
+                logger.log("You're currently using the latest version !")
             else:
                 for release in response:
                     if release["name"] == __version__:
@@ -209,10 +211,12 @@ def main(
             kwargs.update(parameters)
         logger.debug("All checks done and settings loaded.")
 
+    kwargs.update(_kwargs)
+
     # Starting the bot
     try:
         # Instancing Shibbot or PterodactylShibbot
-        shibbot = cls(**kwargs)
+        shibbot = cls(*args, **kwargs)
         shibbot.run(token, command_input=console)  # Running it
     except Exception as err:
         logger.critical("Oops... Shibbot stopped ?", err)

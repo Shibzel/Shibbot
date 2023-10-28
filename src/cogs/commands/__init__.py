@@ -28,7 +28,7 @@ class BotsCommands(BaseCog):
             languages={
                 "en": English(),
                 "fr": French(),
-                "shibberish": Shibberish
+                "shibberish": Shibberish()
             },
             emoji="⚙️"
         )
@@ -182,7 +182,7 @@ class BotsCommands(BaseCog):
                             n_servers=len(self.bot.guilds),
                             n_users=len(self.bot.users),
                             owner_github="https://github.com/Shibzel",
-                            owner=self.bot.project_owner if self.bot.project_owner else "Shibzel#1873"))
+                            owner=self.bot.project_owner if self.bot.project_owner else "shibzel"))
         specs = self.bot.specs
         embed.add_field(name=lang.GET_INFOS_FIELD2_NAME,
                         value=lang.GET_INFOS_FIELD2_DESCRIPTION.format(

@@ -27,14 +27,17 @@ class OwnerCommands(BaseCog):
             message = f"Couldn't {method_name} '{cog_name}', the following error occured :"
             self.logger.error(message, error)
             await ctx.send(message, file=discord.File(fp=create_log_file(self.bot, error)))
+
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx: commands.Context, cog):
         await self._on_cog(ctx, self.bot.reload_extension, cog, "reload")
+
     @commands.command()
     @commands.is_owner()
     async def load(self, ctx: commands.Context, cog):
         await self._on_cog(ctx, self.bot.load_extension, cog, "load")
+        
     @commands.command()
     @commands.is_owner()
     async def unload(self, ctx: commands.Context, cog):

@@ -1,14 +1,15 @@
-# / This is a Shibbot v1 config file.
+# / This is a Shibbot configuration file.
 # / DO NOT EDIT if this file is named
 # "config.toml.exemple".
 # / Instead, copy its content into
 # another file named "config.toml".
+config_version = 1
 
 [Settings]
 UseConsole = true
 DebugMode = false
-# / If you want a better disponibility
-# of ressources by caching them (uses
+# / If you want a better availability
+# of resources by caching them (uses
 # more ram and storage)
 UseCache = false
 # / Disables every default cog

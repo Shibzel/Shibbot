@@ -159,31 +159,11 @@ class Moderation(PluginCog):
         if tasks:
             self.logger.debug(f"Resuming {len(tasks)} tempbans and tempmutes.")
             await asyncio.gather(*tasks)
+        else:
+            self.logger.debug("Nothing to do.")
             
     async def enable_logs(self, guild_id,):
         pass  # TODO: Complete
-        
-    async def set_log_channel(self, channel: discord.TextChannel, lang: English = None) -> None:
-        guild = channel.guild
-        db = self.bot.db
-        query = f"SELECT log_channel FROM {self.plugin_name} WHERE guild_id=?"
-        cur = db.execute(query, (guild.id,))
-        result = cur.fetchone()
-        if result:
-            query = f"UPDATE {self.plugin_name} SET log_channel=? WHERE guild_id=?"
-        else:
-            query = f"INSERT INTO {self.plugin_name} (log_channel, guild_id) VALUES (?, ?)"
-
-        db.execute(query, (channel.id, guild.id,))
-        db.commit()
-        
-        if not lang:
-            lang = self.get_lang(guild)        
-        embed = discord.Embed(title=lang.ON_LOG_CHANNEL_UPDATE_TITLE,
-                              description=lang.ON_LOG_CHANNEL_UPDATE_DESCRIPTION,
-                              color=discord.Color.green())
-        log_channel = self.get_log_channel(guild)
-        await log_channel.send(embed=embed)
     
     def get_log_channel(self, guild: discord.Guild) -> discord.TextChannel | None:
         db = self.bot.db
@@ -230,8 +210,6 @@ class Moderation(PluginCog):
         query = f"SELECT * FROM {self.plugin_name}_warns WHERE guild_id=? AND member_id=?"
         cur = db.execute(query, (guild.id, user.id,))
         return cur.fetchall()
-    
-    # CAT: Events
     
     async def _find_entry(
         self,
@@ -386,29 +364,6 @@ class Moderation(PluginCog):
                          description=description, color=discord.Color.orange())
         await log_channel.send(embed=embed)
         
-    async def on_purge(
-        self,
-        channel: discord.TextChannel | discord.Thread,
-        messages: int,
-        moderator: discord.Member,
-        user: discord.User = None,
-        reason: str = None,
-        lang: English = None,
-        log_channel: discord.TextChannel = None
-    ) -> None:
-        guild = channel.guild
-        if not (log_channel := log_channel or self.get_log_channel(guild)):
-            return
-        if not lang:
-            lang = self.get_lang(guild)
-            
-        description = lang.ON_PURGE_USER_DESCRIPTION if user else lang.ON_PURGE_CHANNEL_DESCRIPTION
-        description = description.format(user=user, mod=moderator, messages=messages, channel=channel,
-                                         reason=reason or lang.NO_REASON_PLACEHOLDER)
-        embed = LogEmbed(title=lang.ON_WARN_TITLE, user=user,
-                         description=description, color=discord.Color.yellow())
-        await log_channel.send(embed=embed)
-        
     async def on_mute(
         self,
         member: discord.Member,
@@ -508,8 +463,28 @@ class Moderation(PluginCog):
         await member.add_roles(mute_role)
         await self.on_mute(member, self.bot.user, "User joined while he was muted.", update_from_db=False)
     
-    # CAT: Commands
-    
+    async def set_log_channel(self, channel: discord.TextChannel, lang: English = None) -> None:
+        guild = channel.guild
+        db = self.bot.db
+        query = f"SELECT log_channel FROM {self.plugin_name} WHERE guild_id=?"
+        cur = db.execute(query, (guild.id,))
+        result = cur.fetchone()
+        if result:
+            query = f"UPDATE {self.plugin_name} SET log_channel=? WHERE guild_id=?"
+        else:
+            query = f"INSERT INTO {self.plugin_name} (log_channel, guild_id) VALUES (?, ?)"
+
+        db.execute(query, (channel.id, guild.id,))
+        db.commit()
+        
+        if not lang:
+            lang = self.get_lang(guild)        
+        embed = discord.Embed(title=lang.ON_LOG_CHANNEL_UPDATE_TITLE,
+                              description=lang.ON_LOG_CHANNEL_UPDATE_DESCRIPTION,
+                              color=discord.Color.green())
+        log_channel = self.get_log_channel(guild)
+        await log_channel.send(embed=embed)
+
     @bridge.bridge_command(
         name="logs",
         description="Changes the log channel.",
@@ -526,6 +501,29 @@ class Moderation(PluginCog):
         embed = discord.Embed(title=lang.SET_LOG_CHANNEL_TITLE, description=description,
                               color=discord.Color.green())
         await ctx.respond(embed=embed)
+        
+    async def on_purge(
+        self,
+        channel: discord.TextChannel | discord.Thread,
+        messages: int,
+        moderator: discord.Member,
+        user: discord.User = None,
+        reason: str = None,
+        lang: English = None,
+        log_channel: discord.TextChannel = None
+    ) -> None:
+        guild = channel.guild
+        if not (log_channel := log_channel or self.get_log_channel(guild)):
+            return
+        if not lang:
+            lang = self.get_lang(guild)
+            
+        description = lang.ON_PURGE_USER_DESCRIPTION if user else lang.ON_PURGE_CHANNEL_DESCRIPTION
+        description = description.format(user=user, mod=moderator, messages=messages, channel=channel,
+                                         reason=reason or lang.NO_REASON_PLACEHOLDER)
+        embed = LogEmbed(title=lang.ON_PURGE_TITLE, user=user,
+                         description=description, color=discord.Color.yellow())
+        await log_channel.send(embed=embed)
     
     @bridge.bridge_command(
         name="clear",
@@ -534,20 +532,21 @@ class Moderation(PluginCog):
             discord.Option(int, name="limit", description="The number of messages you want to clear, maximum: 100."),
             discord.Option(str, name="reason", description="Why.", required=False)
     ])
-    async def clean_messages(self, ctx: bridge.BridgeApplicationContext, limit: int, reason: str = None):
+    async def clear_channel(self, ctx: bridge.BridgeApplicationContext, limit: int, reason: str = None):
         lang: English = self.get_lang(ctx)
 
+        limit += 1
         if limit > 100:
             limit = 100
 
-        async with ctx.channel.typing():
-            deleted_messages = len(await ctx.channel.purge(limit=limit) or ())
-            description = lang.CLEAN_MESSAGES_DESCRIPTION.format(
-                messages=deleted_messages)
+        await ctx.defer()
+        deleted_messages = len(await ctx.channel.purge(limit=limit) or ())
+        description = lang.CLEAN_MESSAGES_DESCRIPTION.format(
+            messages=deleted_messages)
         
         embed = discord.Embed(title=lang.CLEAN_MESSAGES_TITLE, description=description,
                               color=discord.Color.green())
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
         await self.on_purge(ctx.channel, deleted_messages, ctx.author, reason=reason, lang=lang)
 
     @bridge.bridge_command(
@@ -566,7 +565,7 @@ class Moderation(PluginCog):
 
         async with ctx.channel.typing():
             messages = []
-            after = datetime.utcnow() - timedelta(days=14-1)
+            after = datetime.utcnow() - timedelta(days=14-0.5)
             async for message in ctx.channel.history(limit=None, after=after):
                 # The bot can't bulk delete messages older than 14 days
                 if len(messages) >= limit:

@@ -5,12 +5,12 @@ from datetime import datetime, timedelta
 from traceback import format_exc
 from time import perf_counter
 import discord
-from discord.ext import bridge, commands as cmmds
+from discord.ext import bridge, commands
 
 from . import __version__
 from .database import SqliteDatabase
 from .utils import convert_to_import_path
-from .utils import json as jayson
+from .utils import json as ljson
 from .utils.hardware import Uptime, ServerSpecifications, PteroContainerSpecifications
 from .logging import Logger, ANSIEscape, LoggingLevel
 from .models import PluginCog, BaseCog
@@ -22,13 +22,31 @@ from .constants import (
 )
 
 
+# SQLite3 default parameters
 SQLITE_DEFAULT_CACHE_SIZE = 2000
 SQLITE_DEFAULT_CACHE_TYPE = "FILE"
 
-MAX_PROCESS_TIMES_LEN = 10000
-
-STATS_FILE_NAME = "/stats.json"
+MAX_PROCESS_TIMES_LEN = 10000  # The maximum length of the list of commands process times
 PREVIOUS_VERSIONS_FILE_NAME = "/previous_versions.json"
+DEFAULT_ALLOWED_MENTIONS = discord.AllowedMentions(
+    everyone=False,
+    users=True,
+    roles=True,
+    replied_user=False
+)
+DEFAULT_INTENTS = discord.Intents(
+    bans=True,
+    dm_messages=True,  # Whatever we want the bot to respond to dms or not
+    emojis=True,
+    guild_messages=True,
+    guild_reactions=False,  # Not needed yet
+    guilds=True,
+    invites=False,
+    members=True,
+    message_content=True,
+    presences=True,
+    voice_states=False
+)
 
 async def _get_prefix(bot: "Shibbot", ctx):
     return bot.db.get_prefix(ctx.guild)
@@ -39,14 +57,20 @@ class Shibbot(bridge.Bot):
     def __init__(
         self,
         logger: Logger,
+        # Base class settings
         instance_owners: list[int] = None,
+        mentions: discord.AllowedMentions = DEFAULT_ALLOWED_MENTIONS,
+        intents: discord.Intents = DEFAULT_INTENTS,
+        default_help_commands: bool = False,  # True: uses the default pycord help command 
+                                              # (can conflict if "src.cogs.commands" isn't disabled)
+
+        # Shibbot settings
         debug: bool = False,
         caching: bool = False,
-
         minimal: bool = False,
-        allowed_cogs: list[str] | None = None,
-        disabled_cogs: list[str] | None = None,
-
+        allowed_cogs: list[str] = None,
+        disabled_cogs: list[str] = None,
+        # Advanced
         database_fp: str = DATABASE_FILE_PATH,
         extensions_path: str = EXTENSIONS_PATH,
         cache_path: str = CACHE_PATH,
@@ -65,8 +89,8 @@ class Shibbot(bridge.Bot):
             self.logger.warn("Debug/beta mode enabled.")
         self._caching = caching
         if self.caching:
-            self.logger.warn("Caching enabled. Note that this option offers higher disponibility"
-                " for some ressources but can increase the RAM and disk usage.")
+            self.logger.warn("Caching enabled. Note that this option offers higher availability"
+                " for some resources but can increase the RAM and disk usage.")
         self.database_fp = database_fp
         self.cache_path = cache_path
         self.temp_cache_path = temp_cache_path
@@ -88,41 +112,26 @@ class Shibbot(bridge.Bot):
         super().__init__(
             command_prefix=_get_prefix,
             owner_ids=[SHIBZEL_ID] if instance_owners in (None, []) else instance_owners,
-            # Being mentionned by a bot is very annoying, that's why it's all set to False.
-            allowed_mentions=discord.AllowedMentions(
-                everyone=False,
-                users=True,
-                roles=True,
-                replied_user=False),
-            intents=discord.Intents(
-                bans=True,
-                dm_messages=True,  # Waterver we want the bot to respond to dms or not
-                emojis=True,
-                guild_messages=True,
-                guild_reactions=False,  # Not needed yet
-                guilds=True,
-                invites=False,
-                members=True,
-                message_content=True,
-                presences=True,
-                voice_states=False),
+            allowed_mentions=mentions,
+            intents=intents,
             case_insensitive=True,
             activity=discord.Streaming(
                 name="connecting...",
                 url="https://www.youtube.com/watch?v=dQw4w9WgXcQ") if not minimal else None,
             *args, **kwargs
         )
-        super().remove_command("help")
+        if not default_help_commands:
+            super().remove_command("help")
 
         # Cache
         # Previous versions
         prev_v_fp = self.cache_path + PREVIOUS_VERSIONS_FILE_NAME
-        self._versions = jayson.load(prev_v_fp) if os.path.exists(prev_v_fp) else []
+        self._versions = ljson.load(prev_v_fp) if os.path.exists(prev_v_fp) else []
         if __version__ not in self._versions:
             self._versions.append(__version__)
-            jayson.dump(self._versions, prev_v_fp)
+            ljson.dump(self._versions, prev_v_fp)
         
-        # Console objects
+        # Console object
         self.console = Console(self)
 
         # Client that gets the specifications of the bot
@@ -131,7 +140,7 @@ class Shibbot(bridge.Bot):
         # SQLite3 database
         self.db = SqliteDatabase(self, database_fp)
 
-        # Loading all extensions and cogs
+        # Loading extensions and cogs
         disabled_cogs = set(disabled_cogs) if disabled_cogs else set()
         if minimal:
             self.logger.warn("Shibbot started in minimal mode so no default cog will load except allowed ones.")
@@ -237,7 +246,7 @@ class Shibbot(bridge.Bot):
     async def on_resumed(self) -> None:
         self.is_alive = True
         dtime = datetime.utcnow().timestamp() - self.last_disconnection.timestamp()
-        log = "Resuming" + (f"(has been disconnected for {dtime} sec)." if dtime > 5 else ".")
+        log = "Resuming" + (f" (has been disconnected for {dtime} sec)." if dtime > 10 else ".")
         self.logger.debug(log)
 
     async def on_disconnect(self) -> None:
@@ -249,7 +258,7 @@ class Shibbot(bridge.Bot):
             await asyncio.sleep(60)
             if self.is_alive is False:
                 self.logger.error("Shibbot has been offline for over a minute,"
-                             " maybe there are network issues ?")
+                                  " maybe there are network issues ?")
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
         if before.content != after.content:
@@ -282,7 +291,7 @@ class Shibbot(bridge.Bot):
             self.logger.debug(f"Adding '{language}' language code in the language list.")
             self.languages.append(language)
 
-    async def _invoke(self, method, ctx: discord.SlashCommand | cmmds.Context) -> None:
+    async def _invoke(self, method, ctx: discord.SlashCommand | commands.Context) -> None:
         coro = method(ctx)
         if not ctx.command:
             return await coro
@@ -302,7 +311,7 @@ class Shibbot(bridge.Bot):
                     f" Took {time_took*1000:.2f}ms.")
         return result
 
-    async def invoke(self, ctx: cmmds.Context) -> None:
+    async def invoke(self, ctx: commands.Context) -> None:
         if ctx.command:
             self.commands_invoked += 1
         return await self._invoke(super().invoke, ctx)
